@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test: Header Only (from modular prompts)</title>
+    <style>
+        /* From _base/fonts.md */
+        @font-face {
+            font-family: 'Samsung Sharp Sans';
+            src: url('../assets/fonts/SamsungSharpSansBd.woff2') format('woff2'),
+                 url('../assets/fonts/SamsungSharpSans-Bold.ttf') format('truetype');
+            font-weight: 700;
+        }
+        @font-face {
+            font-family: 'Samsung One';
+            src: url('../assets/fonts/SamsungOneLatinWeb-400.woff2') format('woff2'),
+                 url('../assets/fonts/SamsungOneLatinCompact-400.ttf') format('truetype');
+            font-weight: 400;
+        }
+
+        /* From _base/design-tokens.md */
+        :root {
+            --color-primary: #1428A0;
+            --color-bg-header: #f7f7f7;
+            --color-border-accent: #1428A0;
+            --font-display: 'Samsung Sharp Sans', sans-serif;
+            --font-size-2xl: 28px;
+            --font-weight-bold: 700;
+            --spacing-lg: 16px;
+            --spacing-2xl: 24px;
+            --max-width: 1400px;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Samsung One', -apple-system, sans-serif; background: #f8f9fa; }
+    </style>
+</head>
+<body>
+    <!-- Generated from elements/header.md (approved implementation) -->
+    <header style="background:#f7f7f7;border-bottom:3px solid #1428A0;margin-bottom:24px;box-shadow:0 2px 4px rgba(0,0,0,0.05)">
+        <div style="max-width:1400px;margin:0 auto;padding:16px 24px;display:flex;justify-content:space-between;align-items:center">
+            <span style="font-family:'Samsung Sharp Sans',sans-serif;font-size:28px;font-weight:700;color:#1428A0">AI Visibility Dashboard</span>
+            <img src="../assets/logo.jpg" alt="Samsung" height="36">
+        </div>
+    </header>
+
+    <div style="max-width:1400px;margin:0 auto;padding:24px">
+        <p style="color:#666">✅ This header was generated using only the modular prompt files:</p>
+        <ul style="color:#666;margin-top:12px;margin-left:24px">
+            <li><code>_base/design-tokens.md</code> - CSS variables</li>
+            <li><code>_base/fonts.md</code> - @font-face declarations</li>
+            <li><code>elements/header.md</code> - Header HTML spec</li>
+        </ul>
+    </div>
+</body>
+</html>

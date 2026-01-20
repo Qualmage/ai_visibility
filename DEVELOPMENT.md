@@ -41,6 +41,83 @@ General Analytics/
 
 ## Session Progress
 
+### 2026-01-20: Samsung TV Prompts CSV to JSON Parser
+
+**Summary:** Created a Python script to convert Semrush TV prompts CSV into structured JSON with hierarchical tags for the Samsung AI Visibility dashboard tag filter dropdown.
+
+#### What Was Done
+
+1. **Created CSV parsing script** (`clients/samsung/scripts/parse_prompts_csv.py`):
+   - Parses `clients/samsung/assets/tv_prompts_semrush_import_v2.csv` (382 prompts)
+   - Builds hierarchical tag tree from `__` delimiter (e.g., "TV Reviews & Brand__Year Reviews__2026")
+   - Counts matching prompts per tag node
+   - Outputs structured JSON at `clients/samsung/assets/tv_prompts.json`
+
+2. **JSON structure (Option C):**
+   - `meta` - Total prompt count and unique tag count
+   - `tagTree` - Nested hierarchy with counts (TV Features, TV Models, TV Reviews & Brand, TV Sizes)
+   - `prompts` - Array of prompt objects with text and associated tags
+
+3. **How to regenerate:** `uv run clients/samsung/scripts/parse_prompts_csv.py`
+
+---
+
+### 2026-01-20: Modular Prompt System for Samsung Dashboards
+
+**Summary:** Refactored monolithic dashboard prompt into a modular system with reusable components, design tokens, and individual element files. Enables generating single dashboard components without full context.
+
+#### What Was Done
+
+1. **Created modular prompt structure** at `clients/samsung/prompts/`:
+   - `_base/` - Foundation files (design tokens, fonts, components)
+   - `elements/` - Individual dashboard components (header, KPI cards, charts, tables)
+   - `_archive/` - Old monolithic files for reference
+   - `full-dashboard.md` - Assembly instructions
+
+2. **Key files created:**
+   - `_base/design-tokens.md` - CSS variables for colors, spacing, typography
+   - `_base/fonts.md` - @font-face declarations for Samsung fonts
+   - `_base/components.md` - Reusable UI patterns
+   - `elements/header.md` - Dashboard header (includes approved v3 implementation)
+   - `elements/kpi-cards.md`, `line-chart.md`, `donut-chart.md`, `stacked-bar.md`, `leaderboard-table.md`, `data-table.md`
+
+3. **Benefits achieved:**
+   - Generate individual components without full context
+   - Single source of truth for design tokens
+   - Consistent styling across all elements
+   - Easier maintenance and updates
+
+---
+
+### 2026-01-20: Samsung AI Visibility Dashboard & GitHub Push
+
+**Summary:** Built a styled AI Visibility Dashboard for Samsung with proper branding, fixed header alignment issues, secured API key handling, and pushed the initial commit to GitHub.
+
+#### What Was Done
+
+1. **Samsung AI Visibility Dashboard** (`clients/samsung/dashboards/v3-ai-overview.html`):
+   - Applied Samsung branding with official fonts (Samsung Sharp Sans, Samsung One)
+   - Fixed header alignment - logo and title now align with main content using same max-width and padding
+   - Header: #f7f7f7 background, "AI Visibility Dashboard" title (28px bold, Samsung blue) on left, logo on right
+   - KPI cards use CSS grid (`grid-template-columns: repeat(4, 1fr)`) for equal-width alignment
+   - All asset paths use relative paths (`../assets/`) for static file usage
+
+2. **Updated prompt file** (`clients/samsung/prompts/ai-overview-dashboard.md`):
+   - Renamed to "AI Visibility Dashboard"
+   - Added Page Header section with alignment requirements
+   - Updated font paths to relative
+   - Changed KPI cards from flex to CSS grid specification
+
+3. **Security fix** (`clients/samsung/groq_kimi.py`):
+   - Removed hardcoded Groq API key
+   - Now requires GROQ_API_KEY in .env file (raises error if missing)
+
+4. **GitHub push** to https://github.com/Qualmage/ai_visibility:
+   - Initial commit with 68 files
+   - .env properly gitignored (API keys protected)
+
+---
+
 ### 2026-01-19: Direct Groq API Script for Kimi K2
 
 **Summary:** After extensive troubleshooting with claude-code-router (which has a known bug with extended thinking parameters), we bypassed it entirely and created a direct Groq API script to query the Kimi K2 model.
@@ -157,6 +234,10 @@ General Analytics/
 
 | Date | Decision | Why | Alternatives Rejected |
 |------|----------|-----|----------------------|
+| 2026-01-20 | Modular prompt system with separate element files | Enables generating individual components without full context, easier maintenance | Single monolithic prompt file (requires full context for any change) |
+| 2026-01-20 | CSS Grid for KPI cards instead of Flexbox | Guarantees equal-width cards regardless of content | Flexbox (width varies with content) |
+| 2026-01-20 | Relative asset paths (`../assets/`) | Enables static file usage without server | Absolute paths (requires specific deployment location) |
+| 2026-01-20 | Explicit text descriptions for visual alignment | Works better than annotated screenshots with AI | Screenshots with drawn annotations |
 | 2026-01-13 | Isolated Python 3.13 venv for analytics-mcp | Avoids asyncio conflicts with miniconda | Using system Python, pipx with miniconda |
 | 2026-01-13 | Credentials in user directory | Windows workaround for GitHub Issue #73 | AppData\Roaming\gcloud path (doesn't work) |
 | 2026-01-13 | Separate admin credentials file | Keeps read-only MCP creds separate from admin creds | Single credential file (scope conflicts) |
@@ -174,11 +255,27 @@ General Analytics/
 
 ### [Unreleased]
 
+#### Added
+- TV prompts CSV to JSON parser (`clients/samsung/scripts/parse_prompts_csv.py`) - Converts Semrush prompts CSV to hierarchical JSON for dashboard tag filtering
+- Samsung TV prompts JSON (`clients/samsung/assets/tv_prompts.json`) - 382 prompts with nested tag tree (58 unique tags)
+- Modular prompt system for Samsung dashboards (`clients/samsung/prompts/`) - Enables generating individual components
+  - `_base/design-tokens.md` - CSS variables for colors, spacing, typography
+  - `_base/fonts.md` - @font-face declarations
+  - `_base/components.md` - Reusable UI patterns
+  - `elements/header.md` - Dashboard header with approved implementation
+  - `elements/kpi-cards.md`, `line-chart.md`, `donut-chart.md`, `stacked-bar.md`, `leaderboard-table.md`, `data-table.md`
+  - `full-dashboard.md` - Assembly instructions
+- Samsung AI Visibility Dashboard (`clients/samsung/dashboards/v3-ai-overview.html`) - Samsung-branded dashboard with proper font, color, and layout styling
+- Dashboard prompt documentation (`clients/samsung/prompts/ai-overview-dashboard.md`) - Specification for generating consistent dashboards (now archived)
+- Initial GitHub repository at https://github.com/Qualmage/ai_visibility (68 files)
+
 #### Fixed
+- Header alignment in dashboard - logo and title now align with main content area
+- Security: Removed hardcoded API key from `groq_kimi.py` - now requires .env file
 - uv PATH configuration - added `~\.local\bin` to user PATH for `uv.exe` access
 - Virtual environment prompt showing "hisense" instead of "general-analytics"
 
-#### Added
+#### Added (previous)
 - Direct Groq API script for Kimi K2 (`clients/samsung/groq_kimi.py`) - bypasses broken claude-code-router
 - Dependencies: `httpx` for async HTTP requests
 

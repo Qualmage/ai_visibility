@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test: Multi-Element Assembly</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        /*
+         * ASSEMBLY RECIPE:
+         * 1. _base/fonts.md      → @font-face
+         * 2. _base/design-tokens.md → :root variables
+         * 3. _base/components.md → shared component styles
+         * 4. elements/*.md       → element-specific styles
+         */
+
+        /* ========== 1. FROM _base/fonts.md ========== */
+        @font-face {
+            font-family: 'Samsung Sharp Sans';
+            src: url('../assets/fonts/SamsungSharpSansBd.woff2') format('woff2'),
+                 url('../assets/fonts/SamsungSharpSans-Bold.ttf') format('truetype');
+            font-weight: 700;
+        }
+        @font-face {
+            font-family: 'Samsung One';
+            src: url('../assets/fonts/SamsungOneLatinWeb-400.woff2') format('woff2'),
+                 url('../assets/fonts/SamsungOneLatinCompact-400.ttf') format('truetype');
+            font-weight: 400;
+        }
+
+        /* ========== 2. FROM _base/design-tokens.md ========== */
+        :root {
+            /* Brand */
+            --color-primary: #1428A0;
+            /* Semantic */
+            --color-success: #4caf50;
+            --color-error: #f44336;
+            --color-neutral: #9e9e9e;
+            /* Backgrounds */
+            --color-bg-page: #f8f9fa;
+            --color-bg-header: #f7f7f7;
+            --color-bg-card: #ffffff;
+            --color-bg-success: #e8f5e9;
+            --color-bg-error: #ffebee;
+            /* Text */
+            --color-text-primary: #000000;
+            --color-text-secondary: #666666;
+            /* Borders */
+            --color-border: #e0e0e0;
+            --color-border-accent: #1428A0;
+            /* Brand colors */
+            --color-brand-samsung: #1428A0;
+            --color-brand-lg: #A50034;
+            --color-brand-sony: #000000;
+            --color-brand-tcl: #E31937;
+            --color-brand-hisense: #00A0DF;
+            --color-brand-xbox: #107C10;
+            --color-brand-roku: #6C3C97;
+            /* Typography */
+            --font-display: 'Samsung Sharp Sans', sans-serif;
+            --font-body: 'Samsung One', -apple-system, sans-serif;
+            --font-size-xs: 11px;
+            --font-size-sm: 12px;
+            --font-size-base: 14px;
+            --font-size-lg: 18px;
+            --font-size-xl: 24px;
+            --font-size-2xl: 28px;
+            --font-size-metric: 42px;
+            --font-weight-bold: 700;
+            --line-height-tight: 1.1;
+            /* Spacing */
+            --spacing-xs: 4px;
+            --spacing-sm: 8px;
+            --spacing-md: 12px;
+            --spacing-lg: 16px;
+            --spacing-xl: 20px;
+            --spacing-2xl: 24px;
+            /* Layout */
+            --max-width: 1400px;
+            /* Radius */
+            --radius-sm: 4px;
+            --radius-md: 6px;
+            --radius-lg: 8px;
+            --radius-xl: 12px;
+            /* Shadows */
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        /* ========== 3. FROM _base/components.md ========== */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: var(--font-body); background: var(--color-bg-page); color: var(--color-text-primary); }
+        .container { max-width: var(--max-width); margin: 0 auto; padding: var(--spacing-2xl); }
+        h1 { font-family: var(--font-display); font-size: var(--font-size-xl); font-weight: var(--font-weight-bold); margin-bottom: var(--spacing-lg); color: var(--color-primary); }
+
+        .filter-btn { font-family: var(--font-body); background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--spacing-sm) var(--spacing-lg); font-size: var(--font-size-base); cursor: pointer; transition: all 0.2s; }
+        .filter-btn:hover { border-color: var(--color-primary); }
+        .filter-btn.active { background: var(--color-primary); color: #fff; border-color: var(--color-primary); }
+        .filters { display: flex; gap: var(--spacing-sm); margin-bottom: var(--spacing-2xl); }
+
+        .toggle-group { display: flex; gap: var(--spacing-xs); }
+        .toggle-btn { font-family: var(--font-body); background: var(--color-bg-card); border: 1px solid var(--color-border); padding: 6px 12px; font-size: var(--font-size-sm); border-radius: var(--radius-md); cursor: pointer; transition: all 0.2s; }
+        .toggle-btn:hover { border-color: var(--color-primary); }
+        .toggle-btn.active { background: var(--color-primary); color: #fff; border-color: var(--color-primary); }
+
+        .tabs { display: flex; gap: var(--spacing-sm); margin-bottom: var(--spacing-lg); }
+        .tab-btn { font-family: var(--font-body); background: var(--color-bg-card); border: 1px solid var(--color-border); padding: var(--spacing-sm) var(--spacing-lg); border-radius: var(--radius-lg); cursor: pointer; font-size: var(--font-size-base); transition: all 0.2s; }
+        .tab-btn:hover { border-color: var(--color-primary); }
+        .tab-btn.active { background: var(--color-primary); color: #fff; border-color: var(--color-primary); }
+
+        .badge { font-family: var(--font-body); padding: var(--spacing-xs) var(--spacing-sm); border-radius: var(--radius-sm); font-size: var(--font-size-sm); font-weight: 500; }
+        .badge.new { background: var(--color-bg-success); color: var(--color-success); }
+        .badge.lost { background: var(--color-bg-error); color: var(--color-error); }
+
+        .section-title { font-family: var(--font-display); font-size: var(--font-size-lg); font-weight: var(--font-weight-bold); margin-bottom: var(--spacing-md); display: flex; justify-content: space-between; align-items: center; color: var(--color-primary); }
+
+        .legend { display: flex; flex-direction: column; gap: var(--spacing-sm); font-size: var(--font-size-base); }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-color { width: 12px; height: 12px; border-radius: 2px; }
+        input[type="checkbox"] { accent-color: var(--color-primary); }
+
+        /* ========== 4. FROM elements/kpi-cards.md ========== */
+        .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--spacing-lg); margin-bottom: var(--spacing-2xl); align-items: stretch; }
+        .kpi-card { background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius-xl); padding: var(--spacing-xl); display: grid; grid-template-rows: auto 1fr; min-height: 120px; }
+        .kpi-label { font-size: var(--font-size-xs); text-transform: uppercase; color: var(--color-text-secondary); letter-spacing: 0.5px; font-weight: 500; }
+        .kpi-value { font-family: var(--font-display); font-size: var(--font-size-metric); font-weight: var(--font-weight-bold); color: var(--color-primary); line-height: var(--line-height-tight); }
+        .kpi-content { display: flex; flex-direction: column; justify-content: center; align-items: flex-start; }
+        .kpi-change { font-size: 13px; margin-top: var(--spacing-xs); }
+        .kpi-change.positive { color: var(--color-success); }
+        .kpi-change.negative { color: var(--color-error); }
+
+        /* ========== 5. FROM elements/line-chart.md ========== */
+        .chart-container { background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius-xl); padding: var(--spacing-xl); margin-bottom: var(--spacing-2xl); }
+    </style>
+</head>
+<body>
+    <!-- ========== ELEMENT: header.md ========== -->
+    <header style="background:#f7f7f7;border-bottom:3px solid #1428A0;margin-bottom:24px;box-shadow:0 2px 4px rgba(0,0,0,0.05)">
+        <div style="max-width:1400px;margin:0 auto;padding:16px 24px;display:flex;justify-content:space-between;align-items:center">
+            <span style="font-family:'Samsung Sharp Sans',sans-serif;font-size:28px;font-weight:700;color:#1428A0">AI Visibility Dashboard</span>
+            <img src="../assets/logo.jpg" alt="Samsung" height="36">
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Page title + filters -->
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+            <h1>Overview</h1>
+        </div>
+        <div class="filters">
+            <button class="filter-btn">Last 7 days</button>
+            <button class="filter-btn active">Samsung</button>
+            <button class="filter-btn">Chat GPT ✕</button>
+            <button class="filter-btn">Tags ▾</button>
+            <button class="filter-btn">Select Segment ▾</button>
+        </div>
+
+        <!-- ========== ELEMENT: kpi-cards.md ========== -->
+        <div class="kpi-row">
+            <div class="kpi-card">
+                <div class="kpi-label">Share of Voice</div>
+                <div class="kpi-content">
+                    <div class="kpi-value">57%</div>
+                    <div class="kpi-change negative">↓ -1%</div>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Brand Visibility</div>
+                <div class="kpi-content">
+                    <div class="kpi-value">63%</div>
+                    <div class="kpi-change negative">↓ -12%</div>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Prompts</div>
+                <div class="kpi-content" style="justify-content:flex-start;gap:12px;padding-top:8px">
+                    <div style="display:flex;justify-content:space-between;align-items:center;width:100%">
+                        <span style="font-size:14px">Responses with brand mention</span>
+                        <span class="badge new">240 <span style="color:#4caf50">+182</span></span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;width:100%">
+                        <span style="font-size:14px">Responses without brand mention</span>
+                        <span class="badge lost">143 <span style="color:#f44336">-123</span></span>
+                    </div>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Mentions by Sentiment</div>
+                <div class="kpi-content" style="flex-direction:row;align-items:center;gap:16px">
+                    <svg id="donutChart" width="80" height="80"></svg>
+                    <div style="font-family:'Samsung Sharp Sans',sans-serif;font-size:32px;font-weight:700;color:#1428A0">3K</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== ELEMENT: line-chart.md ========== -->
+        <div class="chart-container">
+            <div class="section-title">
+                <span>Historical Trend</span>
+                <div class="toggle-group">
+                    <button class="toggle-btn">Day</button>
+                    <button class="toggle-btn active">Week</button>
+                    <button class="toggle-btn">Month</button>
+                </div>
+            </div>
+            <div class="tabs">
+                <button class="tab-btn active">Share of Voice</button>
+                <button class="tab-btn">Brand Visibility</button>
+                <button class="tab-btn">Mentions</button>
+                <button class="tab-btn">Avg. Position</button>
+            </div>
+            <div style="display:flex;gap:24px">
+                <svg id="lineChart" width="800" height="300"></svg>
+                <div class="legend">
+                    <label class="legend-item"><input type="checkbox" checked> <span class="legend-color" style="background:#1428A0"></span>Samsung</label>
+                    <label class="legend-item"><input type="checkbox" checked> <span class="legend-color" style="background:#A50034"></span>LG</label>
+                    <label class="legend-item"><input type="checkbox" checked> <span class="legend-color" style="background:#000"></span>Sony</label>
+                    <label class="legend-item"><input type="checkbox" checked> <span class="legend-color" style="background:#E31937"></span>TCL</label>
+                    <label class="legend-item"><input type="checkbox" checked> <span class="legend-color" style="background:#00A0DF"></span>Hisense</label>
+                    <label class="legend-item"><input type="checkbox" checked> <span class="legend-color" style="background:#107C10"></span>Xbox</label>
+                    <label class="legend-item"><input type="checkbox" checked> <span class="legend-color" style="background:#6C3C97"></span>Roku</label>
+                    <button class="filter-btn" style="margin-top:8px">+ Add Brand</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ========== D3: donut-chart.md ========== */
+        const donutData = [
+            {label:'Positive', value:1500, color:'#4caf50'},
+            {label:'Neutral',  value:900,  color:'#9e9e9e'},
+            {label:'Negative', value:600,  color:'#f44336'}
+        ];
+        const donut = d3.select("#donutChart");
+        const pie = d3.pie().value(d => d.value);
+        const arc = d3.arc().innerRadius(25).outerRadius(40);
+        donut.selectAll("path")
+            .data(pie(donutData))
+            .join("path")
+            .attr("d", arc)
+            .attr("fill", d => d.data.color)
+            .attr("transform", "translate(40,40)");
+
+        /* ========== D3: line-chart.md ========== */
+        const dates = ['Jan14','Jan15','Jan16','Jan17','Jan18','Jan19','Jan20'];
+        const brands = [
+            {name:'Samsung',color:'#1428A0',values:[54,55,56,57,56,56,57]},
+            {name:'LG',color:'#A50034',values:[24,25,25,26,26,26,26]},
+            {name:'Sony',color:'#000',values:[20,20,21,21,21,21,21]},
+            {name:'TCL',color:'#E31937',values:[18,18,19,19,19,19,19]},
+            {name:'Hisense',color:'#00A0DF',values:[16,16,17,17,17,17,17]},
+            {name:'Xbox',color:'#107C10',values:[3,3,3,3,3,3,3]},
+            {name:'Roku',color:'#6C3C97',values:[3,3,3,3,3,3,3]}
+        ];
+        const lineSvg = d3.select("#lineChart");
+        const margin = {top:20,right:20,bottom:30,left:50};
+        const width = 800 - margin.left - margin.right;
+        const height = 300 - margin.top - margin.bottom;
+        const x = d3.scalePoint().domain(dates).range([0,width]);
+        const y = d3.scaleLinear().domain([0,60]).range([height,0]);
+        const line = d3.line().x((d,i)=>x(dates[i])).y(d=>y(d)).curve(d3.curveMonotoneX);
+        const g = lineSvg.append("g").attr("transform",`translate(${margin.left},${margin.top})`);
+        g.selectAll(".grid").data(y.ticks(6)).join("line")
+            .attr("x1",0).attr("x2",width)
+            .attr("y1",d=>y(d)).attr("y2",d=>y(d))
+            .attr("stroke","#e0e0e0").attr("stroke-dasharray","2,2");
+        brands.forEach(b=>{
+            g.append("path").datum(b.values)
+                .attr("fill","none")
+                .attr("stroke",b.color)
+                .attr("stroke-width",2)
+                .attr("d",line);
+        });
+        g.append("g").attr("transform",`translate(0,${height})`).call(d3.axisBottom(x));
+        g.append("g").call(d3.axisLeft(y).tickFormat(d=>d+"%"));
+    </script>
+</body>
+</html>

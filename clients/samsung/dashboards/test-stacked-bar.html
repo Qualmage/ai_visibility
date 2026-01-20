@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test: Stacked Bar Chart - Sentiment Over Time</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        @font-face {
+            font-family: 'Samsung Sharp Sans';
+            src: url('../assets/fonts/SamsungSharpSansBd.woff2') format('woff2'),
+                 url('../assets/fonts/SamsungSharpSans-Bold.ttf') format('truetype');
+            font-weight: 700;
+        }
+        @font-face {
+            font-family: 'Samsung One';
+            src: url('../assets/fonts/SamsungOneLatinWeb-400.woff2') format('woff2'),
+                 url('../assets/fonts/SamsungOneLatinCompact-400.ttf') format('truetype');
+            font-weight: 400;
+        }
+
+        :root {
+            --color-primary: #1428A0;
+            --color-success: #4caf50;
+            --color-error: #f44336;
+            --color-neutral: #9e9e9e;
+            --color-bg-page: #f8f9fa;
+            --color-bg-card: #ffffff;
+            --color-border: #e0e0e0;
+            --color-text-secondary: #666666;
+            --font-display: 'Samsung Sharp Sans', sans-serif;
+            --font-body: 'Samsung One', -apple-system, sans-serif;
+            --font-size-sm: 12px;
+            --font-size-lg: 18px;
+            --font-weight-bold: 700;
+            --spacing-sm: 8px;
+            --spacing-md: 12px;
+            --spacing-xl: 20px;
+            --spacing-2xl: 24px;
+            --radius-xl: 12px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: var(--font-body); background: var(--color-bg-page); padding: var(--spacing-2xl); }
+
+        .chart-container {
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-xl);
+            max-width: 500px;
+        }
+
+        .section-title {
+            font-family: var(--font-display);
+            font-size: var(--font-size-lg);
+            font-weight: var(--font-weight-bold);
+            margin-bottom: var(--spacing-md);
+            color: var(--color-primary);
+        }
+
+        .legend {
+            display: flex;
+            gap: var(--spacing-md);
+            justify-content: center;
+            font-size: var(--font-size-sm);
+            margin-top: var(--spacing-sm);
+        }
+
+        .legend-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 2px;
+            margin-right: 4px;
+        }
+
+        .source { color: var(--color-text-secondary); margin-top: 24px; font-size: 13px; }
+        code { background: #e0e0e0; padding: 2px 6px; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <h2 style="color:#1428A0;margin-bottom:16px;font-family:'Samsung Sharp Sans',sans-serif">Test: Stacked Bar Chart</h2>
+
+    <!-- FROM elements/stacked-bar.md -->
+    <div class="chart-container">
+        <div class="section-title">Sentiment Over Time</div>
+        <svg id="stackedBar" width="450" height="220"></svg>
+        <div class="legend">
+            <span><span class="legend-dot" style="background:#f44336"></span>negative</span>
+            <span><span class="legend-dot" style="background:#9e9e9e"></span>neutral</span>
+            <span><span class="legend-dot" style="background:#4caf50"></span>positive</span>
+        </div>
+    </div>
+
+    <p class="source">Source: <code>elements/stacked-bar.md</code></p>
+
+    <script>
+        // FROM elements/stacked-bar.md
+        const stackedData = [
+            {date:'Jan14', negative:800,  neutral:1200, positive:1400},
+            {date:'Jan15', negative:850,  neutral:1250, positive:1450},
+            {date:'Jan16', negative:900,  neutral:1300, positive:1500},
+            {date:'Jan17', negative:950,  neutral:1350, positive:1550},
+            {date:'Jan18', negative:1000, neutral:1400, positive:1600},
+            {date:'Jan19', negative:1050, neutral:1450, positive:1650},
+            {date:'Jan20', negative:1100, neutral:1500, positive:1700}
+        ];
+
+        const dates = ['Jan14','Jan15','Jan16','Jan17','Jan18','Jan19','Jan20'];
+
+        const stackedSvg = d3.select("#stackedBar");
+        const margin = {top: 20, right: 20, bottom: 30, left: 45};
+        const width = 450 - margin.left - margin.right;
+        const height = 220 - margin.top - margin.bottom;
+
+        const sx = d3.scaleBand()
+            .domain(dates)
+            .range([0, width])
+            .padding(0.2);
+
+        const sy = d3.scaleLinear()
+            .domain([0, 4500])
+            .range([height, 0]);
+
+        const stack = d3.stack().keys(['negative', 'neutral', 'positive']);
+        const series = stack(stackedData);
+
+        const sg = stackedSvg.append("g")
+            .attr("transform", `translate(${margin.left},${margin.top})`);
+
+        // Grid lines
+        sg.selectAll(".grid")
+            .data(sy.ticks(5))
+            .join("line")
+            .attr("x1", 0)
+            .attr("x2", width)
+            .attr("y1", d => sy(d))
+            .attr("y2", d => sy(d))
+            .attr("stroke", "#e0e0e0")
+            .attr("stroke-dasharray", "2,2");
+
+        // Bars
+        sg.selectAll("g.layer")
+            .data(series)
+            .join("g")
+            .attr("class", "layer")
+            .attr("fill", d => {
+                if (d.key === 'negative') return '#f44336';
+                if (d.key === 'neutral') return '#9e9e9e';
+                return '#4caf50';
+            })
+            .selectAll("rect")
+            .data(d => d)
+            .join("rect")
+            .attr("x", d => sx(d.data.date))
+            .attr("y", d => sy(d[1]))
+            .attr("height", d => sy(d[0]) - sy(d[1]))
+            .attr("width", sx.bandwidth())
+            .attr("rx", 2);
+
+        // X-axis
+        sg.append("g")
+            .attr("transform", `translate(0,${height})`)
+            .call(d3.axisBottom(sx).tickSize(0))
+            .select(".domain").remove();
+
+        // Y-axis
+        sg.append("g")
+            .call(d3.axisLeft(sy).ticks(5).tickFormat(d => d >= 1000 ? (d/1000) + 'K' : d))
+            .select(".domain").remove();
+    </script>
+</body>
+</html>

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test: Single KPI Card (from modular prompts)</title>
+    <style>
+        /* From _base/fonts.md */
+        @font-face {
+            font-family: 'Samsung Sharp Sans';
+            src: url('../assets/fonts/SamsungSharpSansBd.woff2') format('woff2'),
+                 url('../assets/fonts/SamsungSharpSans-Bold.ttf') format('truetype');
+            font-weight: 700;
+        }
+        @font-face {
+            font-family: 'Samsung One';
+            src: url('../assets/fonts/SamsungOneLatinWeb-400.woff2') format('woff2'),
+                 url('../assets/fonts/SamsungOneLatinCompact-400.ttf') format('truetype');
+            font-weight: 400;
+        }
+
+        /* From _base/design-tokens.md (only tokens needed for KPI card) */
+        :root {
+            --color-primary: #1428A0;
+            --color-bg-card: #ffffff;
+            --color-border: #e0e0e0;
+            --color-text-secondary: #666666;
+            --color-success: #4caf50;
+            --color-error: #f44336;
+            --font-display: 'Samsung Sharp Sans', sans-serif;
+            --font-size-xs: 11px;
+            --font-size-metric: 42px;
+            --font-weight-bold: 700;
+            --spacing-xs: 4px;
+            --spacing-lg: 16px;
+            --spacing-xl: 20px;
+            --radius-xl: 12px;
+            --line-height-tight: 1.1;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Samsung One', -apple-system, sans-serif;
+            background: #f8f9fa;
+            padding: 24px;
+        }
+
+        /* From elements/kpi-cards.md */
+        .kpi-card {
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-xl);
+            display: grid;
+            grid-template-rows: auto 1fr;
+            min-height: 120px;
+            max-width: 300px;
+        }
+
+        .kpi-label {
+            font-size: var(--font-size-xs);
+            text-transform: uppercase;
+            color: var(--color-text-secondary);
+            letter-spacing: 0.5px;
+            font-weight: 500;
+        }
+
+        .kpi-value {
+            font-family: var(--font-display);
+            font-size: var(--font-size-metric);
+            font-weight: var(--font-weight-bold);
+            color: var(--color-primary);
+            line-height: var(--line-height-tight);
+        }
+
+        .kpi-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .kpi-change {
+            font-size: 13px;
+            margin-top: var(--spacing-xs);
+        }
+
+        .kpi-change.positive { color: var(--color-success); }
+        .kpi-change.negative { color: var(--color-error); }
+
+        .info { color: #666; margin-top: 24px; font-size: 14px; }
+        code { background: #e0e0e0; padding: 2px 6px; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <h2 style="color:#1428A0;margin-bottom:16px;font-family:'Samsung Sharp Sans',sans-serif">Test: Single KPI Card</h2>
+
+    <!-- Generated from elements/kpi-cards.md - Card 1 only -->
+    <div class="kpi-card">
+        <div class="kpi-label">Share of Voice</div>
+        <div class="kpi-content">
+            <div class="kpi-value">57%</div>
+            <div class="kpi-change negative">↓ -1%</div>
+        </div>
+    </div>
+
+    <p class="info">
+        ✅ This single KPI card was generated using only:<br><br>
+        • <code>_base/design-tokens.md</code> - CSS variables (only the ones needed)<br>
+        • <code>_base/fonts.md</code> - @font-face declarations<br>
+        • <code>elements/kpi-cards.md</code> - Card 1 HTML spec
+    </p>
+    <p class="info" style="margin-top:12px">
+        <strong>Key benefit:</strong> No need to read the full 217-line dashboard spec!
+    </p>
+</body>
+</html>

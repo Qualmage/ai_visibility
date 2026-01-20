@@ -10,6 +10,550 @@ A detailed journal of the General Analytics development process. Each session do
 
 ---
 
+## 2026-01-20: Samsung TV Prompts CSV to JSON Parser
+
+### Session Goals
+Convert a Semrush export CSV containing 382 TV-related prompts into structured JSON that powers a hierarchical tag filter dropdown in the Samsung AI Visibility dashboard.
+
+---
+
+### Part 1: The Problem
+
+#### What We Needed
+The Samsung AI Visibility dashboard needs a tag filter dropdown where users can filter prompts by category. The prompts come from Semrush in a flat CSV format with hierarchical tags encoded using double underscore delimiters.
+
+#### CSV Input Format
+The CSV file (`tv_prompts_semrush_import_v2.csv`) contains rows like:
+```
+prompt,tag1,tag2,tag3,...
+"best 55 inch tv 2025",TV Sizes__55 Inch,TV Reviews & Brand__Year Reviews__2025,...
+```
+
+The tags use `__` as a hierarchy delimiter:
+- `TV Reviews & Brand__Year Reviews__2026` means: TV Reviews & Brand > Year Reviews > 2026
+- This represents a three-level nested category
+
+#### Plain English
+Imagine a filing system where labels can have sub-labels. Instead of just "Electronics", you might have "Electronics > TVs > Samsung". The double underscore (`__`) is how these nested categories are written in a single text field. We needed to convert this flat text representation into an actual nested folder structure.
+
+---
+
+### Part 2: The JSON Structure (Option C)
+
+#### Why "Option C"?
+Three structures were considered:
+- **Option A:** Flat list of tags with parent references
+- **Option B:** Tag tree separate from prompts, no counts
+- **Option C:** Tag tree with counts embedded + prompts array
+
+Option C was chosen because the dashboard filter needs to show how many prompts match each tag level, and having counts pre-calculated means the frontend does not need to count on every filter change.
+
+#### JSON Output Structure
+
+```json
+{
+  "meta": {
+    "totalPrompts": 382,
+    "totalTags": 58
+  },
+  "tagTree": {
+    "TV Features": {
+      "count": 301,
+      "children": {
+        "AI": { "count": 35, "children": {} },
+        "Audio": { "count": 60, "children": {} },
+        "Display": {
+          "count": 100,
+          "children": {
+            "OLED": { "count": 50, "children": {} },
+            "QLED": { "count": 30, "children": {} }
+          }
+        }
+      }
+    },
+    "TV Models": { "count": 347, "children": {...} },
+    "TV Reviews & Brand": { "count": 621, "children": {...} },
+    "TV Sizes": { "count": 130, "children": {...} }
+  },
+  "prompts": [
+    {
+      "text": "best 55 inch tv 2025",
+      "tags": ["TV Sizes__55 Inch", "TV Reviews & Brand__Year Reviews__2025"]
+    }
+  ]
+}
+```
+
+#### Plain English
+The output JSON has three parts:
+1. **meta** - A summary: how many prompts total, how many unique tags
+2. **tagTree** - A nested folder structure where each folder shows how many items are inside it (counting items in subfolders too)
+3. **prompts** - The actual list of prompts, each tagged with its categories
+
+The count at each level includes all prompts in that category AND all subcategories. So if "TV Features" shows 301, that means 301 prompts have tags somewhere under "TV Features" (including AI, Audio, Display, etc.).
+
+---
+
+### Part 3: The Python Script
+
+#### What The Script Does
+
+**File:** `clients/samsung/scripts/parse_prompts_csv.py`
+
+1. **Reads the CSV** - Opens the Semrush export file
+2. **Extracts tags** - Looks at columns starting with "tag" (tag1, tag2, tag3...)
+3. **Builds the tree** - For each tag like "A__B__C", creates nested nodes A > B > C
+4. **Counts prompts** - Each node tracks which prompts belong to it
+5. **Writes JSON** - Outputs the structured file
+
+#### Key Technical Details
+
+**Handling the hierarchy:**
+```python
+def add_tag_to_tree(tree, tag_path, prompt_index):
+    parts = tag_path.split("__")
+    current = tree
+    for part in parts:
+        if part not in current:
+            current[part] = {"count": 0, "prompts": set(), "children": {}}
+        current[part]["prompts"].add(prompt_index)
+        current = current[part]["children"]
+```
+
+**Plain English:**
+The script walks down the tag path like walking down a file path. For "TV Features__Display__OLED", it first goes to (or creates) "TV Features", then inside that goes to "Display", then inside that goes to "OLED". At each level, it remembers that this prompt belongs there.
+
+#### Running the Script
+
+```bash
+uv run clients/samsung/scripts/parse_prompts_csv.py
+```
+
+This reads from `clients/samsung/assets/tv_prompts_semrush_import_v2.csv` and writes to `clients/samsung/assets/tv_prompts.json`.
+
+---
+
+### Part 4: The Top-Level Categories
+
+The 382 prompts are organized under four main categories:
+
+| Category | Count | Description |
+|----------|-------|-------------|
+| TV Features | 301 | Technical features (AI, Audio, Display, Smart TV, Gaming) |
+| TV Models | 347 | Brand and model names (Samsung, LG, Sony models) |
+| TV Reviews & Brand | 621 | Review types, brand comparisons, year-based reviews |
+| TV Sizes | 130 | Screen sizes (43", 55", 65", 75", 85") |
+
+Note: Counts can exceed 382 because one prompt can have multiple tags. A prompt about "best 55 inch Samsung OLED TV 2025" might be tagged under TV Sizes, TV Models, TV Features, AND TV Reviews.
+
+#### Plain English
+Think of this like a library where one book can be shelved in multiple sections using cross-references. A cookbook about Italian desserts might be listed under both "Cooking > Desserts" AND "Cooking > Italian". The same prompt can appear in multiple categories because it is relevant to multiple topics.
+
+---
+
+### Part 5: Dashboard Integration
+
+#### How The Frontend Uses This
+
+The tag filter dropdown in the AI Visibility dashboard:
+1. Loads `tv_prompts.json` on page load
+2. Renders `tagTree` as a nested expandable menu
+3. Shows counts next to each category (e.g., "TV Features (301)")
+4. When user selects a tag, filters the `prompts` array to show only matching prompts
+
+#### Why Pre-Calculated Counts Matter
+
+Without pre-calculated counts, the frontend would need to:
+1. Loop through all 382 prompts
+2. Check each prompt's tags
+3. Count matches for the current filter
+4. Repeat this for every filter change
+
+With pre-calculated counts, it just reads the number from the JSON - instant display, no computation.
+
+#### Plain English
+It is like a library catalog that already shows "Science: 450 books" vs. having to count all the science books every time someone asks. The counting is done once when we create the JSON, not repeatedly every time someone uses the filter.
+
+---
+
+### Session Summary
+
+| Task | Status |
+|------|--------|
+| Create CSV parsing script | Complete |
+| Build hierarchical tag tree | Complete |
+| Calculate prompt counts per tag | Complete |
+| Output structured JSON | Complete |
+| Document regeneration command | Complete |
+
+### Files Created
+
+- `clients/samsung/scripts/parse_prompts_csv.py` - Python script to parse CSV and build JSON
+- `clients/samsung/assets/tv_prompts.json` - Output JSON with nested tag tree + prompts array
+
+### Input/Output Files
+
+| File | Type | Description |
+|------|------|-------------|
+| `clients/samsung/assets/tv_prompts_semrush_import_v2.csv` | Input | Semrush export with 382 prompts |
+| `clients/samsung/assets/tv_prompts.json` | Output | Structured JSON for dashboard |
+
+### Lessons Learned
+
+1. **Delimiter conventions matter:** Using `__` for hierarchy is common in flat-file exports but needs explicit documentation so everyone knows the convention
+2. **Pre-calculate for performance:** Counts embedded in the tree avoid expensive client-side loops
+3. **One prompt, many tags:** Real-world categorization is not hierarchical - items belong to multiple branches simultaneously
+
+---
+
+## 2026-01-20: Modular Prompt System for Samsung Dashboards
+
+### Session Goals
+Refactor the monolithic dashboard prompt file into a modular system with reusable components, design tokens, and individual element files.
+
+---
+
+### Part 1: Why Modularize?
+
+#### The Problem
+The original `ai-overview-dashboard.md` was a single large file containing all dashboard specifications. This created issues:
+- Generating a single component (like just the header) required providing the entire file
+- Changes to design tokens had to be made in multiple places
+- No clear separation between "what" (elements) and "how" (styling rules)
+
+#### The Solution
+Split the monolithic file into a modular structure:
+
+```
+clients/samsung/prompts/
+├── _base/
+│   ├── design-tokens.md      # Colors, spacing, typography variables
+│   ├── fonts.md              # @font-face declarations
+│   └── components.md         # Reusable UI patterns
+├── elements/
+│   ├── header.md             # Dashboard header (approved)
+│   ├── kpi-cards.md          # KPI card row
+│   ├── line-chart.md         # Historical trend chart
+│   ├── donut-chart.md        # Sentiment donut
+│   ├── stacked-bar.md        # Sentiment over time
+│   ├── leaderboard-table.md  # Brand leaderboard
+│   └── data-table.md         # Product performance table
+├── _archive/
+│   ├── ai-overview-dashboard.md  # Old monolithic file
+│   └── dashboard-header.md       # Old header file
+└── full-dashboard.md         # Assembly instructions
+```
+
+#### Plain English
+Imagine having a recipe book where every recipe also includes how to grow the ingredients, how to build the oven, and the complete history of cooking. Finding anything would be a nightmare. We split this into:
+- A pantry list (design tokens)
+- Individual recipe cards (elements)
+- Assembly instructions for the full meal (full-dashboard.md)
+
+Now you can grab just the recipe card for "KPI cards" without carrying the whole book.
+
+---
+
+### Part 2: The Base Layer
+
+#### design-tokens.md
+Contains all CSS variables that define the visual language:
+- **Colors:** Samsung blue (#1428a0), backgrounds, text colors
+- **Spacing:** Consistent padding and gaps (0.5rem, 1rem, 1.5rem, etc.)
+- **Typography:** Font sizes, weights, line heights
+- **Effects:** Shadows, border-radius values
+
+#### fonts.md
+Contains the @font-face declarations for:
+- Samsung Sharp Sans (headings)
+- Samsung One (body text)
+
+This ensures fonts are loaded consistently across all generated components.
+
+#### components.md
+Contains reusable UI patterns like:
+- Card containers with shadows
+- Section headers
+- Responsive grid patterns
+
+#### Plain English
+Think of `_base/` as the foundation of a house - it defines all the rules before you start building rooms. Every element file can reference these tokens to stay consistent. If Samsung changes their brand blue color, we update ONE file and everything inherits the change.
+
+---
+
+### Part 3: Element Files
+
+Each element file is self-contained and includes:
+1. **Purpose:** What this component does
+2. **Structure:** HTML skeleton
+3. **Styling:** CSS specific to this element
+4. **Data requirements:** What data it expects
+5. **Approved implementation:** Working code from v3-ai-overview.html (where available)
+
+#### Elements Created
+| File | Purpose |
+|------|---------|
+| `header.md` | Dashboard title bar with logo |
+| `kpi-cards.md` | Row of 4 metric cards |
+| `line-chart.md` | Historical trend visualization |
+| `donut-chart.md` | Sentiment distribution pie |
+| `stacked-bar.md` | Sentiment over time bars |
+| `leaderboard-table.md` | Brand ranking table |
+| `data-table.md` | Product performance grid |
+
+#### Plain English
+Each element file is like a LEGO instruction sheet for one specific piece. You can build just that piece without needing the instructions for the entire set. Want to generate only the KPI cards? Just provide `design-tokens.md` + `kpi-cards.md` - no need for the chart or table specs.
+
+---
+
+### Part 4: The Archive
+
+Moved old files to `_archive/` to preserve history:
+- `ai-overview-dashboard.md` - The original monolithic file
+- `dashboard-header.md` - An earlier header-only attempt
+
+#### Plain English
+We kept the old files in an "archive" folder rather than deleting them. This way, if something in the new system is missing, we can always check what the original said.
+
+---
+
+### Part 5: Full Dashboard Assembly
+
+Created `full-dashboard.md` that explains how to combine all elements:
+1. Start with design tokens and fonts
+2. Add the header
+3. Build the KPI row
+4. Add charts in the appropriate layout
+5. Include tables at the bottom
+
+This file is the "master recipe" that references all other files.
+
+#### Plain English
+This is like the table of contents for the LEGO set - it tells you the order to build things and how they fit together, but the actual building instructions are in the individual element files.
+
+---
+
+### Session Summary
+
+| Task | Status |
+|------|--------|
+| Create `_base/` folder with foundation files | Complete |
+| Create `elements/` folder with 7 component files | Complete |
+| Archive old monolithic files | Complete |
+| Create full-dashboard.md assembly guide | Complete |
+
+### Files Created
+
+**Base layer:**
+- `clients/samsung/prompts/_base/design-tokens.md`
+- `clients/samsung/prompts/_base/fonts.md`
+- `clients/samsung/prompts/_base/components.md`
+
+**Elements:**
+- `clients/samsung/prompts/elements/header.md`
+- `clients/samsung/prompts/elements/kpi-cards.md`
+- `clients/samsung/prompts/elements/line-chart.md`
+- `clients/samsung/prompts/elements/donut-chart.md`
+- `clients/samsung/prompts/elements/stacked-bar.md`
+- `clients/samsung/prompts/elements/leaderboard-table.md`
+- `clients/samsung/prompts/elements/data-table.md`
+
+**Assembly:**
+- `clients/samsung/prompts/full-dashboard.md`
+
+**Archive:**
+- `clients/samsung/prompts/_archive/ai-overview-dashboard.md`
+- `clients/samsung/prompts/_archive/dashboard-header.md`
+
+### Decision Made
+
+| Decision | Why | Alternative Rejected |
+|----------|-----|---------------------|
+| Modular prompt system with separate element files | Enables generating individual components without full context, easier maintenance, single source of truth for design tokens | Single monolithic prompt file (requires full context for any change, duplicated styling rules) |
+
+### Lessons Learned
+
+1. **Modularity enables flexibility:** When prompts are split into composable pieces, you can request exactly what you need without overwhelming the context
+2. **Design tokens prevent drift:** Centralizing colors, spacing, and typography means changes propagate automatically
+3. **Archive, don't delete:** Keeping old files provides a safety net and historical reference
+4. **Include approved implementations:** Element files that contain working code (not just specs) are more reliable for generation
+
+---
+
+## 2026-01-20: Samsung AI Visibility Dashboard & GitHub Push
+
+### Session Goals
+Create a branded dashboard for Samsung's AI Visibility project, fix visual alignment issues, secure API credentials, and push the project to GitHub.
+
+---
+
+### Part 1: Samsung AI Visibility Dashboard
+
+#### What We Did
+Built a styled HTML dashboard at `clients/samsung/dashboards/v3-ai-overview.html` with Samsung branding:
+
+**Visual Design:**
+- Samsung Sharp Sans font for headings
+- Samsung One font for body text
+- Samsung blue (#1428a0) for accent colors
+- Light gray (#f7f7f7) header background
+- Rounded corners and subtle shadows on cards
+
+**Layout Structure:**
+- Header: Full width with max-width content container
+- Dashboard title "AI Visibility Dashboard" (28px, bold, Samsung blue) on left
+- Samsung logo on right
+- Main content area with same max-width as header for alignment
+- KPI cards in a 4-column CSS grid
+
+#### Technical Details - Header Alignment Fix
+
+**The Problem:**
+The header logo and title were not aligned with the main content below. The logo's left edge did not line up with the "Overview" section title.
+
+**Technical Explanation:**
+The header had different padding than the main content area. Even though both used max-width, the internal padding created a visual misalignment. The fix required:
+1. Adding a `.header-content` wrapper inside the header
+2. Giving it the same `max-width` and `padding` as the `.dashboard-container`
+3. Using flexbox with `justify-content: space-between` for left/right positioning
+
+**Plain English:**
+Imagine two rows of books on a shelf - even if the shelves are the same length, if one row starts further from the edge, they look misaligned. We made sure both the header and main content start at exactly the same spot by giving them identical "margins from the edge."
+
+#### Technical Details - CSS Grid for KPI Cards
+
+**The Problem:**
+KPI cards had different widths depending on their content.
+
+**Why Flexbox Failed:**
+With `display: flex`, cards naturally size based on their content. A card with "52.3%" takes different space than one with "1,847 keywords."
+
+**The Solution:**
+```css
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+}
+```
+
+**Plain English:**
+Flexbox is like asking four people to stand in a line and each take "as much space as they need" - they end up uneven. CSS Grid is like drawing four equal boxes on the ground and saying "everyone stand in your box" - guaranteed equal spacing.
+
+---
+
+### Part 2: Updated Prompt Documentation
+
+#### What We Did
+Updated `clients/samsung/prompts/ai-overview-dashboard.md` to serve as a specification for generating consistent dashboards.
+
+**Changes Made:**
+- Renamed from "AI Overview Dashboard" to "AI Visibility Dashboard"
+- Added Page Header section with explicit alignment requirements
+- Changed font paths from absolute to relative (`../assets/fonts/`)
+- Changed KPI card specification from flexbox to CSS grid
+
+#### Plain English
+This prompt file is like a recipe card. When we want to create another dashboard like this one (or modify this one), we can give this document to Claude and say "follow these instructions." Having the exact specifications written down means we get consistent results every time.
+
+---
+
+### Part 3: Security Fix - API Key Handling
+
+#### What We Did
+Fixed `clients/samsung/groq_kimi.py` to require the API key from environment variables instead of having it hardcoded.
+
+**Before (insecure):**
+```python
+api_key = "gsk_xxxxx..."  # Hardcoded in source code
+```
+
+**After (secure):**
+```python
+api_key = os.getenv("GROQ_API_KEY")
+if not api_key:
+    raise ValueError("GROQ_API_KEY not found in environment. Add it to .env file.")
+```
+
+#### Plain English
+Imagine writing your house key's location on a sticky note and leaving it on your front door. That is what hardcoding an API key does - anyone who sees the code can use your account. By requiring the key to be in a separate `.env` file (which is never shared), the "house key" stays hidden even if someone sees the code.
+
+#### Why This Matters
+- The `.env` file is listed in `.gitignore`, so it never gets uploaded to GitHub
+- Even if the code is public, the API credentials remain private
+- Each developer can use their own API key without changing the code
+
+---
+
+### Part 4: GitHub Repository Push
+
+#### What We Did
+Pushed the initial commit to a new GitHub repository:
+- **URL:** https://github.com/Qualmage/ai_visibility
+- **Files:** 68 files committed
+- **Security:** `.env` file properly gitignored
+
+#### Plain English
+We uploaded the project to GitHub, which is like putting it in a shared cloud folder that tracks every change. Importantly, the file containing our secret passwords (`.env`) was NOT uploaded - it stays only on our computer.
+
+---
+
+### Lesson Learned: Describing Visual Issues to AI
+
+#### The Problem
+When trying to fix the header alignment, annotated screenshots (with arrows drawn on them) were not effective at communicating the issue to Claude.
+
+#### What Works Better
+Explicit text descriptions that state exactly what should align with what:
+
+**Less Effective:**
+"See the screenshot - the logo needs to move"
+
+**More Effective:**
+"The logo's left edge should align with the Overview section title below. Both should have the same left margin from the edge of the viewport."
+
+#### Plain English
+AI understands written descriptions better than visual annotations. Instead of drawing an arrow on a picture, describe in words exactly what you see and what you want. Be specific about which elements should line up with which other elements.
+
+---
+
+### Session Summary
+
+| Task | Status |
+|------|--------|
+| Apply Samsung branding to dashboard | Complete |
+| Fix header/content alignment | Complete |
+| Change KPI cards to CSS grid | Complete |
+| Update prompt documentation | Complete |
+| Remove hardcoded API key | Complete |
+| Push to GitHub | Complete |
+
+### Files Created
+
+- `clients/samsung/dashboards/v3-ai-overview.html` - Styled AI Visibility Dashboard
+
+### Files Modified
+
+- `clients/samsung/prompts/ai-overview-dashboard.md` - Updated specifications
+- `clients/samsung/groq_kimi.py` - Secured API key handling
+
+### Decisions Made
+
+| Decision | Why | Alternative Rejected |
+|----------|-----|---------------------|
+| CSS Grid for KPI cards | Guarantees equal-width cards regardless of content | Flexbox (width varies with content) |
+| Relative asset paths (`../assets/`) | Enables static file usage without web server | Absolute paths (requires specific deployment) |
+| Text descriptions for visual issues | Works better than annotated screenshots with AI | Screenshots with drawn annotations |
+
+### Lessons Learned
+
+1. **CSS Grid vs Flexbox for equal columns:** When you need guaranteed equal widths, use CSS Grid with `repeat(n, 1fr)`. Flexbox widths depend on content.
+2. **Alignment requires matching containers:** For header elements to align with body content, they need the same max-width AND the same padding.
+3. **Describing visual issues to AI:** Use explicit text ("element A should align with element B") rather than annotated screenshots. AI processes text descriptions more reliably than visual markup.
+4. **API key security:** Never hardcode API keys. Use environment variables loaded from `.env` files that are gitignored.
+
+---
+
 ## 2026-01-19: Direct Groq API Script for Kimi K2
 
 ### Session Goals

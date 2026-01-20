@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test: Data Table - Brand/Product Performance</title>
+    <style>
+        @font-face {
+            font-family: 'Samsung Sharp Sans';
+            src: url('../assets/fonts/SamsungSharpSansBd.woff2') format('woff2'),
+                 url('../assets/fonts/SamsungSharpSans-Bold.ttf') format('truetype');
+            font-weight: 700;
+        }
+        @font-face {
+            font-family: 'Samsung One';
+            src: url('../assets/fonts/SamsungOneLatinWeb-400.woff2') format('woff2'),
+                 url('../assets/fonts/SamsungOneLatinCompact-400.ttf') format('truetype');
+            font-weight: 400;
+        }
+
+        :root {
+            --color-primary: #1428A0;
+            --color-success: #4caf50;
+            --color-error: #f44336;
+            --color-bg-page: #f8f9fa;
+            --color-bg-card: #ffffff;
+            --color-bg-success: #e8f5e9;
+            --color-bg-error: #ffebee;
+            --color-border: #e0e0e0;
+            --color-text-secondary: #666666;
+            --font-display: 'Samsung Sharp Sans', sans-serif;
+            --font-body: 'Samsung One', -apple-system, sans-serif;
+            --font-size-sm: 12px;
+            --font-size-base: 14px;
+            --font-size-lg: 18px;
+            --font-weight-bold: 700;
+            --spacing-xs: 4px;
+            --spacing-sm: 8px;
+            --spacing-md: 12px;
+            --spacing-lg: 16px;
+            --spacing-xl: 20px;
+            --spacing-2xl: 24px;
+            --radius-sm: 4px;
+            --radius-lg: 8px;
+            --radius-xl: 12px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: var(--font-body); background: var(--color-bg-page); padding: var(--spacing-2xl); }
+
+        .chart-container {
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-xl);
+            max-width: 900px;
+        }
+
+        .section-title {
+            font-family: var(--font-display);
+            font-size: var(--font-size-lg);
+            font-weight: var(--font-weight-bold);
+            margin-bottom: var(--spacing-md);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--color-primary);
+        }
+
+        .filter-btn {
+            font-family: var(--font-body);
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-sm) var(--spacing-lg);
+            font-size: var(--font-size-base);
+            cursor: pointer;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: var(--font-size-base);
+        }
+
+        th, td {
+            padding: var(--spacing-md);
+            text-align: left;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        th {
+            font-family: var(--font-display);
+            font-weight: var(--font-weight-bold);
+            color: var(--color-primary);
+            font-size: 13px;
+        }
+
+        .prompt-link {
+            color: var(--color-primary);
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .prompt-link:hover {
+            text-decoration: underline;
+        }
+
+        .model-icon {
+            color: var(--color-text-secondary);
+        }
+
+        .position {
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .badge {
+            font-family: var(--font-body);
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: var(--radius-sm);
+            font-size: var(--font-size-sm);
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .badge.new {
+            background: var(--color-bg-success);
+            color: var(--color-success);
+        }
+
+        .badge.lost {
+            background: var(--color-bg-error);
+            color: var(--color-error);
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: var(--spacing-md);
+            font-size: var(--font-size-base);
+            color: var(--color-text-secondary);
+        }
+
+        .pagination-buttons {
+            display: flex;
+            gap: var(--spacing-sm);
+        }
+
+        input[type="checkbox"] {
+            accent-color: var(--color-primary);
+        }
+
+        .source { color: var(--color-text-secondary); margin-top: 24px; font-size: 13px; }
+        code { background: #e0e0e0; padding: 2px 6px; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <h2 style="color:#1428A0;margin-bottom:16px;font-family:'Samsung Sharp Sans',sans-serif">Test: Data Table</h2>
+
+    <!-- FROM elements/data-table.md -->
+    <div class="chart-container">
+        <div class="section-title">
+            Brand / Product Performance (All Products)
+            <button class="filter-btn">Advanced ▾</button>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width:40px"><input type="checkbox"></th>
+                    <th>Prompt</th>
+                    <th style="width:60px">Model</th>
+                    <th>Product</th>
+                    <th style="width:80px">Jan 14</th>
+                    <th style="width:80px">Jan 20</th>
+                    <th style="width:80px">Change</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><input type="checkbox"></td>
+                    <td><a class="prompt-link">best tv for casual gaming</a></td>
+                    <td class="model-icon">⚙</td>
+                    <td>S95F</td>
+                    <td class="position">—</td>
+                    <td class="position">1</td>
+                    <td><span class="badge new">New</span></td>
+                </tr>
+                <tr>
+                    <td><input type="checkbox"></td>
+                    <td><a class="prompt-link">85 inch tv reviews</a></td>
+                    <td class="model-icon">⚙</td>
+                    <td>QN90D</td>
+                    <td class="position">—</td>
+                    <td class="position">3</td>
+                    <td><span class="badge new">New</span></td>
+                </tr>
+                <tr>
+                    <td><input type="checkbox"></td>
+                    <td><a class="prompt-link">Samsung The Frame Pro reviews</a></td>
+                    <td class="model-icon">⚙</td>
+                    <td>Frame/Pro</td>
+                    <td class="position">—</td>
+                    <td class="position">1</td>
+                    <td><span class="badge new">New</span></td>
+                </tr>
+                <tr>
+                    <td><input type="checkbox"></td>
+                    <td><a class="prompt-link">what tv should I buy?</a></td>
+                    <td class="model-icon">⚙</td>
+                    <td>S95H QD</td>
+                    <td class="position">—</td>
+                    <td class="position">3</td>
+                    <td><span class="badge new">New</span></td>
+                </tr>
+                <tr>
+                    <td><input type="checkbox"></td>
+                    <td><a class="prompt-link">Is AI upscaling TV worth it?</a></td>
+                    <td class="model-icon">⚙</td>
+                    <td>Q8F Vision</td>
+                    <td class="position">6</td>
+                    <td class="position">—</td>
+                    <td><span class="badge lost">Lost</span></td>
+                </tr>
+                <tr>
+                    <td><input type="checkbox"></td>
+                    <td><a class="prompt-link">What are the main features of art TVs vs regular?</a></td>
+                    <td class="model-icon">⚙</td>
+                    <td>Frame Pro Neo QLED</td>
+                    <td class="position">—</td>
+                    <td class="position">2</td>
+                    <td><span class="badge new">New</span></td>
+                </tr>
+                <tr>
+                    <td><input type="checkbox"></td>
+                    <td><a class="prompt-link">Which 4K TVs are best for gaming?</a></td>
+                    <td class="model-icon">⚙</td>
+                    <td>S95F</td>
+                    <td class="position">—</td>
+                    <td class="position">2</td>
+                    <td><span class="badge new">New</span></td>
+                </tr>
+                <tr>
+                    <td><input type="checkbox"></td>
+                    <td><a class="prompt-link">tv with 120Hz refresh rate and HDMI 2.1</a></td>
+                    <td class="model-icon">⚙</td>
+                    <td>S95F OLED TV</td>
+                    <td class="position">—</td>
+                    <td class="position">1</td>
+                    <td><span class="badge new">New</span></td>
+                </tr>
+                <tr>
+                    <td><input type="checkbox"></td>
+                    <td><a class="prompt-link">S84F reviews</a></td>
+                    <td class="model-icon">⚙</td>
+                    <td>S84F OLED TV</td>
+                    <td class="position">—</td>
+                    <td class="position">1</td>
+                    <td><span class="badge new">New</span></td>
+                </tr>
+                <tr>
+                    <td><input type="checkbox"></td>
+                    <td><a class="prompt-link">tv for sports with great color accuracy</a></td>
+                    <td class="model-icon">⚙</td>
+                    <td>S95C</td>
+                    <td class="position">—</td>
+                    <td class="position">1</td>
+                    <td><span class="badge new">New</span></td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="pagination">
+            <span>1-10 of 529</span>
+            <div class="pagination-buttons">
+                <button class="filter-btn">&lt;</button>
+                <button class="filter-btn">&gt;</button>
+            </div>
+        </div>
+    </div>
+
+    <p class="source">Source: <code>elements/data-table.md</code></p>
+</body>
+</html>

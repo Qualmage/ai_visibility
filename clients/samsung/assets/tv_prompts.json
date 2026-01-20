@@ -1,0 +1,3560 @@
+{
+  "meta": {
+    "totalPrompts": 382,
+    "totalTags": 58
+  },
+  "tagTree": {
+    "TV Features": {
+      "children": {
+        "AI": {
+          "children": {},
+          "count": 6
+        },
+        "Anti-Glare": {
+          "children": {},
+          "count": 26
+        },
+        "Art Mode": {
+          "children": {},
+          "count": 5
+        },
+        "Brightness": {
+          "children": {},
+          "count": 11
+        },
+        "Connectivity": {
+          "children": {},
+          "count": 5
+        },
+        "HDR": {
+          "children": {},
+          "count": 6
+        },
+        "Input Lag": {
+          "children": {},
+          "count": 7
+        },
+        "Motion Handling": {
+          "children": {},
+          "count": 16
+        },
+        "Panel Technology": {
+          "children": {},
+          "count": 8
+        },
+        "Picture Settings": {
+          "children": {},
+          "count": 18
+        },
+        "Refresh Rate": {
+          "children": {},
+          "count": 12
+        },
+        "Resolution": {
+          "children": {
+            "4K": {
+              "children": {},
+              "count": 11
+            },
+            "8K": {
+              "children": {},
+              "count": 1
+            }
+          },
+          "count": 31
+        },
+        "Smart Features": {
+          "children": {},
+          "count": 3
+        },
+        "Sound": {
+          "children": {},
+          "count": 1
+        },
+        "Streaming": {
+          "children": {},
+          "count": 1
+        },
+        "Viewing Angles": {
+          "children": {},
+          "count": 3
+        }
+      },
+      "count": 301
+    },
+    "TV Models": {
+      "children": {
+        "Art TV": {
+          "children": {},
+          "count": 1
+        },
+        "Gaming TVs": {
+          "children": {},
+          "count": 40
+        },
+        "Micro RGB": {
+          "children": {},
+          "count": 16
+        },
+        "Mini-LED": {
+          "children": {},
+          "count": 22
+        },
+        "Movies & Cinema": {
+          "children": {},
+          "count": 11
+        },
+        "OLED": {
+          "children": {},
+          "count": 26
+        },
+        "Outdoor TV": {
+          "children": {},
+          "count": 2
+        },
+        "QLED": {
+          "children": {},
+          "count": 31
+        },
+        "Smart TV": {
+          "children": {},
+          "count": 7
+        },
+        "Sports TVs": {
+          "children": {},
+          "count": 33
+        }
+      },
+      "count": 347
+    },
+    "TV Reviews & Brand": {
+      "children": {
+        "Affordable": {
+          "children": {},
+          "count": 5
+        },
+        "Best Of": {
+          "children": {},
+          "count": 85
+        },
+        "Brand": {
+          "children": {
+            "TV Features": {
+              "children": {
+                "AI": {
+                  "children": {},
+                  "count": 3
+                },
+                "Smart Features": {
+                  "children": {},
+                  "count": 2
+                },
+                "Streaming": {
+                  "children": {},
+                  "count": 2
+                }
+              },
+              "count": 14
+            },
+            "TV Models": {
+              "children": {
+                "Crystal UHD": {
+                  "children": {},
+                  "count": 2
+                },
+                "Micro RGB": {
+                  "children": {},
+                  "count": 2
+                },
+                "MovingStyle": {
+                  "children": {},
+                  "count": 1
+                },
+                "Neo QLED": {
+                  "children": {},
+                  "count": 3
+                },
+                "Smart TV": {
+                  "children": {},
+                  "count": 1
+                },
+                "The Frame": {
+                  "children": {},
+                  "count": 3
+                }
+              },
+              "count": 24
+            }
+          },
+          "count": 109
+        },
+        "Brand TV Model Reviews": {
+          "children": {},
+          "count": 37
+        },
+        "Buying Guides": {
+          "children": {},
+          "count": 57
+        },
+        "Comparison": {
+          "children": {},
+          "count": 38
+        },
+        "Deals": {
+          "children": {},
+          "count": 4
+        },
+        "Year Reviews": {
+          "children": {
+            "2025": {
+              "children": {},
+              "count": 10
+            },
+            "2026": {
+              "children": {},
+              "count": 33
+            }
+          },
+          "count": 84
+        }
+      },
+      "count": 621
+    },
+    "TV Sizes": {
+      "children": {
+        "Large Size": {
+          "children": {},
+          "count": 28
+        },
+        "Medium Size": {
+          "children": {},
+          "count": 16
+        },
+        "Small Size": {
+          "children": {},
+          "count": 6
+        },
+        "Super Size": {
+          "children": {},
+          "count": 3
+        },
+        "Viewing Distance": {
+          "children": {},
+          "count": 10
+        }
+      },
+      "count": 130
+    }
+  },
+  "prompts": [
+    {
+      "text": "2025 vs 2026 OLED tvs",
+      "tags": [
+        "TV Models",
+        "TV Models__OLED",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Comparison",
+        "TV Reviews & Brand__Year Reviews",
+        "TV Reviews & Brand__Year Reviews__2025",
+        "TV Reviews & Brand__Year Reviews__2026"
+      ]
+    },
+    {
+      "text": "32 inch tv for bedroom",
+      "tags": [
+        "TV Sizes",
+        "TV Sizes__Small Size"
+      ]
+    },
+    {
+      "text": "32 inch tv recommendations",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of",
+        "TV Sizes",
+        "TV Sizes__Small Size"
+      ]
+    },
+    {
+      "text": "43 inch tv recommendations",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of",
+        "TV Sizes",
+        "TV Sizes__Small Size"
+      ]
+    },
+    {
+      "text": "4K AI upscaling tv",
+      "tags": [
+        "TV Features",
+        "TV Features__AI",
+        "TV Features__Resolution",
+        "TV Features__Resolution__4K"
+      ]
+    },
+    {
+      "text": "4K upscaling explained",
+      "tags": [
+        "TV Features",
+        "TV Features__Resolution",
+        "TV Features__Resolution__4K"
+      ]
+    },
+    {
+      "text": "50 inch tv recommendations",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of",
+        "TV Sizes",
+        "TV Sizes__Small Size"
+      ]
+    },
+    {
+      "text": "55 inch tv reviews",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Buying Guides",
+        "TV Sizes",
+        "TV Sizes__Medium Size"
+      ]
+    },
+    {
+      "text": "55 inch vs 65 inch tvs",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Comparison",
+        "TV Sizes",
+        "TV Sizes__Medium Size"
+      ]
+    },
+    {
+      "text": "65 inch tv reviews",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Buying Guides",
+        "TV Sizes",
+        "TV Sizes__Medium Size"
+      ]
+    },
+    {
+      "text": "65 inch vs 75 inch tvs",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Comparison",
+        "TV Sizes",
+        "TV Sizes__Large Size",
+        "TV Sizes__Medium Size"
+      ]
+    },
+    {
+      "text": "75 inch QLED tv reviews",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Buying Guides",
+        "TV Sizes",
+        "TV Sizes__Large Size",
+        "TV Models",
+        "TV Models__QLED"
+      ]
+    },
+    {
+      "text": "75 inch tv refresh rate for sports",
+      "tags": [
+        "TV Sizes",
+        "TV Sizes__Large Size",
+        "TV Models",
+        "TV Models__Sports TVs",
+        "TV Features",
+        "TV Features__Refresh Rate"
+      ]
+    },
+    {
+      "text": "75 inch tv reviews",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Buying Guides",
+        "TV Sizes",
+        "TV Sizes__Large Size"
+      ]
+    },
+    {
+      "text": "75 inch TV vs 85 inch TV",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Comparison",
+        "TV Sizes",
+        "TV Sizes__Large Size"
+      ]
+    },
+    {
+      "text": "85 inch tv for gaming",
+      "tags": [
+        "TV Sizes",
+        "TV Sizes__Large Size",
+        "TV Models",
+        "TV Models__Gaming TVs"
+      ]
+    },
+    {
+      "text": "85 inch tv reviews",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Buying Guides",
+        "TV Sizes",
+        "TV Sizes__Large Size"
+      ]
+    },
+    {
+      "text": "98 inch tv price",
+      "tags": [
+        "TV Sizes",
+        "TV Sizes__Super Size"
+      ]
+    },
+    {
+      "text": "98 inch tv reviews",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Buying Guides",
+        "TV Sizes",
+        "TV Sizes__Super Size"
+      ]
+    },
+    {
+      "text": "advantages and disadvantages of OLED tvs",
+      "tags": [
+        "TV Models",
+        "TV Models__OLED"
+      ]
+    },
+    {
+      "text": "affordable 32 inch tv",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Affordable",
+        "TV Sizes",
+        "TV Sizes__Small Size"
+      ]
+    },
+    {
+      "text": "affordable 50 inch tv",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Affordable",
+        "TV Sizes",
+        "TV Sizes__Small Size"
+      ]
+    },
+    {
+      "text": "affordable tv for sports 2026",
+      "tags": [
+        "TV Features",
+        "TV Models",
+        "TV Models__Sports TVs",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Affordable",
+        "TV Reviews & Brand__Year Reviews",
+        "TV Reviews & Brand__Year Reviews__2026"
+      ]
+    },
+    {
+      "text": "AI smart tv",
+      "tags": [
+        "TV Features",
+        "TV Features__AI",
+        "TV Models",
+        "TV Models__Smart TV"
+      ]
+    },
+    {
+      "text": "AI tv",
+      "tags": [
+        "TV Features",
+        "TV Features__AI"
+      ]
+    },
+    {
+      "text": "AI upscaling tv",
+      "tags": [
+        "TV Features",
+        "TV Features__AI",
+        "TV Features__Resolution"
+      ]
+    },
+    {
+      "text": "ALLM feature on gaming tvs",
+      "tags": [
+        "TV Features",
+        "TV Features__Input Lag",
+        "TV Models",
+        "TV Models__Gaming TVs"
+      ]
+    },
+    {
+      "text": "anti-glare tv for bright room sports",
+      "tags": [
+        "TV Features",
+        "TV Features__Brightness",
+        "TV Features__Anti-Glare",
+        "TV Models",
+        "TV Models__Sports TVs"
+      ]
+    },
+    {
+      "text": "anti-reflective coating for tv screens explained",
+      "tags": [
+        "TV Features",
+        "TV Features__Anti-Glare"
+      ]
+    },
+    {
+      "text": "are glossy screens more vibrant",
+      "tags": [
+        "TV Features",
+        "TV Features__Anti-Glare"
+      ]
+    },
+    {
+      "text": "are Mini-LED tvs good for sports",
+      "tags": [
+        "TV Models",
+        "TV Models__Mini-LED",
+        "TV Models__Sports TVs"
+      ]
+    },
+    {
+      "text": "are QLED tvs good for sports",
+      "tags": [
+        "TV Models",
+        "TV Models__QLED",
+        "TV Models__Sports TVs"
+      ]
+    },
+    {
+      "text": "benefits of Micro RGB tv",
+      "tags": [
+        "TV Models",
+        "TV Models__Micro RGB"
+      ]
+    },
+    {
+      "text": "best 4K tv for sports 2026",
+      "tags": [
+        "TV Features",
+        "TV Features__Resolution",
+        "TV Features__Resolution__4K",
+        "TV Models",
+        "TV Models__Sports TVs",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of",
+        "TV Reviews & Brand__Year Reviews",
+        "TV Reviews & Brand__Year Reviews__2026"
+      ]
+    },
+    {
+      "text": "best 55 inch QLED tv",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of",
+        "TV Sizes",
+        "TV Sizes__Medium Size",
+        "TV Models",
+        "TV Models__QLED"
+      ]
+    },
+    {
+      "text": "best 55 inch tv",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of",
+        "TV Sizes",
+        "TV Sizes__Medium Size"
+      ]
+    },
+    {
+      "text": "best 55 inch tv 2025",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of",
+        "TV Reviews & Brand__Year Reviews",
+        "TV Reviews & Brand__Year Reviews__2025",
+        "TV Sizes",
+        "TV Sizes__Medium Size"
+      ]
+    },
+    {
+      "text": "best 55 inch tv 2026",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of",
+        "TV Reviews & Brand__Year Reviews",
+        "TV Reviews & Brand__Year Reviews__2026",
+        "TV Sizes",
+        "TV Sizes__Medium Size"
+      ]
+    },
+    {
+      "text": "best 55 inch tv deals",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of",
+        "TV Reviews & Brand__Deals",
+        "TV Sizes",
+        "TV Sizes__Medium Size"
+      ]
+    },
+    {
+      "text": "best 65 inch QLED tv",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of",
+        "TV Sizes",
+        "TV Sizes__Medium Size",
+        "TV Models",
+        "TV Models__QLED"
+      ]
+    },
+    {
+      "text": "best 65 inch tv 2025",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of",
+        "TV Reviews & Brand__Year Reviews",
+        "TV Reviews & Brand__Year Reviews__2025",
+        "TV Sizes",
+        "TV Sizes__Medium Size"
+      ]
+    },
+    {
+      "text": "best 65 inch tv 2026",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of",
+        "TV Reviews & Brand__Year Reviews",
+        "TV Reviews & Brand__Year Reviews__2026",
+        "TV Sizes",
+        "TV Sizes__Medium Size"
+      ]
+    },
+    {
+      "text": "best 65 inch tv for sports",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of",
+        "TV Sizes",
+        "TV Sizes__Medium Size",
+        "TV Models",
+        "TV Models__Sports TVs"
+      ]
+    },
+    {
+      "text": "best 65 inch tv for sports 2025",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of",
+        "TV Reviews & Brand__Year Reviews",
+        "TV Reviews & Brand__Year Reviews__2025",
+        "TV Sizes",
+        "TV Sizes__Medium Size",
+        "TV Models",
+        "TV Models__Sports TVs"
+      ]
+    },
+    {
+      "text": "best 65 inch tv for sports 2026",
+      "tags": [
+        "TV Features",
+        "TV Models",
+        "TV Models__Sports TVs",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of",
+        "TV Reviews & Brand__Year Reviews",
+        "TV Reviews & Brand__Year Reviews__2026",
+        "TV Sizes",
+        "TV Sizes__Medium Size"
+      ]
+    },
+    {
+      "text": "best 65 inch tv under $1000",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of",
+        "TV Reviews & Brand__Deals",
+        "TV Sizes",
+        "TV Sizes__Medium Size"
+      ]
+    },
+    {
+      "text": "best 75 inch QLED tv",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of",
+        "TV Sizes",
+        "TV Sizes__Large Size",
+        "TV Models",
+        "TV Models__QLED"
+      ]
+    },
+    {
+      "text": "best 75 inch tv",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of",
+        "TV Sizes",
+        "TV Sizes__Large Size"
+      ]
+    },
+    {
+      "text": "best 75 inch tv 2025",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of",
+        "TV Reviews & Brand__Year Reviews",
+        "TV Reviews & Brand__Year Reviews__2025",
+        "TV Sizes",
+        "TV Sizes__Large Size"
+      ]
+    },
+    {
+      "text": "best 75 inch tv 2026",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of",
+        "TV Reviews & Brand__Year Reviews",
+        "TV Reviews & Brand__Year Reviews__2026",
+        "TV Sizes",
+        "TV Sizes__Large Size"
+      ]
+    },
+    {
+      "text": "best 75 inch tv for bright room",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of",
+        "TV Sizes",
+        "TV Sizes__Large Size",
+        "TV Features",
+        "TV Features__Brightness",
+        "TV Features__Anti-Glare"
+      ]
+    },
+    {
+      "text": "best 75 inch tv for gaming",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of",
+        "TV Sizes",
+        "TV Sizes__Large Size",
+        "TV Models",
+        "TV Models__Gaming TVs"
+      ]
+    },
+    {
+      "text": "best 75 inch tv for sports",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of",
+        "TV Sizes",
+        "TV Sizes__Large Size",
+        "TV Models",
+        "TV Models__Sports TVs"
+      ]
+    },
+    {
+      "text": "best 75 inch tv for sports 2025",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of",
+        "TV Reviews & Brand__Year Reviews",
+        "TV Reviews & Brand__Year Reviews__2025",
+        "TV Sizes",
+        "TV Sizes__Large Size",
+        "TV Models",
+        "TV Models__Sports TVs"
+      ]
+    },
+    {
+      "text": "best 75 inch tv for sports 2026",
+      "tags": [
+        "TV Features",
+        "TV Models",
+        "TV Models__Sports TVs",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of",
+        "TV Reviews & Brand__Year Reviews",
+        "TV Reviews & Brand__Year Reviews__2026",
+        "TV Sizes",
+        "TV Sizes__Large Size"
+      ]
+    },
+    {
+      "text": "best 75 inch tv under $1500",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of",
+        "TV Reviews & Brand__Deals",
+        "TV Sizes",
+        "TV Sizes__Large Size"
+      ]
+    },
+    {
+      "text": "best 85 inch tv",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of",
+        "TV Sizes",
+        "TV Sizes__Large Size"
+      ]
+    },
+    {
+      "text": "best 85 inch tv 2025",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of",
+        "TV Reviews & Brand__Year Reviews",
+        "TV Reviews & Brand__Year Reviews__2025",
+        "TV Sizes",
+        "TV Sizes__Large Size"
+      ]
+    },
+    {
+      "text": "best 85 inch tv 2026",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of",
+        "TV Reviews & Brand__Year Reviews",
+        "TV Reviews & Brand__Year Reviews__2026",
+        "TV Sizes",
+        "TV Sizes__Large Size"
+      ]
+    },
+    {
+      "text": "best 85 inch tv for bright room",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of",
+        "TV Sizes",
+        "TV Sizes__Large Size",
+        "TV Features",
+        "TV Features__Brightness",
+        "TV Features__Anti-Glare"
+      ]
+    },
+    {
+      "text": "best 85 inch tv for sports",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of",
+        "TV Sizes",
+        "TV Sizes__Large Size",
+        "TV Models",
+        "TV Models__Sports TVs"
+      ]
+    },
+    {
+      "text": "best 8K tvs 2026",
+      "tags": [
+        "TV Features",
+        "TV Features__Resolution",
+        "TV Features__Resolution__8K",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of",
+        "TV Reviews & Brand__Year Reviews",
+        "TV Reviews & Brand__Year Reviews__2026"
+      ]
+    },
+    {
+      "text": "best anti-glare tv 2026",
+      "tags": [
+        "TV Features",
+        "TV Features__Anti-Glare",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of",
+        "TV Reviews & Brand__Year Reviews",
+        "TV Reviews & Brand__Year Reviews__2026"
+      ]
+    },
+    {
+      "text": "best budget tv",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of",
+        "TV Reviews & Brand__Affordable"
+      ]
+    },
+    {
+      "text": "best gaming tv 2026",
+      "tags": [
+        "TV Models",
+        "TV Models__Gaming TVs",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of",
+        "TV Reviews & Brand__Year Reviews",
+        "TV Reviews & Brand__Year Reviews__2026"
+      ]
+    },
+    {
+      "text": "best large screen tv for sports 2026",
+      "tags": [
+        "TV Features",
+        "TV Models",
+        "TV Models__Sports TVs",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of",
+        "TV Reviews & Brand__Year Reviews",
+        "TV Reviews & Brand__Year Reviews__2026",
+        "TV Sizes"
+      ]
+    },
+    {
+      "text": "best large screen tvs 2026",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of",
+        "TV Reviews & Brand__Year Reviews",
+        "TV Reviews & Brand__Year Reviews__2026",
+        "TV Sizes"
+      ]
+    },
+    {
+      "text": "best LED tvs 2026",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of",
+        "TV Reviews & Brand__Year Reviews",
+        "TV Reviews & Brand__Year Reviews__2026"
+      ]
+    },
+    {
+      "text": "best Micro RGB tvs 2025",
+      "tags": [
+        "TV Models",
+        "TV Models__Micro RGB",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of",
+        "TV Reviews & Brand__Year Reviews",
+        "TV Reviews & Brand__Year Reviews__2025"
+      ]
+    },
+    {
+      "text": "best Micro RGB tvs 2026",
+      "tags": [
+        "TV Models",
+        "TV Models__Micro RGB",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of",
+        "TV Reviews & Brand__Year Reviews",
+        "TV Reviews & Brand__Year Reviews__2026"
+      ]
+    },
+    {
+      "text": "best OLED tv 2026",
+      "tags": [
+        "TV Models",
+        "TV Models__OLED",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of",
+        "TV Reviews & Brand__Year Reviews",
+        "TV Reviews & Brand__Year Reviews__2026"
+      ]
+    },
+    {
+      "text": "best outdoor tv 2026",
+      "tags": [
+        "TV Models",
+        "TV Models__Outdoor TV",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of",
+        "TV Reviews & Brand__Year Reviews",
+        "TV Reviews & Brand__Year Reviews__2026"
+      ]
+    },
+    {
+      "text": "best QLED tvs 2026",
+      "tags": [
+        "TV Models",
+        "TV Models__QLED",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of",
+        "TV Reviews & Brand__Year Reviews",
+        "TV Reviews & Brand__Year Reviews__2026"
+      ]
+    },
+    {
+      "text": "best Samsung tv 2025",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Year Reviews",
+        "TV Reviews & Brand__Year Reviews__2025"
+      ]
+    },
+    {
+      "text": "best Samsung tv 2026",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Year Reviews",
+        "TV Reviews & Brand__Year Reviews__2026"
+      ]
+    },
+    {
+      "text": "best Samsung tvs 2026",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Year Reviews",
+        "TV Reviews & Brand__Year Reviews__2026"
+      ]
+    },
+    {
+      "text": "best screen size for small living room",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of",
+        "TV Sizes"
+      ]
+    },
+    {
+      "text": "best smart tvs 2026",
+      "tags": [
+        "TV Features",
+        "TV Models",
+        "TV Models__Smart TV",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of",
+        "TV Reviews & Brand__Year Reviews",
+        "TV Reviews & Brand__Year Reviews__2026"
+      ]
+    },
+    {
+      "text": "best tv 2026",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of",
+        "TV Reviews & Brand__Year Reviews",
+        "TV Reviews & Brand__Year Reviews__2026"
+      ]
+    },
+    {
+      "text": "best tv brands 2026",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of",
+        "TV Reviews & Brand__Year Reviews",
+        "TV Reviews & Brand__Year Reviews__2026"
+      ]
+    },
+    {
+      "text": "best tv brands for longevity",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of"
+      ]
+    },
+    {
+      "text": "best tv brands ranked",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of"
+      ]
+    },
+    {
+      "text": "best tv for american football 2026",
+      "tags": [
+        "TV Models",
+        "TV Models__Sports TVs",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of",
+        "TV Reviews & Brand__Year Reviews",
+        "TV Reviews & Brand__Year Reviews__2026"
+      ]
+    },
+    {
+      "text": "best tv for bedroom",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of"
+      ]
+    },
+    {
+      "text": "best tv for casual gaming",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of",
+        "TV Models",
+        "TV Models__Gaming TVs"
+      ]
+    },
+    {
+      "text": "best tv for fast paced sports 2026",
+      "tags": [
+        "TV Features",
+        "TV Models",
+        "TV Models__Sports TVs",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of",
+        "TV Reviews & Brand__Year Reviews",
+        "TV Reviews & Brand__Year Reviews__2026"
+      ]
+    },
+    {
+      "text": "best tv for general use",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of"
+      ]
+    },
+    {
+      "text": "best tv for hockey 2026",
+      "tags": [
+        "TV Models",
+        "TV Models__Sports TVs",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of",
+        "TV Reviews & Brand__Year Reviews",
+        "TV Reviews & Brand__Year Reviews__2026"
+      ]
+    },
+    {
+      "text": "best tv for live events 2026",
+      "tags": [
+        "TV Models",
+        "TV Models__Sports TVs",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of",
+        "TV Reviews & Brand__Year Reviews",
+        "TV Reviews & Brand__Year Reviews__2026"
+      ]
+    },
+    {
+      "text": "best tv for living room",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of"
+      ]
+    },
+    {
+      "text": "best tv for rugby 2026",
+      "tags": [
+        "TV Models",
+        "TV Models__Sports TVs",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of",
+        "TV Reviews & Brand__Year Reviews",
+        "TV Reviews & Brand__Year Reviews__2026"
+      ]
+    },
+    {
+      "text": "best tv for small apartment",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of"
+      ]
+    },
+    {
+      "text": "best tv for soccer World Cup 2026",
+      "tags": [
+        "TV Models",
+        "TV Models__Sports TVs",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of",
+        "TV Reviews & Brand__Year Reviews",
+        "TV Reviews & Brand__Year Reviews__2026"
+      ]
+    },
+    {
+      "text": "best tv for sports and movies 2026",
+      "tags": [
+        "TV Features",
+        "TV Models",
+        "TV Models__Movies & Cinema",
+        "TV Models__Sports TVs",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of",
+        "TV Reviews & Brand__Year Reviews",
+        "TV Reviews & Brand__Year Reviews__2026"
+      ]
+    },
+    {
+      "text": "black frame insertion tv",
+      "tags": [
+        "TV Features",
+        "TV Features__Motion Handling"
+      ]
+    },
+    {
+      "text": "black level settings for gaming tv",
+      "tags": [
+        "TV Models",
+        "TV Models__Gaming TVs",
+        "TV Features",
+        "TV Features__Picture Settings"
+      ]
+    },
+    {
+      "text": "bright tvs for sports in a sunny room",
+      "tags": [
+        "TV Models",
+        "TV Models__Sports TVs",
+        "TV Features",
+        "TV Features__Brightness"
+      ]
+    },
+    {
+      "text": "can you make a glossy screen matte",
+      "tags": [
+        "TV Features",
+        "TV Features__Anti-Glare"
+      ]
+    },
+    {
+      "text": "can you make a matte screen glossy",
+      "tags": [
+        "TV Features",
+        "TV Features__Anti-Glare"
+      ]
+    },
+    {
+      "text": "can you tell the difference between 4K and 1080p at my viewing distance",
+      "tags": [
+        "TV Sizes",
+        "TV Sizes__Viewing Distance",
+        "TV Features",
+        "TV Features__Resolution"
+      ]
+    },
+    {
+      "text": "compare OLED vs QLED tvs",
+      "tags": [
+        "TV Models",
+        "TV Models__OLED",
+        "TV Models__QLED",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Comparison"
+      ]
+    },
+    {
+      "text": "compare Samsung vs Hisense tvs",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Comparison",
+        "TV Reviews & Brand__Brand"
+      ]
+    },
+    {
+      "text": "compare Samsung vs LG OLED tvs",
+      "tags": [
+        "TV Models",
+        "TV Models__OLED",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Comparison"
+      ]
+    },
+    {
+      "text": "compare Samsung vs LG tvs",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Comparison",
+        "TV Reviews & Brand__Brand"
+      ]
+    },
+    {
+      "text": "compare Samsung vs Sony tvs",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Comparison",
+        "TV Reviews & Brand__Brand"
+      ]
+    },
+    {
+      "text": "compare Samsung vs TCL tvs",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Comparison",
+        "TV Reviews & Brand__Brand"
+      ]
+    },
+    {
+      "text": "compare Samsung vs Vizio tvs",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Comparison",
+        "TV Reviews & Brand__Brand"
+      ]
+    },
+    {
+      "text": "compare the 2025 and 2026 Frame TV",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Brand__TV Models",
+        "TV Reviews & Brand__Brand__TV Models__The Frame",
+        "TV Reviews & Brand__Comparison",
+        "TV Reviews & Brand__Year Reviews",
+        "TV Reviews & Brand__Year Reviews__2025",
+        "TV Reviews & Brand__Year Reviews__2026"
+      ]
+    },
+    {
+      "text": "compare the different outdoor tv brands",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Comparison",
+        "TV Models",
+        "TV Models__Outdoor TV"
+      ]
+    },
+    {
+      "text": "compare the different picture frame tvs",
+      "tags": [
+        "TV Models",
+        "TV Models__Art TV",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Comparison"
+      ]
+    },
+    {
+      "text": "contrast settings for gaming on tv",
+      "tags": [
+        "TV Models",
+        "TV Models__Gaming TVs",
+        "TV Features",
+        "TV Features__Picture Settings"
+      ]
+    },
+    {
+      "text": "difference between game mode and standard picture mode",
+      "tags": [
+        "TV Features",
+        "TV Features__Picture Settings"
+      ]
+    },
+    {
+      "text": "difference between gaming tv and regular tv",
+      "tags": [
+        "TV Models",
+        "TV Models__Gaming TVs",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Comparison"
+      ]
+    },
+    {
+      "text": "difference between Mini-LED and OLED displays",
+      "tags": [
+        "TV Models",
+        "TV Models__OLED",
+        "TV Models__Mini-LED",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Comparison"
+      ]
+    },
+    {
+      "text": "difference between QLED and OLED",
+      "tags": [
+        "TV Models",
+        "TV Models__OLED",
+        "TV Models__QLED",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Comparison"
+      ]
+    },
+    {
+      "text": "difference between smart tv and gaming tv",
+      "tags": [
+        "TV Models",
+        "TV Models__Gaming TVs",
+        "TV Models__Smart TV",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Comparison"
+      ]
+    },
+    {
+      "text": "difference between tvs for movies and sports",
+      "tags": [
+        "TV Models",
+        "TV Models__Movies & Cinema",
+        "TV Models__Sports TVs",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Comparison"
+      ]
+    },
+    {
+      "text": "different tv picture modes explained",
+      "tags": [
+        "TV Features",
+        "TV Features__Picture Settings"
+      ]
+    },
+    {
+      "text": "disadvantages of Micro RGB displays",
+      "tags": [
+        "TV Models",
+        "TV Models__Micro RGB"
+      ]
+    },
+    {
+      "text": "DIY tv calibration steps",
+      "tags": [
+        "TV Features",
+        "TV Features__Picture Settings"
+      ]
+    },
+    {
+      "text": "do all tvs have reflections",
+      "tags": [
+        "TV Features",
+        "TV Features__Anti-Glare"
+      ]
+    },
+    {
+      "text": "do i need 120Hz tv",
+      "tags": [
+        "TV Features",
+        "TV Features__Refresh Rate"
+      ]
+    },
+    {
+      "text": "do i need a gaming tv",
+      "tags": [
+        "TV Models",
+        "TV Models__Gaming TVs"
+      ]
+    },
+    {
+      "text": "do i need HDMI 2.1 for PS5",
+      "tags": [
+        "TV Models",
+        "TV Models__Gaming TVs",
+        "TV Features",
+        "TV Features__Connectivity"
+      ]
+    },
+    {
+      "text": "do i need HDR tv",
+      "tags": [
+        "TV Features",
+        "TV Features__HDR"
+      ]
+    },
+    {
+      "text": "do i need to calibrate my tv for gaming",
+      "tags": [
+        "TV Models",
+        "TV Models__Gaming TVs"
+      ]
+    },
+    {
+      "text": "do matte screens look dull",
+      "tags": [
+        "TV Features",
+        "TV Features__Anti-Glare"
+      ]
+    },
+    {
+      "text": "does anti-glare screen protector work for tvs",
+      "tags": [
+        "TV Features",
+        "TV Features__Anti-Glare"
+      ]
+    },
+    {
+      "text": "does filmmaker mode disable true motion",
+      "tags": [
+        "TV Models",
+        "TV Models__Movies & Cinema",
+        "TV Features",
+        "TV Features__Motion Handling"
+      ]
+    },
+    {
+      "text": "does Mini-LED have blooming",
+      "tags": [
+        "TV Models",
+        "TV Models__Mini-LED"
+      ]
+    },
+    {
+      "text": "does soap opera effect ruin movies",
+      "tags": [
+        "TV Features",
+        "TV Features__Motion Handling",
+        "TV Models",
+        "TV Models__Movies & Cinema"
+      ]
+    },
+    {
+      "text": "DU7200 reviews",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Brand TV Model Reviews",
+        "TV Reviews & Brand__Buying Guides"
+      ]
+    },
+    {
+      "text": "DU8000 reviews",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Brand TV Model Reviews",
+        "TV Reviews & Brand__Buying Guides"
+      ]
+    },
+    {
+      "text": "DU900 reviews",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Brand TV Model Reviews",
+        "TV Reviews & Brand__Buying Guides"
+      ]
+    },
+    {
+      "text": "DUX1E reviews",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Brand TV Model Reviews",
+        "TV Reviews & Brand__Buying Guides"
+      ]
+    },
+    {
+      "text": "G-Sync compatible tv for gaming",
+      "tags": [
+        "TV Features",
+        "TV Features__Input Lag",
+        "TV Features__Refresh Rate",
+        "TV Models",
+        "TV Models__Gaming TVs"
+      ]
+    },
+    {
+      "text": "gaming tv features to look for",
+      "tags": [
+        "TV Models",
+        "TV Models__Gaming TVs"
+      ]
+    },
+    {
+      "text": "gaming tv for Nintendo Switch",
+      "tags": [
+        "TV Models",
+        "TV Models__Gaming TVs"
+      ]
+    },
+    {
+      "text": "gaming tv for PS5",
+      "tags": [
+        "TV Models",
+        "TV Models__Gaming TVs"
+      ]
+    },
+    {
+      "text": "gaming tv for retro consoles",
+      "tags": [
+        "TV Models",
+        "TV Models__Gaming TVs"
+      ]
+    },
+    {
+      "text": "gaming tv for Xbox Series X",
+      "tags": [
+        "TV Models",
+        "TV Models__Gaming TVs"
+      ]
+    },
+    {
+      "text": "gaming tv setup tips",
+      "tags": [
+        "TV Models",
+        "TV Models__Gaming TVs"
+      ]
+    },
+    {
+      "text": "gaming tv with FreeSync premium",
+      "tags": [
+        "TV Features",
+        "TV Features__Input Lag",
+        "TV Features__Refresh Rate",
+        "TV Models",
+        "TV Models__Gaming TVs"
+      ]
+    },
+    {
+      "text": "HDMI input tv picture settings",
+      "tags": [
+        "TV Features",
+        "TV Features__Picture Settings"
+      ]
+    },
+    {
+      "text": "HDR gaming on tv",
+      "tags": [
+        "TV Features",
+        "TV Features__HDR",
+        "TV Models",
+        "TV Models__Gaming TVs"
+      ]
+    },
+    {
+      "text": "HDR tv explained",
+      "tags": [
+        "TV Features",
+        "TV Features__HDR"
+      ]
+    },
+    {
+      "text": "help me choose between a Samsung and an LG OLED tv",
+      "tags": [
+        "TV Models",
+        "TV Models__OLED",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Comparison"
+      ]
+    },
+    {
+      "text": "help me choose between a Sony and a Samsung tv",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Comparison",
+        "TV Reviews & Brand__Brand"
+      ]
+    },
+    {
+      "text": "help me choose between an OLED and a QLED tv",
+      "tags": [
+        "TV Models",
+        "TV Models__OLED",
+        "TV Models__QLED",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Comparison"
+      ]
+    },
+    {
+      "text": "help me choose the best tv under $1000",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of",
+        "TV Reviews & Brand__Comparison",
+        "TV Reviews & Brand__Deals"
+      ]
+    },
+    {
+      "text": "help me choose the biggest tv for a small living room",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Comparison"
+      ]
+    },
+    {
+      "text": "how do Micro RGB tvs work",
+      "tags": [
+        "TV Models",
+        "TV Models__Micro RGB",
+        "TV Reviews & Brand"
+      ]
+    },
+    {
+      "text": "how do QLED tvs work",
+      "tags": [
+        "TV Models",
+        "TV Models__QLED"
+      ]
+    },
+    {
+      "text": "How do you choose the right size TV?",
+      "tags": [
+        "TV Sizes",
+        "TV Sizes__Viewing Distance"
+      ]
+    },
+    {
+      "text": "how does OLED display technology work",
+      "tags": [
+        "TV Models",
+        "TV Models__OLED"
+      ]
+    },
+    {
+      "text": "how does quantum dot technology work in tvs",
+      "tags": [
+        "TV Models",
+        "TV Models__QLED"
+      ]
+    },
+    {
+      "text": "How does TV AI upscaling work?",
+      "tags": [
+        "TV Features",
+        "TV Features__Resolution",
+        "TV Features__AI"
+      ]
+    },
+    {
+      "text": "how long do QLED tvs last",
+      "tags": [
+        "TV Models",
+        "TV Models__QLED"
+      ]
+    },
+    {
+      "text": "How much should I spend on a good 75-inch TV?",
+      "tags": [
+        "TV Sizes",
+        "TV Sizes__Large Size"
+      ]
+    },
+    {
+      "text": "how to calibrate QLED tv",
+      "tags": [
+        "TV Models",
+        "TV Models__QLED"
+      ]
+    },
+    {
+      "text": "how to get cinematic viewing experience at home",
+      "tags": [
+        "TV Models",
+        "TV Models__Movies & Cinema"
+      ]
+    },
+    {
+      "text": "how to get rid of the soap opera look",
+      "tags": [
+        "TV Features",
+        "TV Features__Motion Handling"
+      ]
+    },
+    {
+      "text": "how to optimize tv for gaming",
+      "tags": [
+        "TV Models",
+        "TV Models__Gaming TVs"
+      ]
+    },
+    {
+      "text": "how to reduce tv input lag",
+      "tags": [
+        "TV Features",
+        "TV Features__Input Lag",
+        "TV Models",
+        "TV Models__Gaming TVs"
+      ]
+    },
+    {
+      "text": "how to reset tv picture settings",
+      "tags": [
+        "TV Features",
+        "TV Features__Picture Settings"
+      ]
+    },
+    {
+      "text": "how to set up a new smart tv",
+      "tags": [
+        "TV Models",
+        "TV Models__Smart TV"
+      ]
+    },
+    {
+      "text": "how to turn off motion smoothing on tv",
+      "tags": [
+        "TV Features",
+        "TV Features__Motion Handling"
+      ]
+    },
+    {
+      "text": "impact of direct sunlight on tv viewing",
+      "tags": [
+        "TV Features",
+        "TV Features__Anti-Glare"
+      ]
+    },
+    {
+      "text": "is a glossy or matte tv screen better for reflections",
+      "tags": [
+        "TV Features",
+        "TV Features__Anti-Glare"
+      ]
+    },
+    {
+      "text": "is a Mini-LED tv better than LED",
+      "tags": [
+        "TV Models",
+        "TV Models__Mini-LED",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Comparison"
+      ]
+    },
+    {
+      "text": "Is AI upscaling TV worth it?",
+      "tags": [
+        "TV Features",
+        "TV Features__AI",
+        "TV Features__Resolution",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Buying Guides"
+      ]
+    },
+    {
+      "text": "is Crystal UHD better than OLED",
+      "tags": [
+        "TV Features",
+        "TV Features__Resolution",
+        "TV Features__Resolution__4K",
+        "TV Models",
+        "TV Models__OLED",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Brand__TV Models",
+        "TV Reviews & Brand__Brand__TV Models__Crystal UHD"
+      ]
+    },
+    {
+      "text": "is edge-lit LED outdated",
+      "tags": [
+        "TV Features",
+        "TV Features__Panel Technology"
+      ]
+    },
+    {
+      "text": "Is it worth buying a 98 inch TV?",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Buying Guides",
+        "TV Sizes",
+        "TV Sizes__Super Size"
+      ]
+    },
+    {
+      "text": "is Mini-LED worth it",
+      "tags": [
+        "TV Models",
+        "TV Models__Mini-LED",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Buying Guides"
+      ]
+    },
+    {
+      "text": "is Mini-LED better than OLED",
+      "tags": [
+        "TV Models",
+        "TV Models__Mini-LED",
+        "TV Models__OLED",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Comparison"
+      ]
+    },
+    {
+      "text": "is OLED better than QLED",
+      "tags": [
+        "TV Models",
+        "TV Models__OLED",
+        "TV Models__QLED",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Comparison"
+      ]
+    },
+    {
+      "text": "is OLED good for competitive gaming",
+      "tags": [
+        "TV Models",
+        "TV Models__OLED",
+        "TV Models__Gaming TVs"
+      ]
+    },
+    {
+      "text": "is OLED good for sports",
+      "tags": [
+        "TV Models",
+        "TV Models__OLED",
+        "TV Models__Sports TVs"
+      ]
+    },
+    {
+      "text": "is OLED worth the extra cost over Mini-LED",
+      "tags": [
+        "TV Models",
+        "TV Models__Mini-LED",
+        "TV Models__OLED",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Comparison"
+      ]
+    },
+    {
+      "text": "is QLED better than LED tv",
+      "tags": [
+        "TV Models",
+        "TV Models__QLED",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Comparison"
+      ]
+    },
+    {
+      "text": "is QLED better than Mini-LED",
+      "tags": [
+        "TV Models",
+        "TV Models__Mini-LED",
+        "TV Models__QLED",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Comparison"
+      ]
+    },
+    {
+      "text": "is QLED good for movies",
+      "tags": [
+        "TV Models",
+        "TV Models__QLED",
+        "TV Models__Movies & Cinema"
+      ]
+    },
+    {
+      "text": "largest gaming tvs",
+      "tags": [
+        "TV Models",
+        "TV Models__Gaming TVs",
+        "TV Sizes"
+      ]
+    },
+    {
+      "text": "latest QLED tv technology advancements",
+      "tags": [
+        "TV Models",
+        "TV Models__QLED"
+      ]
+    },
+    {
+      "text": "M70H reviews",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Brand TV Model Reviews",
+        "TV Reviews & Brand__Buying Guides"
+      ]
+    },
+    {
+      "text": "M80H reviews",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Brand TV Model Reviews",
+        "TV Reviews & Brand__Buying Guides"
+      ]
+    },
+    {
+      "text": "M90H reviews",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Brand TV Model Reviews",
+        "TV Reviews & Brand__Buying Guides"
+      ]
+    },
+    {
+      "text": "matte screen anti-glare coating",
+      "tags": [
+        "TV Features",
+        "TV Features__Anti-Glare"
+      ]
+    },
+    {
+      "text": "matte screen benefits and drawbacks",
+      "tags": [
+        "TV Features",
+        "TV Features__Anti-Glare"
+      ]
+    },
+    {
+      "text": "Micro RGB tv black levels",
+      "tags": [
+        "TV Models",
+        "TV Models__Micro RGB",
+        "TV Reviews & Brand"
+      ]
+    },
+    {
+      "text": "Micro RGB tv brightness",
+      "tags": [
+        "TV Features",
+        "TV Features__Brightness",
+        "TV Models",
+        "TV Models__Micro RGB",
+        "TV Reviews & Brand"
+      ]
+    },
+    {
+      "text": "Micro RGB tv color accuracy",
+      "tags": [
+        "TV Models",
+        "TV Models__Micro RGB",
+        "TV Reviews & Brand"
+      ]
+    },
+    {
+      "text": "Micro RGB tv for gaming",
+      "tags": [
+        "TV Models",
+        "TV Models__Gaming TVs",
+        "TV Models__Micro RGB",
+        "TV Reviews & Brand"
+      ]
+    },
+    {
+      "text": "Micro RGB tv lifespan",
+      "tags": [
+        "TV Models",
+        "TV Models__Micro RGB",
+        "TV Reviews & Brand"
+      ]
+    },
+    {
+      "text": "Micro RGB tv price",
+      "tags": [
+        "TV Models",
+        "TV Models__Micro RGB",
+        "TV Reviews & Brand"
+      ]
+    },
+    {
+      "text": "Micro RGB vs OLED tvs",
+      "tags": [
+        "TV Models",
+        "TV Models__Micro RGB",
+        "TV Models__OLED",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Comparison"
+      ]
+    },
+    {
+      "text": "MicroLED tv price prediction",
+      "tags": [
+        "TV Models",
+        "TV Models__Micro RGB"
+      ]
+    },
+    {
+      "text": "Mini-LED tv for sports review",
+      "tags": [
+        "TV Models",
+        "TV Models__Mini-LED",
+        "TV Models__Sports TVs",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Buying Guides"
+      ]
+    },
+    {
+      "text": "Mini-LED vs OLED",
+      "tags": [
+        "TV Models",
+        "TV Models__Mini-LED",
+        "TV Models__OLED",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Comparison"
+      ]
+    },
+    {
+      "text": "Mini-LED vs QLED",
+      "tags": [
+        "TV Models",
+        "TV Models__Mini-LED",
+        "TV Models__QLED",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Comparison"
+      ]
+    },
+    {
+      "text": "Mini-LED local dimming zones",
+      "tags": [
+        "TV Models",
+        "TV Models__Mini-LED"
+      ]
+    },
+    {
+      "text": "Mini-LED tv benefits and drawbacks",
+      "tags": [
+        "TV Models",
+        "TV Models__Mini-LED"
+      ]
+    },
+    {
+      "text": "Mini-LED tv explained",
+      "tags": [
+        "TV Models",
+        "TV Models__Mini-LED"
+      ]
+    },
+    {
+      "text": "Mini-LED tv gaming performance",
+      "tags": [
+        "TV Models",
+        "TV Models__Mini-LED",
+        "TV Models__Gaming TVs"
+      ]
+    },
+    {
+      "text": "Mini-LED tv price difference",
+      "tags": [
+        "TV Models",
+        "TV Models__Mini-LED"
+      ]
+    },
+    {
+      "text": "Neo QLED",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Brand__TV Models",
+        "TV Reviews & Brand__Brand__TV Models__Neo QLED"
+      ]
+    },
+    {
+      "text": "Neo QLED vs OLED",
+      "tags": [
+        "TV Models",
+        "TV Models__OLED",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Brand__TV Models",
+        "TV Reviews & Brand__Brand__TV Models__Neo QLED",
+        "TV Reviews & Brand__Comparison"
+      ]
+    },
+    {
+      "text": "new smart tv operating systems",
+      "tags": [
+        "TV Models",
+        "TV Models__Smart TV"
+      ]
+    },
+    {
+      "text": "new tv backlight technology",
+      "tags": [
+        "TV Features",
+        "TV Features__Picture Settings",
+        "TV Features__Panel Technology"
+      ]
+    },
+    {
+      "text": "new tv refresh rate technologies",
+      "tags": [
+        "TV Features",
+        "TV Features__Refresh Rate"
+      ]
+    },
+    {
+      "text": "next generation tv display types",
+      "tags": [
+        "TV Features",
+        "TV Features__Panel Technology"
+      ]
+    },
+    {
+      "text": "nits tv brightness explained",
+      "tags": [
+        "TV Features",
+        "TV Features__Brightness"
+      ]
+    },
+    {
+      "text": "OLED burn-in risk for gaming",
+      "tags": [
+        "TV Models",
+        "TV Models__OLED",
+        "TV Models__Gaming TVs"
+      ]
+    },
+    {
+      "text": "OLED tv for gaming",
+      "tags": [
+        "TV Models",
+        "TV Models__OLED",
+        "TV Models__Gaming TVs"
+      ]
+    },
+    {
+      "text": "optimal color settings for gaming tv",
+      "tags": [
+        "TV Models",
+        "TV Models__Gaming TVs",
+        "TV Features",
+        "TV Features__Picture Settings"
+      ]
+    },
+    {
+      "text": "optimal gamma settings for gaming tv",
+      "tags": [
+        "TV Models",
+        "TV Models__Gaming TVs",
+        "TV Features",
+        "TV Features__Picture Settings"
+      ]
+    },
+    {
+      "text": "optimal screen size for a bedroom tv",
+      "tags": [
+        "TV Sizes",
+        "TV Sizes__Viewing Distance"
+      ]
+    },
+    {
+      "text": "optimal viewing distance for tv",
+      "tags": [
+        "TV Sizes",
+        "TV Sizes__Viewing Distance"
+      ]
+    },
+    {
+      "text": "projector screen size calculator based on throw distance",
+      "tags": [
+        "TV Sizes",
+        "TV Sizes__Viewing Distance"
+      ]
+    },
+    {
+      "text": "Q6F reviews",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Brand TV Model Reviews",
+        "TV Reviews & Brand__Buying Guides"
+      ]
+    },
+    {
+      "text": "Q7F reviews",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Brand TV Model Reviews",
+        "TV Reviews & Brand__Buying Guides"
+      ]
+    },
+    {
+      "text": "Q8F reviews",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Brand TV Model Reviews",
+        "TV Reviews & Brand__Buying Guides"
+      ]
+    },
+    {
+      "text": "QE1D reviews",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Brand TV Model Reviews",
+        "TV Reviews & Brand__Buying Guides"
+      ]
+    },
+    {
+      "text": "QEF1 reviews",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Brand TV Model Reviews",
+        "TV Reviews & Brand__Buying Guides"
+      ]
+    },
+    {
+      "text": "QLED tv benefits and drawbacks",
+      "tags": [
+        "TV Models",
+        "TV Models__QLED"
+      ]
+    },
+    {
+      "text": "QLED tv black levels",
+      "tags": [
+        "TV Models",
+        "TV Models__QLED"
+      ]
+    },
+    {
+      "text": "QLED tv burn-in risk",
+      "tags": [
+        "TV Models",
+        "TV Models__QLED"
+      ]
+    },
+    {
+      "text": "QLED tv color accuracy",
+      "tags": [
+        "TV Models",
+        "TV Models__QLED"
+      ]
+    },
+    {
+      "text": "QLED tv contrast ratio",
+      "tags": [
+        "TV Models",
+        "TV Models__QLED"
+      ]
+    },
+    {
+      "text": "QLED tv energy consumption",
+      "tags": [
+        "TV Models",
+        "TV Models__QLED"
+      ]
+    },
+    {
+      "text": "QLED tv for gaming performance",
+      "tags": [
+        "TV Models",
+        "TV Models__QLED",
+        "TV Models__Gaming TVs"
+      ]
+    },
+    {
+      "text": "QLED tv for home theater",
+      "tags": [
+        "TV Models",
+        "TV Models__QLED",
+        "TV Models__Movies & Cinema"
+      ]
+    },
+    {
+      "text": "QLED tv manufacturers",
+      "tags": [
+        "TV Models",
+        "TV Models__QLED"
+      ]
+    },
+    {
+      "text": "QLED tv operating system",
+      "tags": [
+        "TV Models",
+        "TV Models__QLED"
+      ]
+    },
+    {
+      "text": "QLED tv price range",
+      "tags": [
+        "TV Models",
+        "TV Models__QLED"
+      ]
+    },
+    {
+      "text": "QLED tv screen uniformity",
+      "tags": [
+        "TV Models",
+        "TV Models__QLED"
+      ]
+    },
+    {
+      "text": "QN1EF reviews",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Brand TV Model Reviews",
+        "TV Reviews & Brand__Buying Guides"
+      ]
+    },
+    {
+      "text": "QN1EH reviews",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Brand TV Model Reviews",
+        "TV Reviews & Brand__Buying Guides"
+      ]
+    },
+    {
+      "text": "QN70F reviews",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Brand TV Model Reviews",
+        "TV Reviews & Brand__Buying Guides"
+      ]
+    },
+    {
+      "text": "QN70H reviews",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Brand TV Model Reviews",
+        "TV Reviews & Brand__Buying Guides"
+      ]
+    },
+    {
+      "text": "QN80F reviews",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Brand TV Model Reviews",
+        "TV Reviews & Brand__Buying Guides"
+      ]
+    },
+    {
+      "text": "QN80H reviews",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Brand TV Model Reviews",
+        "TV Reviews & Brand__Buying Guides"
+      ]
+    },
+    {
+      "text": "QN900F reviews",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Brand TV Model Reviews",
+        "TV Reviews & Brand__Buying Guides"
+      ]
+    },
+    {
+      "text": "QN90D reviews",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Brand TV Model Reviews",
+        "TV Reviews & Brand__Buying Guides"
+      ]
+    },
+    {
+      "text": "QN990F reviews",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Brand TV Model Reviews",
+        "TV Reviews & Brand__Buying Guides"
+      ]
+    },
+    {
+      "text": "QN990H reviews",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Brand TV Model Reviews",
+        "TV Reviews & Brand__Buying Guides"
+      ]
+    },
+    {
+      "text": "R85H reviews",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Brand TV Model Reviews",
+        "TV Reviews & Brand__Buying Guides"
+      ]
+    },
+    {
+      "text": "R95H reviews",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Brand TV Model Reviews",
+        "TV Reviews & Brand__Buying Guides"
+      ]
+    },
+    {
+      "text": "reviews of Samsung Frame TV",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Brand__TV Models",
+        "TV Reviews & Brand__Brand__TV Models__The Frame",
+        "TV Reviews & Brand__Buying Guides"
+      ]
+    },
+    {
+      "text": "S84F reviews",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Brand TV Model Reviews",
+        "TV Reviews & Brand__Buying Guides"
+      ]
+    },
+    {
+      "text": "S84H reviews",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Brand TV Model Reviews",
+        "TV Reviews & Brand__Buying Guides"
+      ]
+    },
+    {
+      "text": "S85F reviews",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Brand TV Model Reviews",
+        "TV Reviews & Brand__Buying Guides"
+      ]
+    },
+    {
+      "text": "S85H reviews",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Brand TV Model Reviews",
+        "TV Reviews & Brand__Buying Guides"
+      ]
+    },
+    {
+      "text": "S90D reviews",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Brand TV Model Reviews",
+        "TV Reviews & Brand__Buying Guides"
+      ]
+    },
+    {
+      "text": "S90F reviews",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Brand TV Model Reviews",
+        "TV Reviews & Brand__Buying Guides"
+      ]
+    },
+    {
+      "text": "S90H reviews",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Brand TV Model Reviews",
+        "TV Reviews & Brand__Buying Guides"
+      ]
+    },
+    {
+      "text": "S95D reviews",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Brand TV Model Reviews",
+        "TV Reviews & Brand__Buying Guides"
+      ]
+    },
+    {
+      "text": "S95F reviews",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Brand TV Model Reviews",
+        "TV Reviews & Brand__Buying Guides"
+      ]
+    },
+    {
+      "text": "S95F vs G5",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Comparison"
+      ]
+    },
+    {
+      "text": "S95F vs S95H",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Comparison"
+      ]
+    },
+    {
+      "text": "S95H reviews",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Brand TV Model Reviews",
+        "TV Reviews & Brand__Buying Guides"
+      ]
+    },
+    {
+      "text": "S95H vs G6",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Comparison"
+      ]
+    },
+    {
+      "text": "Samsung AI tv",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Brand__TV Features",
+        "TV Reviews & Brand__Brand__TV Features__AI"
+      ]
+    },
+    {
+      "text": "Samsung Bixby reviews",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Brand__TV Features",
+        "TV Reviews & Brand__Brand__TV Features__Smart Features",
+        "TV Reviews & Brand__Buying Guides"
+      ]
+    },
+    {
+      "text": "Samsung Crystal UHD reviews",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Brand__TV Models",
+        "TV Reviews & Brand__Brand__TV Models__Crystal UHD",
+        "TV Reviews & Brand__Buying Guides"
+      ]
+    },
+    {
+      "text": "Samsung Micro RGB tv",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Brand__TV Models",
+        "TV Reviews & Brand__Brand__TV Models__Micro RGB"
+      ]
+    },
+    {
+      "text": "Samsung Micro RGB tv reviews",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Brand__TV Models",
+        "TV Reviews & Brand__Brand__TV Models__Micro RGB",
+        "TV Reviews & Brand__Buying Guides"
+      ]
+    },
+    {
+      "text": "Samsung MovingStyle reviews",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Brand__TV Models",
+        "TV Reviews & Brand__Brand__TV Models__MovingStyle",
+        "TV Reviews & Brand__Buying Guides"
+      ]
+    },
+    {
+      "text": "Samsung Neo QLED review",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Brand__TV Models",
+        "TV Reviews & Brand__Brand__TV Models__Neo QLED",
+        "TV Reviews & Brand__Buying Guides"
+      ]
+    },
+    {
+      "text": "Samsung smart tv",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Brand__TV Models",
+        "TV Reviews & Brand__Brand__TV Models__Smart TV"
+      ]
+    },
+    {
+      "text": "Samsung television reviews",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Buying Guides",
+        "TV Reviews & Brand__Brand"
+      ]
+    },
+    {
+      "text": "Samsung The Frame Pro reviews",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Brand__TV Models",
+        "TV Reviews & Brand__Brand__TV Models__The Frame",
+        "TV Reviews & Brand__Buying Guides"
+      ]
+    },
+    {
+      "text": "Samsung TV Plus",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Brand__TV Features",
+        "TV Reviews & Brand__Brand__TV Features__Streaming"
+      ]
+    },
+    {
+      "text": "Samsung Vision AI",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Brand__TV Features",
+        "TV Reviews & Brand__Brand__TV Features__AI"
+      ]
+    },
+    {
+      "text": "Samsung Vision AI tv",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Brand__TV Features",
+        "TV Reviews & Brand__Brand__TV Features__AI"
+      ]
+    },
+    {
+      "text": "screen size and pixel density",
+      "tags": [
+        "TV Features",
+        "TV Features__Resolution",
+        "TV Sizes"
+      ]
+    },
+    {
+      "text": "screen size for living room tv",
+      "tags": [
+        "TV Sizes",
+        "TV Sizes__Viewing Distance"
+      ]
+    },
+    {
+      "text": "screen uniformity gaming tv importance",
+      "tags": [
+        "TV Models",
+        "TV Models__Gaming TVs"
+      ]
+    },
+    {
+      "text": "self-emissive display technology explained",
+      "tags": [
+        "TV Features",
+        "TV Features__Panel Technology"
+      ]
+    },
+    {
+      "text": "semi-glossy screen benefits",
+      "tags": [
+        "TV Features",
+        "TV Features__Anti-Glare"
+      ]
+    },
+    {
+      "text": "should i turn off motion smoothing",
+      "tags": [
+        "TV Features",
+        "TV Features__Motion Handling"
+      ]
+    },
+    {
+      "text": "should i wait for Micro RGB tv",
+      "tags": [
+        "TV Models",
+        "TV Models__Micro RGB"
+      ]
+    },
+    {
+      "text": "smart tv features to consider",
+      "tags": [
+        "TV Models",
+        "TV Models__Smart TV"
+      ]
+    },
+    {
+      "text": "soap opera effect explained",
+      "tags": [
+        "TV Features",
+        "TV Features__Motion Handling"
+      ]
+    },
+    {
+      "text": "tv art mode explained",
+      "tags": [
+        "TV Features",
+        "TV Features__Art Mode"
+      ]
+    },
+    {
+      "text": "tv brightness for bright room",
+      "tags": [
+        "TV Features",
+        "TV Features__Brightness",
+        "TV Features__Anti-Glare"
+      ]
+    },
+    {
+      "text": "tv brightness settings guide",
+      "tags": [
+        "TV Features",
+        "TV Features__Brightness"
+      ]
+    },
+    {
+      "text": "tv calibration settings guide",
+      "tags": [
+        "TV Features",
+        "TV Features__Picture Settings"
+      ]
+    },
+    {
+      "text": "tv connectivity options guide",
+      "tags": [
+        "TV Features",
+        "TV Features__Connectivity"
+      ]
+    },
+    {
+      "text": "tv display panel types",
+      "tags": [
+        "TV Features",
+        "TV Features__Panel Technology"
+      ]
+    },
+    {
+      "text": "tv for sports with great color accuracy",
+      "tags": [
+        "TV Models",
+        "TV Models__Sports TVs"
+      ]
+    },
+    {
+      "text": "tv for sports with minimal motion blur",
+      "tags": [
+        "TV Models",
+        "TV Models__Sports TVs",
+        "TV Features",
+        "TV Features__Motion Handling"
+      ]
+    },
+    {
+      "text": "tv for sports with minimal reflection",
+      "tags": [
+        "TV Models",
+        "TV Models__Sports TVs",
+        "TV Features",
+        "TV Features__Anti-Glare"
+      ]
+    },
+    {
+      "text": "tv for sports with upscaling",
+      "tags": [
+        "TV Models",
+        "TV Models__Sports TVs",
+        "TV Features",
+        "TV Features__Resolution"
+      ]
+    },
+    {
+      "text": "tv for sports with wide viewing angle",
+      "tags": [
+        "TV Models",
+        "TV Models__Sports TVs",
+        "TV Features",
+        "TV Features__Viewing Angles"
+      ]
+    },
+    {
+      "text": "tv motion blur fix",
+      "tags": [
+        "TV Features",
+        "TV Features__Motion Handling"
+      ]
+    },
+    {
+      "text": "tv motion smoothing explained",
+      "tags": [
+        "TV Features",
+        "TV Features__Motion Handling"
+      ]
+    },
+    {
+      "text": "tv panel types explained",
+      "tags": [
+        "TV Features",
+        "TV Features__Panel Technology"
+      ]
+    },
+    {
+      "text": "tv picture quality explained",
+      "tags": [
+        "TV Features",
+        "TV Features__Picture Settings"
+      ]
+    },
+    {
+      "text": "tv picture settings explained",
+      "tags": [
+        "TV Features",
+        "TV Features__Picture Settings"
+      ]
+    },
+    {
+      "text": "tv refresh rate explained",
+      "tags": [
+        "TV Features",
+        "TV Features__Refresh Rate"
+      ]
+    },
+    {
+      "text": "tv screen glare reduction tips",
+      "tags": [
+        "TV Features",
+        "TV Features__Anti-Glare"
+      ]
+    },
+    {
+      "text": "tv screen reflection solutions",
+      "tags": [
+        "TV Features",
+        "TV Features__Anti-Glare"
+      ]
+    },
+    {
+      "text": "tv screen types and glare reduction",
+      "tags": [
+        "TV Features",
+        "TV Features__Anti-Glare",
+        "TV Features__Panel Technology"
+      ]
+    },
+    {
+      "text": "tv settings for natural colors",
+      "tags": [
+        "TV Features",
+        "TV Features__Picture Settings"
+      ]
+    },
+    {
+      "text": "tv settings for vibrant colors",
+      "tags": [
+        "TV Features",
+        "TV Features__Picture Settings"
+      ]
+    },
+    {
+      "text": "tv size to distance ratio",
+      "tags": [
+        "TV Sizes",
+        "TV Sizes__Viewing Distance"
+      ]
+    },
+    {
+      "text": "tv voice control setup",
+      "tags": [
+        "TV Features",
+        "TV Features__Smart Features"
+      ]
+    },
+    {
+      "text": "tv with 120Hz refresh rate and HDMI 2.1",
+      "tags": [
+        "TV Features",
+        "TV Features__Refresh Rate",
+        "TV Features__Connectivity"
+      ]
+    },
+    {
+      "text": "tv with Google Assistant",
+      "tags": [
+        "TV Features",
+        "TV Features__Smart Features"
+      ]
+    },
+    {
+      "text": "tv with wide viewing angles",
+      "tags": [
+        "TV Features",
+        "TV Features__Viewing Angles"
+      ]
+    },
+    {
+      "text": "tvs with anti-reflective screen coating",
+      "tags": [
+        "TV Features",
+        "TV Features__Anti-Glare"
+      ]
+    },
+    {
+      "text": "U7900F reviews",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Buying Guides",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Brand TV Model Reviews"
+      ]
+    },
+    {
+      "text": "U8000F reviews",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Buying Guides",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Brand TV Model Reviews"
+      ]
+    },
+    {
+      "text": "U8000H reviews",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Buying Guides",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Brand TV Model Reviews"
+      ]
+    },
+    {
+      "text": "variable refresh rate tv",
+      "tags": [
+        "TV Features",
+        "TV Features__Refresh Rate"
+      ]
+    },
+    {
+      "text": "variable refresh rate tv explained",
+      "tags": [
+        "TV Features",
+        "TV Features__Refresh Rate"
+      ]
+    },
+    {
+      "text": "What are the best TVs for split-screen gaming?",
+      "tags": [
+        "TV Models",
+        "TV Models__Gaming TVs",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of"
+      ]
+    },
+    {
+      "text": "What are the best TVs for sports with wide viewing angles?",
+      "tags": [
+        "TV Features",
+        "TV Features__Viewing Angles",
+        "TV Models",
+        "TV Models__Sports TVs",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of"
+      ]
+    },
+    {
+      "text": "what are the best-reviewed Mini-LED tvs",
+      "tags": [
+        "TV Models",
+        "TV Models__Mini-LED",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of"
+      ]
+    },
+    {
+      "text": "what are the differences between Mini-LED and Micro RGB tvs",
+      "tags": [
+        "TV Models",
+        "TV Models__Micro RGB",
+        "TV Models__Mini-LED",
+        "TV Reviews & Brand"
+      ]
+    },
+    {
+      "text": "What are the main features of art TVs versus regular TVs?",
+      "tags": [
+        "TV Features",
+        "TV Features__Art Mode",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Comparison"
+      ]
+    },
+    {
+      "text": "What are the most affordable 85 inch 4K TVs?",
+      "tags": [
+        "TV Features",
+        "TV Features__Resolution",
+        "TV Features__Resolution__4K",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Affordable",
+        "TV Sizes",
+        "TV Sizes__Large Size"
+      ]
+    },
+    {
+      "text": "What are the most reliable OLED TVs for movie lovers?",
+      "tags": [
+        "TV Models",
+        "TV Models__Movies & Cinema",
+        "TV Models__OLED",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of"
+      ]
+    },
+    {
+      "text": "What are the top 4K TVs for streaming movies?",
+      "tags": [
+        "TV Features",
+        "TV Features__Resolution",
+        "TV Features__Resolution__4K",
+        "TV Features__Streaming",
+        "TV Models",
+        "TV Models__Movies & Cinema",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of"
+      ]
+    },
+    {
+      "text": "What are the top sports TVs for watching live games?",
+      "tags": [
+        "TV Features",
+        "TV Models",
+        "TV Models__Sports TVs",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of"
+      ]
+    },
+    {
+      "text": "what causes reflections on tv",
+      "tags": [
+        "TV Features",
+        "TV Features__Anti-Glare"
+      ]
+    },
+    {
+      "text": "what causes the soap opera effect",
+      "tags": [
+        "TV Features",
+        "TV Features__Motion Handling"
+      ]
+    },
+    {
+      "text": "what is 4K resolution",
+      "tags": [
+        "TV Features",
+        "TV Features__Resolution",
+        "TV Features__Resolution__4K"
+      ]
+    },
+    {
+      "text": "what is a matte finish screen",
+      "tags": [
+        "TV Features",
+        "TV Features__Anti-Glare"
+      ]
+    },
+    {
+      "text": "What is a micro RGB?",
+      "tags": [
+        "TV Models",
+        "TV Models__Micro RGB",
+        "TV Reviews & Brand"
+      ]
+    },
+    {
+      "text": "what is anti-reflection coating on tv",
+      "tags": [
+        "TV Features",
+        "TV Features__Anti-Glare"
+      ]
+    },
+    {
+      "text": "what is color temperature tv",
+      "tags": [
+        "TV Features",
+        "TV Features__Picture Settings"
+      ]
+    },
+    {
+      "text": "what is HDMI 2.1 on tv",
+      "tags": [
+        "TV Features",
+        "TV Features__Connectivity"
+      ]
+    },
+    {
+      "text": "what is HDR on tv",
+      "tags": [
+        "TV Features",
+        "TV Features__HDR"
+      ]
+    },
+    {
+      "text": "what is HDR tv settings",
+      "tags": [
+        "TV Features",
+        "TV Features__HDR",
+        "TV Features__Picture Settings"
+      ]
+    },
+    {
+      "text": "what is judder and how to fix it",
+      "tags": [
+        "TV Features",
+        "TV Features__Motion Handling"
+      ]
+    },
+    {
+      "text": "what is low latency mode on tv",
+      "tags": [
+        "TV Features",
+        "TV Features__Input Lag",
+        "TV Models",
+        "TV Models__Gaming TVs"
+      ]
+    },
+    {
+      "text": "what is Mini-LED",
+      "tags": [
+        "TV Models",
+        "TV Models__Mini-LED"
+      ]
+    },
+    {
+      "text": "what is motion interpolation",
+      "tags": [
+        "TV Features",
+        "TV Features__Motion Handling"
+      ]
+    },
+    {
+      "text": "what is Samsung Bixby",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Brand__TV Features",
+        "TV Reviews & Brand__Brand__TV Features__Smart Features"
+      ]
+    },
+    {
+      "text": "what is samsung tv plus​?",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Brand",
+        "TV Reviews & Brand__Brand__TV Features",
+        "TV Reviews & Brand__Brand__TV Features__Streaming"
+      ]
+    },
+    {
+      "text": "what is the best 4k tv?​",
+      "tags": [
+        "TV Features",
+        "TV Features__Resolution",
+        "TV Features__Resolution__4K",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of"
+      ]
+    },
+    {
+      "text": "What is the best 75-inch TV?",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of",
+        "TV Sizes",
+        "TV Sizes__Large Size"
+      ]
+    },
+    {
+      "text": "What is the best resolution for TV?",
+      "tags": [
+        "TV Features",
+        "TV Features__Resolution",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of"
+      ]
+    },
+    {
+      "text": "what is the best smart tv​​?",
+      "tags": [
+        "TV Features",
+        "TV Models",
+        "TV Models__Smart TV",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of"
+      ]
+    },
+    {
+      "text": "What is the best TV for the money?",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of"
+      ]
+    },
+    {
+      "text": "What is the best TV for watching sports?",
+      "tags": [
+        "TV Features",
+        "TV Models",
+        "TV Models__Sports TVs",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of"
+      ]
+    },
+    {
+      "text": "what is the purpose of motion smoothing",
+      "tags": [
+        "TV Features",
+        "TV Features__Motion Handling"
+      ]
+    },
+    {
+      "text": "what is the soap opera effect and how to fix it",
+      "tags": [
+        "TV Features",
+        "TV Features__Motion Handling"
+      ]
+    },
+    {
+      "text": "what is tv anti-reflection filter",
+      "tags": [
+        "TV Features",
+        "TV Features__Anti-Glare"
+      ]
+    },
+    {
+      "text": "what is tv input lag",
+      "tags": [
+        "TV Features",
+        "TV Features__Input Lag",
+        "TV Models",
+        "TV Models__Gaming TVs"
+      ]
+    },
+    {
+      "text": "what is tv refresh rate",
+      "tags": [
+        "TV Features",
+        "TV Features__Refresh Rate"
+      ]
+    },
+    {
+      "text": "what is variable refresh rate tv",
+      "tags": [
+        "TV Features",
+        "TV Features__Refresh Rate"
+      ]
+    },
+    {
+      "text": "what resolution is 4K tv",
+      "tags": [
+        "TV Features",
+        "TV Features__Resolution",
+        "TV Features__Resolution__4K"
+      ]
+    },
+    {
+      "text": "what screen size for 10 foot viewing distance",
+      "tags": [
+        "TV Sizes",
+        "TV Sizes__Viewing Distance"
+      ]
+    },
+    {
+      "text": "what size tv do I need?",
+      "tags": [
+        "TV Sizes",
+        "TV Sizes__Viewing Distance"
+      ]
+    },
+    {
+      "text": "what tv should I buy?",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Buying Guides"
+      ]
+    },
+    {
+      "text": "what tv size for a large room",
+      "tags": [
+        "TV Sizes",
+        "TV Sizes__Viewing Distance"
+      ]
+    },
+    {
+      "text": "What type of TV gets the best picture?",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of"
+      ]
+    },
+    {
+      "text": "when is it time to upgrade my tv",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Buying Guides"
+      ]
+    },
+    {
+      "text": "Which 4K TVs are best for gaming?",
+      "tags": [
+        "TV Features",
+        "TV Features__Resolution",
+        "TV Features__Resolution__4K",
+        "TV Models",
+        "TV Models__Gaming TVs",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of"
+      ]
+    },
+    {
+      "text": "Which 75 inch TVs have the highest refresh rates?",
+      "tags": [
+        "TV Features",
+        "TV Features__Refresh Rate",
+        "TV Sizes",
+        "TV Sizes__Large Size"
+      ]
+    },
+    {
+      "text": "Which 85 inch TVs are best for home theater setups?",
+      "tags": [
+        "TV Models",
+        "TV Models__Movies & Cinema",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of",
+        "TV Sizes",
+        "TV Sizes__Large Size"
+      ]
+    },
+    {
+      "text": "Which 85 inch TVs offer the best sound quality out of the box?",
+      "tags": [
+        "TV Features",
+        "TV Features__Sound",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of",
+        "TV Sizes",
+        "TV Sizes__Large Size"
+      ]
+    },
+    {
+      "text": "Which art TVs can display personal photos and artworks?",
+      "tags": [
+        "TV Features",
+        "TV Features__Art Mode"
+      ]
+    },
+    {
+      "text": "Which gaming TVs have the lowest latency?",
+      "tags": [
+        "TV Features",
+        "TV Features__Input Lag",
+        "TV Models",
+        "TV Models__Gaming TVs"
+      ]
+    },
+    {
+      "text": "Which is the best TV to buy in 2026?",
+      "tags": [
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of",
+        "TV Reviews & Brand__Year Reviews",
+        "TV Reviews & Brand__Year Reviews__2026"
+      ]
+    },
+    {
+      "text": "which Mini-LED tv models are best for HDR movies",
+      "tags": [
+        "TV Features",
+        "TV Features__HDR",
+        "TV Models",
+        "TV Models__Mini-LED",
+        "TV Models__Movies & Cinema",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of"
+      ]
+    },
+    {
+      "text": "which Mini-LED tvs have the brightest colors",
+      "tags": [
+        "TV Features",
+        "TV Features__Brightness",
+        "TV Models",
+        "TV Models__Mini-LED"
+      ]
+    },
+    {
+      "text": "Which OLED TVs are rated best for gamers?",
+      "tags": [
+        "TV Models",
+        "TV Models__Gaming TVs",
+        "TV Models__OLED",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of"
+      ]
+    },
+    {
+      "text": "Which OLED TVs have the highest brightness?",
+      "tags": [
+        "TV Features",
+        "TV Features__Brightness",
+        "TV Models",
+        "TV Models__OLED"
+      ]
+    },
+    {
+      "text": "which screen type is better for health",
+      "tags": [
+        "TV Features",
+        "TV Features__Panel Technology"
+      ]
+    },
+    {
+      "text": "which tvs are best for bright rooms: OLED or Mini-LED",
+      "tags": [
+        "TV Features",
+        "TV Features__Brightness",
+        "TV Models",
+        "TV Models__Mini-LED",
+        "TV Models__OLED",
+        "TV Reviews & Brand",
+        "TV Reviews & Brand__Best Of"
+      ]
+    },
+    {
+      "text": "Which TVs display art when not in use?",
+      "tags": [
+        "TV Features",
+        "TV Features__Art Mode"
+      ]
+    },
+    {
+      "text": "Which TVs have HDMI 2.1 support for gaming?",
+      "tags": [
+        "TV Features",
+        "TV Features__Connectivity",
+        "TV Models",
+        "TV Models__Gaming TVs"
+      ]
+    },
+    {
+      "text": "Which TVs offer art mode and customizable frames?",
+      "tags": [
+        "TV Features",
+        "TV Features__Art Mode"
+      ]
+    },
+    {
+      "text": "Which TVs offer both OLED and 4K resolution?",
+      "tags": [
+        "TV Features",
+        "TV Features__Resolution",
+        "TV Features__Resolution__4K",
+        "TV Models",
+        "TV Models__OLED"
+      ]
+    },
+    {
+      "text": "Which TVs support voice control and smart assistants?",
+      "tags": [
+        "TV Features",
+        "TV Features__Smart Features"
+      ]
+    },
+    {
+      "text": "white balance tv calibration",
+      "tags": [
+        "TV Features",
+        "TV Features__Picture Settings"
+      ]
+    },
+    {
+      "text": "why does my tv look like a soap opera",
+      "tags": [
+        "TV Features",
+        "TV Features__Motion Handling"
+      ]
+    }
+  ]
+}
