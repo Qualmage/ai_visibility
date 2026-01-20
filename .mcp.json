@@ -1,0 +1,24 @@
+{
+  "mcpServers": {
+    "chrome-devtools": {
+      "command": "npx",
+      "args": ["-y", "chrome-devtools-mcp@latest"]
+    },
+    "gtm-mcp-server": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "https://gtm-mcp.stape.ai/mcp"
+      ]
+    },
+    "analytics-mcp": {
+      "command": "C:\\Users\\rober\\analytics-mcp-py313\\Scripts\\analytics-mcp.exe",
+      "args": [],
+      "env": {
+        "GOOGLE_PROJECT_ID": "changan-gsc",
+        "GOOGLE_APPLICATION_CREDENTIALS": "C:\\Users\\rober\\application_default_credentials.json"
+      }
+    }
+  }
+}

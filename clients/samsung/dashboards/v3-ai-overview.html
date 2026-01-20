@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Samsung AI Overview Dashboard</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        @font-face {
+            font-family: 'Samsung Sharp Sans';
+            src: url('../assets/fonts/SamsungSharpSansBd.woff2') format('woff2'),
+                 url('../assets/fonts/SamsungSharpSans-Bold.ttf') format('truetype');
+            font-weight: 700;
+        }
+        @font-face {
+            font-family: 'Samsung One';
+            src: url('../assets/fonts/SamsungOneLatinWeb-400.woff2') format('woff2'),
+                 url('../assets/fonts/SamsungOneLatinCompact-400.ttf') format('truetype');
+            font-weight: 400;
+        }
+        *{box-sizing:border-box;margin:0;padding:0}
+        body{font-family:'Samsung One',-apple-system,sans-serif;background:#f8f9fa;color:#000}
+        .container{max-width:1400px;margin:0 auto;padding:24px}
+        h1{font-family:'Samsung Sharp Sans',sans-serif;font-size:24px;font-weight:700;margin-bottom:16px;color:#1428A0}
+        .filters{display:flex;gap:8px;margin-bottom:24px}
+        .filter-btn{font-family:'Samsung One',sans-serif;background:#fff;border:1px solid #e0e0e0;border-radius:8px;padding:8px 16px;font-size:14px;cursor:pointer;transition:all 0.2s}
+        .filter-btn.active{background:#1428A0;color:#fff}
+        .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;align-items:stretch}
+        .kpi-card{background:#fff;border:1px solid #e0e0e0;border-radius:12px;padding:20px;display:grid;grid-template-rows:auto 1fr;min-height:120px}
+        .kpi-label{font-size:11px;text-transform:uppercase;color:#666;letter-spacing:0.5px;font-weight:500}
+        .kpi-value{font-family:'Samsung Sharp Sans',sans-serif;font-size:42px;font-weight:700;color:#1428A0;line-height:1.1}
+        .kpi-change{font-size:13px;margin-top:4px}
+        .kpi-change.positive{color:#4caf50}
+        .kpi-change.negative{color:#f44336}
+        .kpi-content{display:flex;flex-direction:column;justify-content:center;align-items:flex-start}
+        .section-title{font-family:'Samsung Sharp Sans',sans-serif;font-size:18px;font-weight:700;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;color:#1428A0}
+        .toggle-group{display:flex;gap:4px}
+        .toggle-btn{font-family:'Samsung One',sans-serif;background:#fff;border:1px solid #e0e0e0;padding:6px 12px;font-size:12px;border-radius:6px;cursor:pointer;transition:all 0.2s}
+        .toggle-btn:hover{border-color:#1428A0}
+        .toggle-btn.active{background:#1428A0;color:#fff;border-color:#1428A0}
+        .tabs{display:flex;gap:8px;margin-bottom:16px}
+        .tab-btn{font-family:'Samsung One',sans-serif;background:#fff;border:1px solid #e0e0e0;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:14px;transition:all 0.2s}
+        .tab-btn:hover{border-color:#1428A0}
+        .tab-btn.active{background:#1428A0;color:#fff;border-color:#1428A0}
+        .chart-container{background:#fff;border:1px solid #e0e0e0;border-radius:12px;padding:20px;margin-bottom:24px}
+        .legend{display:flex;flex-direction:column;gap:8px;font-size:14px}
+        .legend-item{display:flex;align-items:center;gap:6px}
+        .legend-color{width:12px;height:12px;border-radius:2px}
+        .two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+        table{width:100%;border-collapse:collapse;font-size:14px}
+        th,td{padding:12px;text-align:left;border-bottom:1px solid #e0e0e0}
+        th{font-family:'Samsung Sharp Sans',sans-serif;font-weight:700;color:#1428A0}
+        .badge{font-family:'Samsung One',sans-serif;padding:4px 8px;border-radius:4px;font-size:12px;font-weight:500}
+        .badge.new{background:#e8f5e9;color:#4caf50}
+        .badge.lost{background:#ffebee;color:#f44336}
+        .pagination{display:flex;justify-content:space-between;align-items:center;margin-top:12px;font-size:14px}
+        input[type="checkbox"]{accent-color:#1428A0}
+    </style>
+</head>
+<body>
+    <header style="background:#f7f7f7;border-bottom:3px solid #1428A0;margin-bottom:24px;box-shadow:0 2px 4px rgba(0,0,0,0.05)">
+        <div style="max-width:1400px;margin:0 auto;padding:16px 24px;display:flex;justify-content:space-between;align-items:center">
+            <span style="font-family:'Samsung Sharp Sans',sans-serif;font-size:28px;font-weight:700;color:#1428A0">AI Visibility Dashboard</span>
+            <img src="../assets/logo.jpg" alt="Samsung" height="36">
+        </div>
+    </header>
+    <div class="container">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+            <h1>Overview</h1>
+        </div>
+        <div class="filters">
+            <button class="filter-btn">Last 7 days</button>
+            <button class="filter-btn active">Samsung</button>
+            <button class="filter-btn">Chat GPT ✕</button>
+            <button class="filter-btn">Tags ▾</button>
+            <button class="filter-btn">Select Segment ▾</button>
+        </div>
+
+        <div class="kpi-row">
+            <div class="kpi-card">
+                <div class="kpi-label">Share of Voice</div>
+                <div class="kpi-content">
+                    <div class="kpi-value">57%</div>
+                    <div class="kpi-change negative">↓ -1%</div>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Brand Visibility</div>
+                <div class="kpi-content">
+                    <div class="kpi-value">63%</div>
+                    <div class="kpi-change negative">↓ -12%</div>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Prompts</div>
+                <div class="kpi-content" style="justify-content:flex-start;gap:12px;padding-top:8px">
+                    <div style="display:flex;justify-content:space-between;align-items:center">
+                        <span style="font-size:14px">Responses with brand mention</span>
+                        <span style="background:#e8f5e9;color:#4caf50;padding:4px 8px;border-radius:4px;font-size:12px;font-weight:500">240 <span style="color:#4caf50">+182</span></span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;align-items:center">
+                        <span style="font-size:14px">Responses without brand mention</span>
+                        <span style="background:#ffebee;color:#f44336;padding:4px 8px;border-radius:4px;font-size:12px;font-weight:500">143 <span style="color:#f44336">-123</span></span>
+                    </div>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Mentions by Sentiment</div>
+                <div class="kpi-content" style="flex-direction:row;align-items:center;gap:16px">
+                    <svg id="donutChart" width="80" height="80"></svg>
+                    <div style="font-family:'Samsung Sharp Sans',sans-serif;font-size:32px;font-weight:700;color:#1428A0">3K</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <div class="section-title">
+                <span>Historical Trend</span>
+                <div class="toggle-group">
+                    <button class="toggle-btn">Day</button>
+                    <button class="toggle-btn active">Week</button>
+                    <button class="toggle-btn">Month</button>
+                </div>
+            </div>
+            <div class="tabs">
+                <button class="tab-btn active">Share of Voice</button>
+                <button class="tab-btn">Brand Visibility</button>
+                <button class="tab-btn">Mentions</button>
+                <button class="tab-btn">Avg. Position</button>
+            </div>
+            <div style="display:flex;gap:24px">
+                <svg id="lineChart" width="800" height="300"></svg>
+                <div class="legend">
+                    <label class="legend-item"><input type="checkbox" checked> <span class="legend-color" style="background:#1428A0"></span>Samsung</label>
+                    <label class="legend-item"><input type="checkbox" checked> <span class="legend-color" style="background:#A50034"></span>LG</label>
+                    <label class="legend-item"><input type="checkbox" checked> <span class="legend-color" style="background:#000"></span>Sony</label>
+                    <label class="legend-item"><input type="checkbox" checked> <span class="legend-color" style="background:#E31937"></span>TCL</label>
+                    <label class="legend-item"><input type="checkbox" checked> <span class="legend-color" style="background:#00A0DF"></span>Hisense</label>
+                    <label class="legend-item"><input type="checkbox" checked> <span class="legend-color" style="background:#107C10"></span>Xbox</label>
+                    <label class="legend-item"><input type="checkbox" checked> <span class="legend-color" style="background:#6C3C97"></span>Roku</label>
+                    <button class="filter-btn" style="margin-top:8px">+ Add Brand</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="two-col">
+            <div class="chart-container">
+                <div class="section-title">Brand Leaderboard <span style="font-size:12px;color:#666">3/9</span></div>
+                <table>
+                    <thead><tr><th>SoV Rank</th><th>Brand</th><th>Share</th></tr></thead>
+                    <tbody>
+                        <tr><td>1</td><td>⬤ Samsung</td><td>57% <svg width="100" height="8"><rect x="0" y="0" width="57" height="8" fill="#1428A0" rx="4"/></svg></td></tr>
+                        <tr><td>2</td><td>⬤ LG</td><td>26% <svg width="100" height="8"><rect x="0" y="0" width="26" height="8" fill="#A50034" rx="4"/></svg></td></tr>
+                        <tr><td>3</td><td>⬤ Sony</td><td>21% <svg width="100" height="8"><rect x="0" y="0" width="21" height="8" fill="#000" rx="4"/></svg></td></tr>
+                        <tr><td>4</td><td>⬤ TCL</td><td>19% <svg width="100" height="8"><rect x="0" y="0" width="19" height="8" fill="#E31937" rx="4"/></svg></td></tr>
+                        <tr><td>5</td><td>⬤ Hisense</td><td>17% <svg width="100" height="8"><rect x="0" y="0" width="17" height="8" fill="#00A0DF" rx="4"/></svg></td></tr>
+                        <tr><td>6</td><td>⬤ Xbox</td><td>3% <svg width="100" height="8"><rect x="0" y="0" width="3" height="8" fill="#107C10" rx="4"/></svg></td></tr>
+                        <tr><td>7</td><td>⬤ Roku</td><td>3% <svg width="100" height="8"><rect x="0" y="0" width="3" height="8" fill="#6C3C97" rx="4"/></svg></td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="chart-container">
+                <div class="section-title">Sentiment Over Time</div>
+                <svg id="stackedBar" width="350" height="200"></svg>
+                <div style="display:flex;gap:12px;justify-content:center;font-size:12px;margin-top:8px">
+                    <span><span style="display:inline-block;width:10px;height:10px;background:#f44336;border-radius:2px;margin-right:4px"></span>negative</span>
+                    <span><span style="display:inline-block;width:10px;height:10px;background:#9e9e9e;border-radius:2px;margin-right:4px"></span>neutral</span>
+                    <span><span style="display:inline-block;width:10px;height:10px;background:#4caf50;border-radius:2px;margin-right:4px"></span>positive</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <div class="section-title">Brand / Product Performance (All Products) <button class="filter-btn">Advanced ▾</button></div>
+            <table>
+                <thead><tr><th><input type="checkbox"></th><th>Prompt</th><th>Model</th><th>Product</th><th>Jan 14</th><th>Jan 20</th><th>Change</th></tr></thead>
+                <tbody>
+                    <tr><td><input type="checkbox"></td><td style="color:#1428A0;cursor:pointer">best tv for casual gaming</td><td>⚙</td><td>S95F</td><td>—</td><td>1</td><td><span class="badge new">New</span></td></tr>
+                    <tr><td><input type="checkbox"></td><td style="color:#1428A0;cursor:pointer">85 inch tv reviews</td><td>⚙</td><td>QN90D</td><td>—</td><td>3</td><td><span class="badge new">New</span></td></tr>
+                    <tr><td><input type="checkbox"></td><td style="color:#1428A0;cursor:pointer">Samsung The Frame Pro reviews</td><td>⚙</td><td>Frame/Pro</td><td>—</td><td>1</td><td><span class="badge new">New</span></td></tr>
+                    <tr><td><input type="checkbox"></td><td style="color:#1428A0;cursor:pointer">what tv should I buy?</td><td>⚙</td><td>S95H QD</td><td>—</td><td>3</td><td><span class="badge new">New</span></td></tr>
+                    <tr><td><input type="checkbox"></td><td style="color:#1428A0;cursor:pointer">Is AI upscaling TV worth it?</td><td>⚙</td><td>Q8F Vision</td><td>6</td><td>—</td><td><span class="badge lost">Lost</span></td></tr>
+                </tbody>
+            </table>
+            <div class="pagination">
+                <span>1-10 of 529</span>
+                <div style="display:flex;gap:8px">
+                    <button class="filter-btn">&lt;</button>
+                    <button class="filter-btn">&gt;</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Donut chart
+        const donutData = [
+            {label:'Positive',value:1500,color:'#4caf50'},
+            {label:'Neutral',value:900,color:'#9e9e9e'},
+            {label:'Negative',value:600,color:'#f44336'}
+        ];
+        const donut = d3.select("#donutChart");
+        const radius = 40;
+        const pie = d3.pie().value(d=>d.value);
+        const arc = d3.arc().innerRadius(25).outerRadius(radius);
+        donut.selectAll("path")
+            .data(pie(donutData))
+            .join("path")
+            .attr("d",arc)
+            .attr("fill",d=>d.data.color)
+            .attr("transform","translate(40,40)");
+
+        // Line chart
+        const dates = ['Jan14','Jan15','Jan16','Jan17','Jan18','Jan19','Jan20'];
+        const brands = [
+            {name:'Samsung',color:'#1428A0',values:[54,55,56,57,56,56,57]},
+            {name:'LG',color:'#A50034',values:[24,25,25,26,26,26,26]},
+            {name:'Sony',color:'#000',values:[20,20,21,21,21,21,21]},
+            {name:'TCL',color:'#E31937',values:[18,18,19,19,19,19,19]},
+            {name:'Hisense',color:'#00A0DF',values:[16,16,17,17,17,17,17]},
+            {name:'Xbox',color:'#107C10',values:[3,3,3,3,3,3,3]},
+            {name:'Roku',color:'#6C3C97',values:[3,3,3,3,3,3,3]}
+        ];
+        const lineSvg = d3.select("#lineChart");
+        const margin = {top:20,right:20,bottom:30,left:50};
+        const width = 800 - margin.left - margin.right;
+        const height = 300 - margin.top - margin.bottom;
+        const x = d3.scalePoint().domain(dates).range([0,width]);
+        const y = d3.scaleLinear().domain([0,60]).range([height,0]);
+        const line = d3.line().x((d,i)=>x(dates[i])).y(d=>y(d)).curve(d3.curveMonotoneX);
+        const g = lineSvg.append("g").attr("transform",`translate(${margin.left},${margin.top})`);
+        g.selectAll(".grid").data(y.ticks(6)).join("line")
+            .attr("class","grid")
+            .attr("x1",0).attr("x1",width)
+            .attr("y1",d=>y(d)).attr("y2",d=>y(d))
+            .attr("stroke","#e0e0e0").attr("stroke-dasharray","2,2");
+        brands.forEach(b=>{
+            g.append("path").datum(b.values)
+                .attr("fill","none")
+                .attr("stroke",b.color)
+                .attr("stroke-width",2)
+                .attr("d",line);
+        });
+        g.append("g").attr("transform",`translate(0,${height})`).call(d3.axisBottom(x));
+        g.append("g").call(d3.axisLeft(y).tickFormat(d=>d+"%"));
+
+        // Stacked bar
+        const stackedData = [
+            {date:'Jan14',negative:800,neutral:1200,positive:1400},
+            {date:'Jan15',negative:850,neutral:1250,positive:1450},
+            {date:'Jan16',negative:900,neutral:1300,positive:1500},
+            {date:'Jan17',negative:950,neutral:1350,positive:1550},
+            {date:'Jan18',negative:1000,neutral:1400,positive:1600},
+            {date:'Jan19',negative:1050,neutral:1450,positive:1650},
+            {date:'Jan20',negative:1100,neutral:1500,positive:1700}
+        ];
+        const stackedSvg = d3.select("#stackedBar");
+        const sx = d3.scaleBand().domain(dates).range([0,300]).padding(0.2);
+        const sy = d3.scaleLinear().domain([0,3500]).range([150,0]);
+        const stack = d3.stack().keys(['negative','neutral','positive']);
+        const series = stack(stackedData);
+        const sg = stackedSvg.append("g").attr("transform","translate(20,10)");
+        sg.selectAll("g").data(series).join("g")
+            .attr("fill",d=>d.key==='negative'?'#f44336':d.key==='neutral'?'#9e9e9e':'#4caf50')
+            .selectAll("rect").data(d=>d).join("rect")
+            .attr("x",d=>sx(d.data.date))
+            .attr("y",d=>sy(d[1]))
+            .attr("height",d=>sy(d[0])-sy(d[1]))
+            .attr("width",sx.bandwidth());
+        sg.append("g").attr("transform","translate(0,150)").call(d3.axisBottom(sx));
+    </script>
+</body>
+</html>

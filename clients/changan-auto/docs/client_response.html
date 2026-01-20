@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+  h2 { color: #1a73e8; border-bottom: 2px solid #1a73e8; padding-bottom: 8px; }
+  h3 { color: #333; margin-top: 24px; }
+  table { border-collapse: collapse; width: 100%; margin: 16px 0; }
+  th { background-color: #1a73e8; color: white; padding: 12px; text-align: left; }
+  td { padding: 10px 12px; border-bottom: 1px solid #ddd; }
+  tr:nth-child(even) { background-color: #f9f9f9; }
+  .highlight { background-color: #e8f5e9; }
+  .warning { background-color: #fff3e0; }
+  .answer { background-color: #f5f5f5; padding: 16px; border-left: 4px solid #1a73e8; margin: 16px 0; }
+  .note { background-color: #e3f2fd; padding: 12px; border-radius: 4px; margin: 16px 0; }
+</style>
+</head>
+<body>
+
+<p>Hi,</p>
+
+<p>Thank you for your questions. I've investigated the Google Analytics setup and can provide the following answers:</p>
+
+<h2>Q1: Which website is analyzed by Google Analytics?</h2>
+
+<div class="answer">
+<p><strong>Yes, changaneurope.com is analyzed.</strong> However, the website is tracked using <strong>separate GA4 properties</strong> for each country section:</p>
+</div>
+
+<table>
+  <tr>
+    <th>GA4 Property Name</th>
+    <th>What It Tracks</th>
+  </tr>
+  <tr>
+    <td>Changan Auto Country Picker</td>
+    <td>changaneurope.com (root landing page only)</td>
+  </tr>
+  <tr>
+    <td>Changan Auto Germany</td>
+    <td>changaneurope.com/de/*</td>
+  </tr>
+  <tr>
+    <td>Changan Auto United Kingdom</td>
+    <td>changaneurope.com/uk/*</td>
+  </tr>
+  <tr>
+    <td>Changan Auto Netherlands</td>
+    <td>changaneurope.com/nl/*</td>
+  </tr>
+</table>
+
+<h2>Q2: Can the country pages be evaluated? Where can I find them?</h2>
+
+<div class="answer">
+<p><strong>Yes, each country can be evaluated separately.</strong> Each country has its own dedicated GA4 property.</p>
+</div>
+
+<p><strong>To view Germany data:</strong></p>
+<ol>
+  <li>Go to <a href="https://analytics.google.com">analytics.google.com</a></li>
+  <li>Click the property selector in the top left (where it currently says "Changan Auto Country picker")</li>
+  <li>Select <strong>"Changan Auto Germany"</strong> from the dropdown</li>
+</ol>
+
+<h2>Q3: Where do the discrepancies between GA and Looker Studio come from?</h2>
+
+<div class="answer">
+<p><strong>There is no discrepancy.</strong> The difference in numbers occurred because two different GA4 properties were being compared.</p>
+</div>
+
+<table>
+  <tr>
+    <th>Source</th>
+    <th>GA4 Property Being Used</th>
+    <th>Users (Nov-Dec 2025)</th>
+    <th>Status</th>
+  </tr>
+  <tr class="highlight">
+    <td>Looker Studio (SEO Germany)</td>
+    <td>Changan Auto Germany</td>
+    <td>3,615</td>
+    <td>&#10004; Correct</td>
+  </tr>
+  <tr class="warning">
+    <td>GA Screenshot</td>
+    <td>Changan Auto Country Picker</td>
+    <td>2,852</td>
+    <td>&#10008; Wrong property</td>
+  </tr>
+</table>
+
+<div class="note">
+<strong>Explanation:</strong> The Looker Studio dashboard is correctly connected to the <strong>Germany</strong> property, which tracks all pages under changaneurope.com/de/. The GA screenshot was showing the <strong>Country Picker</strong> property, which only tracks the root landing page where users select their country—it does not include any /de, /uk, or /nl pages.
+</div>
+
+<h3>Verification</h3>
+<p>To confirm the numbers match:</p>
+<ol>
+  <li>Open Google Analytics</li>
+  <li>Switch to the <strong>"Changan Auto Germany"</strong> property</li>
+  <li>Set the date range to 01.11.2025 – 31.12.2025</li>
+  <li>You will see the same 3,615 total users that Looker Studio reports</li>
+</ol>
+
+<h3>Summary of Users by Property (Nov-Dec 2025)</h3>
+
+<table>
+  <tr>
+    <th>Property</th>
+    <th>Total Users</th>
+    <th>Active Users</th>
+    <th>New Users</th>
+  </tr>
+  <tr>
+    <td>Country Picker (landing page only)</td>
+    <td>2,890</td>
+    <td>2,852</td>
+    <td>2,681</td>
+  </tr>
+  <tr>
+    <td>Germany (/de)</td>
+    <td>3,615</td>
+    <td>3,598</td>
+    <td>3,076</td>
+  </tr>
+  <tr>
+    <td>United Kingdom (/uk)</td>
+    <td>20,106</td>
+    <td>20,067</td>
+    <td>18,225</td>
+  </tr>
+  <tr>
+    <td>Netherlands (/nl)</td>
+    <td>1,202</td>
+    <td>1,197</td>
+    <td>1,031</td>
+  </tr>
+</table>
+
+<p>Please let me know if you have any further questions.</p>
+
+<p>Best regards</p>
+
+</body>
+</html>

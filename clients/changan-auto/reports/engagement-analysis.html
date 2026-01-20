@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Changan UK - Engagement Rate Analysis</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        :root {
+            --changan-blue: #004B93;
+            --changan-blue-light: #0066CC;
+            --changan-blue-dark: #003366;
+            --success-green: #28a745;
+            --warning-orange: #fd7e14;
+            --danger-red: #dc3545;
+            --gray-light: #f8f9fa;
+            --gray-medium: #6c757d;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 12px;
+            padding: 24px 32px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .logo {
+            height: 40px;
+        }
+
+        .header-title {
+            border-left: 2px solid var(--changan-blue);
+            padding-left: 24px;
+        }
+
+        .header-title h1 {
+            color: var(--changan-blue-dark);
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .header-title p {
+            color: var(--gray-medium);
+            font-size: 14px;
+            margin-top: 4px;
+        }
+
+        .header-date {
+            color: var(--gray-medium);
+            font-size: 14px;
+            text-align: right;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        }
+
+        .card-full {
+            grid-column: 1 / -1;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--changan-blue-dark);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-title::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: var(--changan-blue);
+            border-radius: 2px;
+        }
+
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+
+        .metric-box {
+            background: var(--gray-light);
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .metric-box.highlight-good {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+        }
+
+        .metric-box.highlight-bad {
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+        }
+
+        .metric-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--changan-blue-dark);
+        }
+
+        .metric-box.highlight-good .metric-value {
+            color: var(--success-green);
+        }
+
+        .metric-box.highlight-bad .metric-value {
+            color: var(--danger-red);
+        }
+
+        .metric-label {
+            font-size: 12px;
+            color: var(--gray-medium);
+            margin-top: 4px;
+        }
+
+        .metric-change {
+            font-size: 12px;
+            margin-top: 8px;
+            font-weight: 500;
+        }
+
+        .metric-change.positive {
+            color: var(--success-green);
+        }
+
+        .metric-change.negative {
+            color: var(--danger-red);
+        }
+
+        .chart-container {
+            width: 100%;
+            height: 300px;
+        }
+
+        .axis-label {
+            font-size: 12px;
+            fill: var(--gray-medium);
+        }
+
+        .tooltip {
+            position: absolute;
+            background: var(--changan-blue-dark);
+            color: white;
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--gray-medium);
+        }
+
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .insight-box {
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeeba 100%);
+            border-left: 4px solid var(--warning-orange);
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 16px;
+        }
+
+        .insight-box h4 {
+            color: #856404;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .insight-box p {
+            color: #856404;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .campaign-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 8px;
+        }
+
+        .campaign-table th {
+            background: var(--changan-blue);
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .campaign-table th:first-child {
+            border-radius: 8px 0 0 0;
+        }
+
+        .campaign-table th:last-child {
+            border-radius: 0 8px 0 0;
+        }
+
+        .campaign-table td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            font-size: 13px;
+        }
+
+        .campaign-table tr:hover {
+            background: var(--gray-light);
+        }
+
+        .campaign-table tr.problem-row {
+            background: #fff5f5;
+        }
+
+        .campaign-table tr.problem-row:hover {
+            background: #ffe0e0;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-danger {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .badge-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 24px;
+            color: var(--gray-medium);
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-left">
+                <img src="data:image/jpeg;base64,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" alt="Changan" class="logo">
+                <div class="header-title">
+                    <h1>UK Engagement Rate Analysis</h1>
+                    <p>Paid Media Campaign Performance Review</p>
+                </div>
+            </div>
+            <div class="header-date">
+                <div>Report Generated</div>
+                <div style="font-weight: 600; color: var(--changan-blue-dark);">January 13, 2026</div>
+            </div>
+        </div>
+
+        <div class="dashboard">
+            <!-- Key Metrics -->
+            <div class="card card-full">
+                <div class="card-title">Key Metrics Summary</div>
+                <div class="metric-grid">
+                    <div class="metric-box highlight-good">
+                        <div class="metric-value">78.9%</div>
+                        <div class="metric-label">Overall Engagement Rate</div>
+                        <div style="font-size: 11px; color: var(--gray-medium); margin-top: 4px;">Dec 14, 2025 - Jan 10, 2026</div>
+                        <div class="metric-change positive">+5.8% vs previous 30 days</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-value">20,512</div>
+                        <div class="metric-label">Total Sessions</div>
+                        <div style="font-size: 11px; color: var(--gray-medium); margin-top: 4px;">Dec 14, 2025 - Jan 10, 2026</div>
+                        <div class="metric-change positive">+129.6% vs previous 30 days</div>
+                    </div>
+                    <div class="metric-box highlight-good">
+                        <div class="metric-value">86.3%</div>
+                        <div class="metric-label">Paid Search Engagement</div>
+                        <div style="font-size: 11px; color: var(--gray-medium); margin-top: 4px;">Dec 14, 2025 - Jan 10, 2026</div>
+                        <div class="metric-change positive">Above average</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-value">77.6%</div>
+                        <div class="metric-label">Organic Search Engagement</div>
+                        <div style="font-size: 11px; color: var(--gray-medium); margin-top: 4px;">Dec 14, 2025 - Jan 10, 2026</div>
+                        <div class="metric-change">Stable baseline</div>
+                    </div>
+                </div>
+                <div class="metric-grid" style="margin-top: 16px;">
+                    <div class="metric-box highlight-good">
+                        <div class="metric-value">21.1%</div>
+                        <div class="metric-label">Overall Bounce Rate</div>
+                        <div style="font-size: 11px; color: var(--gray-medium); margin-top: 4px;">Dec 14, 2025 - Jan 10, 2026</div>
+                        <div class="metric-change positive">-5.8% vs previous 30 days</div>
+                    </div>
+                    <div class="metric-box highlight-good">
+                        <div class="metric-value">13.7%</div>
+                        <div class="metric-label">Paid Search Bounce Rate</div>
+                        <div style="font-size: 11px; color: var(--gray-medium); margin-top: 4px;">Dec 14, 2025 - Jan 10, 2026</div>
+                        <div class="metric-change positive">Low bounce rate</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-value">22.4%</div>
+                        <div class="metric-label">Organic Search Bounce Rate</div>
+                        <div style="font-size: 11px; color: var(--gray-medium); margin-top: 4px;">Dec 14, 2025 - Jan 10, 2026</div>
+                        <div class="metric-change">Stable baseline</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-value">31.2%</div>
+                        <div class="metric-label">Direct Bounce Rate</div>
+                        <div style="font-size: 11px; color: var(--gray-medium); margin-top: 4px;">Dec 14, 2025 - Jan 10, 2026</div>
+                        <div class="metric-change">Higher than average</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Weekly Trend Chart -->
+            <div class="card card-full">
+                <div class="card-title">Weekly Engagement Rate Trend</div>
+                <div class="chart-container" id="trend-chart"></div>
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-dot" style="background: #004B93;"></div>
+                        <span>Overall Engagement</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-dot" style="background: #28a745;"></div>
+                        <span>Paid Search</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-dot" style="background: #6c757d;"></div>
+                        <span>Organic Search</span>
+                    </div>
+                </div>
+                <div class="insight-box">
+                    <h4>Key Insight</h4>
+                    <p>Paid media campaigns launched in Week 50 (mid-December) and have consistently delivered <strong>higher engagement rates (86-93%)</strong> than organic traffic (77-78%). Week 03 is excluded as it's a partial week.</p>
+                </div>
+            </div>
+
+            <!-- Campaign Performance -->
+            <div class="card card-full">
+                <div class="card-title">Campaign Performance (Full Weeks Only)</div>
+                <table class="campaign-table">
+                    <thead>
+                        <tr>
+                            <th>Campaign</th>
+                            <th>Dec 22-28</th>
+                            <th>Dec 29 - Jan 4</th>
+                            <th>Jan 5-11</th>
+                            <th>Jan 5-10</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>MP_Changan_Brand_Search</strong></td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>907 sess / 83.8%</td>
+                            <td>1,753 sess / 83.0%</td>
+                            <td><span class="badge badge-success">Performing</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>MP_Changan_Generic_Search</strong></td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>561 sess / 93.2%</td>
+                            <td>1,383 sess / 93.9%</td>
+                            <td><span class="badge badge-success">Performing</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>deepal-s07_awareness_display</strong></td>
+                            <td>1,000 sess / 91.5%</td>
+                            <td>369 sess / 87.3%</td>
+                            <td>121 sess / 95.0%</td>
+                            <td>169 sess / 91.7%</td>
+                            <td><span class="badge badge-success">Performing</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>deepal-s07_awareness_native</strong></td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>40 sess / 70.0%</td>
+                            <td>42 sess / 85.7%</td>
+                            <td><span class="badge badge-warning">Low Volume</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Organic Search</strong></td>
+                            <td>630 sess / 79.5%</td>
+                            <td>391 sess / 82.4%</td>
+                            <td>378 sess / 83.1%</td>
+                            <td>1,052 sess / 80.4%</td>
+                            <td><span class="badge badge-success">Stable</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Direct</strong></td>
+                            <td>322 sess / 77.3%</td>
+                            <td>152 sess / 78.3%</td>
+                            <td>104 sess / 67.3%</td>
+                            <td>270 sess / 70.7%</td>
+                            <td><span class="badge badge-success">Stable</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p style="font-size: 12px; color: #6c757d; margin-top: 12px;">* Jan 11-13 excluded: partial week</p>
+            </div>
+
+            <!-- Bounce Rate by Channel -->
+            <div class="card card-full">
+                <div class="card-title">Bounce Rate by Channel (Dec 14, 2025 - Jan 10, 2026)</div>
+                <table class="campaign-table">
+                    <thead>
+                        <tr>
+                            <th>Channel</th>
+                            <th>Sessions</th>
+                            <th>Engagement Rate</th>
+                            <th>Bounce Rate</th>
+                            <th>Trend</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Paid Search</strong></td>
+                            <td>10,791</td>
+                            <td>86.3%</td>
+                            <td><span class="badge badge-success">13.7%</span></td>
+                            <td><span class="badge badge-success">Excellent</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Display</strong></td>
+                            <td>2,177</td>
+                            <td>90.0%</td>
+                            <td><span class="badge badge-success">10.0%</span></td>
+                            <td><span class="badge badge-success">Excellent</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Organic Search</strong></td>
+                            <td>3,233</td>
+                            <td>77.6%</td>
+                            <td><span class="badge badge-warning">22.4%</span></td>
+                            <td><span class="badge badge-success">Good</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Referral</strong></td>
+                            <td>1,522</td>
+                            <td>76.8%</td>
+                            <td><span class="badge badge-warning">23.2%</span></td>
+                            <td><span class="badge badge-success">Good</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Direct</strong></td>
+                            <td>1,220</td>
+                            <td>68.8%</td>
+                            <td><span class="badge badge-danger">31.2%</span></td>
+                            <td><span class="badge badge-warning">Monitor</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="insight-box" style="margin-top: 16px;">
+                    <h4>Bounce Rate Insight</h4>
+                    <p>Paid media channels (Paid Search & Display) have significantly lower bounce rates than organic channels, indicating that paid traffic is more engaged and qualified. Direct traffic has the highest bounce rate at 31.2%, which may indicate users landing on pages that don't match their intent.</p>
+                </div>
+            </div>
+
+            <!-- Metric Definition -->
+            <div class="card card-full" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
+                <div class="card-title">Understanding Engagement Rate in GA4</div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px;">
+                    <div>
+                        <h4 style="color: var(--changan-blue); margin-bottom: 16px; font-size: 15px;">Formula</h4>
+                        <div style="background: white; border-radius: 8px; padding: 20px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                            <div style="font-size: 18px; font-weight: 600; color: var(--changan-blue-dark);">
+                                Engagement Rate = <span style="border-bottom: 2px solid var(--changan-blue);">Engaged Sessions</span> ÷ Total Sessions × 100
+                            </div>
+                        </div>
+
+                        <h4 style="color: var(--changan-blue); margin: 24px 0 16px 0; font-size: 15px;">What is an Engaged Session?</h4>
+                        <p style="font-size: 14px; line-height: 1.6; color: #333; margin-bottom: 12px;">
+                            A session is considered <strong>"engaged"</strong> if it meets <strong>ANY ONE</strong> of these criteria:
+                        </p>
+                        <div style="background: white; border-radius: 8px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                            <div style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px;">
+                                <div style="background: var(--changan-blue); color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; flex-shrink: 0;">1</div>
+                                <div style="font-size: 14px;"><strong>Duration:</strong> Session lasts longer than <strong>10 seconds</strong></div>
+                            </div>
+                            <div style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px;">
+                                <div style="background: var(--changan-blue); color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; flex-shrink: 0;">2</div>
+                                <div style="font-size: 14px;"><strong>Conversion:</strong> Session includes a <strong>key event</strong> (conversion)</div>
+                            </div>
+                            <div style="display: flex; align-items: flex-start; gap: 12px;">
+                                <div style="background: var(--changan-blue); color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; flex-shrink: 0;">3</div>
+                                <div style="font-size: 14px;"><strong>Page Views:</strong> Session has <strong>2 or more</strong> page/screen views</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 style="color: var(--changan-blue); margin-bottom: 16px; font-size: 15px;">Relationship to Bounce Rate</h4>
+                        <div style="background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                            <p style="font-size: 14px; line-height: 1.6; color: #333; margin-bottom: 12px;">
+                                In GA4, <strong>Bounce Rate is the inverse of Engagement Rate</strong>:
+                            </p>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; text-align: center;">
+                                <div style="background: #d4edda; padding: 12px; border-radius: 6px;">
+                                    <div style="font-size: 11px; color: #155724; margin-bottom: 4px;">ENGAGEMENT RATE</div>
+                                    <div style="font-size: 20px; font-weight: 700; color: #155724;">79%</div>
+                                </div>
+                                <div style="background: #f8d7da; padding: 12px; border-radius: 6px;">
+                                    <div style="font-size: 11px; color: #721c24; margin-bottom: 4px;">BOUNCE RATE</div>
+                                    <div style="font-size: 20px; font-weight: 700; color: #721c24;">21%</div>
+                                </div>
+                            </div>
+                            <p style="font-size: 12px; color: #6c757d; margin-top: 12px; text-align: center;">
+                                Bounce Rate = 100% − Engagement Rate
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <p style="font-size: 11px; color: #6c757d; margin-top: 20px; text-align: center;">
+                    Source: <a href="https://support.google.com/analytics/answer/12195621" target="_blank" style="color: var(--changan-blue);">Google Analytics Help - Engagement rate and bounce rate</a>
+                </p>
+            </div>
+
+            <!-- Channel Comparison -->
+            <div class="card">
+                <div class="card-title">Channel Engagement Comparison</div>
+                <div class="chart-container" id="channel-chart"></div>
+            </div>
+
+            <!-- Sessions by Channel -->
+            <div class="card">
+                <div class="card-title">Session Volume by Channel</div>
+                <div class="chart-container" id="volume-chart"></div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Prepared by General Analytics | Data Source: Google Analytics 4 | Property: Changan Auto United Kingdom</p>
+        </div>
+    </div>
+
+    <div class="tooltip" id="tooltip"></div>
+
+    <script>
+        // Data
+        // Note: Jan 11-13 excluded as it's partial
+        const weeklyData = [
+            { week: 'Oct 13', overall: 74.6, paidSearch: null, organic: 69.4, sessions: 527 },
+            { week: 'Oct 20', overall: 74.3, paidSearch: null, organic: 75.5, sessions: 948 },
+            { week: 'Oct 27', overall: 75.1, paidSearch: null, organic: 73.4, sessions: 1576 },
+            { week: 'Nov 3', overall: 79.2, paidSearch: null, organic: 77.9, sessions: 3459 },
+            { week: 'Nov 10', overall: 79.9, paidSearch: null, organic: 82.8, sessions: 3523 },
+            { week: 'Nov 17', overall: 76.7, paidSearch: null, organic: 80.7, sessions: 3027 },
+            { week: 'Nov 24', overall: 71.7, paidSearch: null, organic: 78.1, sessions: 1542 },
+            { week: 'Dec 1', overall: 71.7, paidSearch: null, organic: 79.0, sessions: 1664 },
+            { week: 'Dec 8', overall: 72.6, paidSearch: 72.2, organic: 78.0, sessions: 1571, note: 'Paid starts' },
+            { week: 'Dec 15', overall: 75.4, paidSearch: 87.0, organic: 77.8, sessions: 2228 },
+            { week: 'Dec 22', overall: 82.0, paidSearch: 87.4, organic: 79.5, sessions: 5929 },
+            { week: 'Dec 29', overall: 83.3, paidSearch: 87.2, organic: 82.4, sessions: 2896 },
+            { week: 'Jan 5', overall: 82.0, paidSearch: 87.2, organic: 82.4, sessions: 2341 },
+            { week: 'Jan 12', overall: 81.0, paidSearch: 88.1, organic: 80.3, sessions: 5336 }
+        ];
+
+        const channelData = [
+            { channel: 'Paid Search', engagement: 86.3, sessions: 10791, color: '#28a745' },
+            { channel: 'Display', engagement: 90.0, sessions: 2177, color: '#17a2b8' },
+            { channel: 'Organic Search', engagement: 77.6, sessions: 3233, color: '#6c757d' },
+            { channel: 'Referral', engagement: 76.8, sessions: 1522, color: '#fd7e14' },
+            { channel: 'Direct', engagement: 68.8, sessions: 1220, color: '#004B93' }
+        ];
+
+        const tooltip = d3.select('#tooltip');
+
+        // Weekly Trend Chart
+        function createTrendChart() {
+            const container = d3.select('#trend-chart');
+            const width = container.node().getBoundingClientRect().width;
+            const height = 300;
+            const margin = { top: 20, right: 30, bottom: 40, left: 50 };
+
+            const svg = container.append('svg')
+                .attr('width', width)
+                .attr('height', height);
+
+            const xScale = d3.scaleBand()
+                .domain(weeklyData.map(d => d.week))
+                .range([margin.left, width - margin.right])
+                .padding(0.1);
+
+            const yScale = d3.scaleLinear()
+                .domain([0, 100])
+                .range([height - margin.bottom, margin.top]);
+
+            // Grid lines
+            svg.append('g')
+                .attr('class', 'grid')
+                .selectAll('line')
+                .data([25, 50, 75, 100])
+                .enter()
+                .append('line')
+                .attr('x1', margin.left)
+                .attr('x2', width - margin.right)
+                .attr('y1', d => yScale(d))
+                .attr('y2', d => yScale(d))
+                .attr('stroke', '#eee')
+                .attr('stroke-dasharray', '3,3');
+
+            // X Axis
+            svg.append('g')
+                .attr('transform', `translate(0,${height - margin.bottom})`)
+                .call(d3.axisBottom(xScale))
+                .selectAll('text')
+                .attr('class', 'axis-label')
+                .attr('transform', 'rotate(-45)')
+                .style('text-anchor', 'end');
+
+            // Y Axis
+            svg.append('g')
+                .attr('transform', `translate(${margin.left},0)`)
+                .call(d3.axisLeft(yScale).tickFormat(d => d + '%'))
+                .selectAll('text')
+                .attr('class', 'axis-label');
+
+            // Line generators
+            const lineOverall = d3.line()
+                .x(d => xScale(d.week) + xScale.bandwidth() / 2)
+                .y(d => yScale(d.overall))
+                .curve(d3.curveMonotoneX);
+
+            const linePaid = d3.line()
+                .defined(d => d.paidSearch !== null)
+                .x(d => xScale(d.week) + xScale.bandwidth() / 2)
+                .y(d => yScale(d.paidSearch))
+                .curve(d3.curveMonotoneX);
+
+            const lineOrganic = d3.line()
+                .x(d => xScale(d.week) + xScale.bandwidth() / 2)
+                .y(d => yScale(d.organic))
+                .curve(d3.curveMonotoneX);
+
+            // Draw lines
+            svg.append('path')
+                .datum(weeklyData)
+                .attr('fill', 'none')
+                .attr('stroke', '#6c757d')
+                .attr('stroke-width', 2)
+                .attr('d', lineOrganic);
+
+            svg.append('path')
+                .datum(weeklyData.filter(d => d.paidSearch !== null))
+                .attr('fill', 'none')
+                .attr('stroke', '#28a745')
+                .attr('stroke-width', 2.5)
+                .attr('d', linePaid);
+
+            svg.append('path')
+                .datum(weeklyData)
+                .attr('fill', 'none')
+                .attr('stroke', '#004B93')
+                .attr('stroke-width', 3)
+                .attr('d', lineOverall);
+
+            // Data points
+            svg.selectAll('.dot-overall')
+                .data(weeklyData)
+                .enter()
+                .append('circle')
+                .attr('class', 'dot-overall')
+                .attr('cx', d => xScale(d.week) + xScale.bandwidth() / 2)
+                .attr('cy', d => yScale(d.overall))
+                .attr('r', d => d.note ? 8 : 5)
+                .attr('fill', d => d.note === 'Issue' ? '#dc3545' : '#004B93')
+                .attr('stroke', 'white')
+                .attr('stroke-width', 2)
+                .style('cursor', 'pointer')
+                .on('mouseover', function(event, d) {
+                    tooltip.style('opacity', 1)
+                        .html(`<strong>${d.week}</strong><br>Overall: ${d.overall.toFixed(1)}%<br>Sessions: ${d.sessions.toLocaleString()}${d.note ? '<br><em>' + d.note + '</em>' : ''}`)
+                        .style('left', (event.pageX + 10) + 'px')
+                        .style('top', (event.pageY - 10) + 'px');
+                })
+                .on('mouseout', function() {
+                    tooltip.style('opacity', 0);
+                });
+
+            // Data points for Paid Search (green line)
+            svg.selectAll('.dot-paid')
+                .data(weeklyData.filter(d => d.paidSearch !== null))
+                .enter()
+                .append('circle')
+                .attr('class', 'dot-paid')
+                .attr('cx', d => xScale(d.week) + xScale.bandwidth() / 2)
+                .attr('cy', d => yScale(d.paidSearch))
+                .attr('r', 5)
+                .attr('fill', '#28a745')
+                .attr('stroke', 'white')
+                .attr('stroke-width', 2)
+                .style('cursor', 'pointer')
+                .on('mouseover', function(event, d) {
+                    tooltip.style('opacity', 1)
+                        .html(`<strong>${d.week}</strong><br>Paid Search: ${d.paidSearch.toFixed(1)}%<br>Sessions: ${d.sessions.toLocaleString()}`)
+                        .style('left', (event.pageX + 10) + 'px')
+                        .style('top', (event.pageY - 10) + 'px');
+                })
+                .on('mouseout', function() {
+                    tooltip.style('opacity', 0);
+                });
+
+            // Campaign launch annotation
+            const launchWeek = weeklyData.find(d => d.note === 'Paid starts');
+            if (launchWeek) {
+                svg.append('line')
+                    .attr('x1', xScale(launchWeek.week) + xScale.bandwidth() / 2)
+                    .attr('x2', xScale(launchWeek.week) + xScale.bandwidth() / 2)
+                    .attr('y1', margin.top)
+                    .attr('y2', height - margin.bottom)
+                    .attr('stroke', '#28a745')
+                    .attr('stroke-width', 2)
+                    .attr('stroke-dasharray', '5,5');
+
+                svg.append('text')
+                    .attr('x', xScale(launchWeek.week) + xScale.bandwidth() / 2)
+                    .attr('y', margin.top - 5)
+                    .attr('text-anchor', 'middle')
+                    .attr('fill', '#28a745')
+                    .attr('font-size', '11px')
+                    .attr('font-weight', '600')
+                    .text('Paid Media Launch');
+            }
+        }
+
+        // Channel Engagement Chart
+        function createChannelChart() {
+            const container = d3.select('#channel-chart');
+            const width = container.node().getBoundingClientRect().width;
+            const height = 300;
+            const margin = { top: 20, right: 30, bottom: 60, left: 50 };
+
+            const svg = container.append('svg')
+                .attr('width', width)
+                .attr('height', height);
+
+            const xScale = d3.scaleBand()
+                .domain(channelData.map(d => d.channel))
+                .range([margin.left, width - margin.right])
+                .padding(0.3);
+
+            const yScale = d3.scaleLinear()
+                .domain([0, 100])
+                .range([height - margin.bottom, margin.top]);
+
+            // Grid
+            svg.append('g')
+                .selectAll('line')
+                .data([25, 50, 75, 100])
+                .enter()
+                .append('line')
+                .attr('x1', margin.left)
+                .attr('x2', width - margin.right)
+                .attr('y1', d => yScale(d))
+                .attr('y2', d => yScale(d))
+                .attr('stroke', '#eee');
+
+            // Bars
+            svg.selectAll('.bar')
+                .data(channelData)
+                .enter()
+                .append('rect')
+                .attr('class', 'bar')
+                .attr('x', d => xScale(d.channel))
+                .attr('y', d => yScale(d.engagement))
+                .attr('width', xScale.bandwidth())
+                .attr('height', d => height - margin.bottom - yScale(d.engagement))
+                .attr('fill', d => d.color)
+                .attr('rx', 4)
+                .style('cursor', 'pointer')
+                .on('mouseover', function(event, d) {
+                    d3.select(this).attr('opacity', 0.8);
+                    tooltip.style('opacity', 1)
+                        .html(`<strong>${d.channel}</strong><br>Engagement: ${d.engagement.toFixed(1)}%<br>Sessions: ${d.sessions.toLocaleString()}`)
+                        .style('left', (event.pageX + 10) + 'px')
+                        .style('top', (event.pageY - 10) + 'px');
+                })
+                .on('mouseout', function() {
+                    d3.select(this).attr('opacity', 1);
+                    tooltip.style('opacity', 0);
+                });
+
+            // Value labels
+            svg.selectAll('.label')
+                .data(channelData)
+                .enter()
+                .append('text')
+                .attr('x', d => xScale(d.channel) + xScale.bandwidth() / 2)
+                .attr('y', d => yScale(d.engagement) - 8)
+                .attr('text-anchor', 'middle')
+                .attr('font-size', '12px')
+                .attr('font-weight', '600')
+                .attr('fill', '#333')
+                .text(d => d.engagement.toFixed(1) + '%');
+
+            // X Axis
+            svg.append('g')
+                .attr('transform', `translate(0,${height - margin.bottom})`)
+                .call(d3.axisBottom(xScale))
+                .selectAll('text')
+                .attr('class', 'axis-label')
+                .attr('transform', 'rotate(-25)')
+                .style('text-anchor', 'end');
+
+            // Y Axis
+            svg.append('g')
+                .attr('transform', `translate(${margin.left},0)`)
+                .call(d3.axisLeft(yScale).tickFormat(d => d + '%'))
+                .selectAll('text')
+                .attr('class', 'axis-label');
+        }
+
+        // Volume Chart
+        function createVolumeChart() {
+            const container = d3.select('#volume-chart');
+            const width = container.node().getBoundingClientRect().width;
+            const height = 300;
+            const margin = { top: 20, right: 30, bottom: 60, left: 60 };
+
+            const svg = container.append('svg')
+                .attr('width', width)
+                .attr('height', height);
+
+            const xScale = d3.scaleBand()
+                .domain(channelData.map(d => d.channel))
+                .range([margin.left, width - margin.right])
+                .padding(0.3);
+
+            const yScale = d3.scaleLinear()
+                .domain([0, d3.max(channelData, d => d.sessions)])
+                .range([height - margin.bottom, margin.top]);
+
+            // Grid
+            svg.append('g')
+                .selectAll('line')
+                .data(yScale.ticks(5))
+                .enter()
+                .append('line')
+                .attr('x1', margin.left)
+                .attr('x2', width - margin.right)
+                .attr('y1', d => yScale(d))
+                .attr('y2', d => yScale(d))
+                .attr('stroke', '#eee');
+
+            // Bars
+            svg.selectAll('.bar')
+                .data(channelData)
+                .enter()
+                .append('rect')
+                .attr('class', 'bar')
+                .attr('x', d => xScale(d.channel))
+                .attr('y', d => yScale(d.sessions))
+                .attr('width', xScale.bandwidth())
+                .attr('height', d => height - margin.bottom - yScale(d.sessions))
+                .attr('fill', d => d.color)
+                .attr('rx', 4)
+                .style('cursor', 'pointer')
+                .on('mouseover', function(event, d) {
+                    d3.select(this).attr('opacity', 0.8);
+                    tooltip.style('opacity', 1)
+                        .html(`<strong>${d.channel}</strong><br>Sessions: ${d.sessions.toLocaleString()}<br>Engagement: ${d.engagement.toFixed(1)}%`)
+                        .style('left', (event.pageX + 10) + 'px')
+                        .style('top', (event.pageY - 10) + 'px');
+                })
+                .on('mouseout', function() {
+                    d3.select(this).attr('opacity', 1);
+                    tooltip.style('opacity', 0);
+                });
+
+            // Value labels
+            svg.selectAll('.label')
+                .data(channelData)
+                .enter()
+                .append('text')
+                .attr('x', d => xScale(d.channel) + xScale.bandwidth() / 2)
+                .attr('y', d => yScale(d.sessions) - 8)
+                .attr('text-anchor', 'middle')
+                .attr('font-size', '11px')
+                .attr('font-weight', '600')
+                .attr('fill', '#333')
+                .text(d => d.sessions.toLocaleString());
+
+            // X Axis
+            svg.append('g')
+                .attr('transform', `translate(0,${height - margin.bottom})`)
+                .call(d3.axisBottom(xScale))
+                .selectAll('text')
+                .attr('class', 'axis-label')
+                .attr('transform', 'rotate(-25)')
+                .style('text-anchor', 'end');
+
+            // Y Axis
+            svg.append('g')
+                .attr('transform', `translate(${margin.left},0)`)
+                .call(d3.axisLeft(yScale).tickFormat(d3.format(',.0f')))
+                .selectAll('text')
+                .attr('class', 'axis-label');
+        }
+
+        // Initialize charts
+        createTrendChart();
+        createChannelChart();
+        createVolumeChart();
+    </script>
+</body>
+</html>
