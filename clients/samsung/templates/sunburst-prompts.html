@@ -1,0 +1,531 @@
+<!-- CSS -->
+/* Sunburst Card */
+.sunburst-card {
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-2xl);
+}
+
+.sunburst-card .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-xl);
+}
+
+.sunburst-card .card-title {
+    font-family: var(--font-display);
+    font-size: 16px;
+    font-weight: 700;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sunburst-card .tooltip-icon {
+    position: relative;
+    width: 18px;
+    height: 18px;
+    background: var(--color-accent-purple);
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: help;
+    flex-shrink: 0;
+}
+
+.sunburst-card .tooltip-icon span {
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.sunburst-card .tooltip-text {
+    visibility: hidden;
+    opacity: 0;
+    position: absolute;
+    top: 28px;
+    left: 0;
+    width: 280px;
+    background: #333;
+    color: white;
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 400;
+    padding: 10px 12px;
+    border-radius: 6px;
+    line-height: 1.4;
+    z-index: 100;
+    transition: opacity 0.2s;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.sunburst-card .tooltip-text::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    left: 12px;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-bottom: 6px solid #333;
+}
+
+.sunburst-card .tooltip-icon:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Sunburst layout */
+.sunburst-container {
+    display: flex;
+    gap: 40px;
+    align-items: flex-start;
+}
+
+.sunburst-chart {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.sunburst-details {
+    flex: 1;
+    min-width: 300px;
+}
+
+.sunburst-details .details-header {
+    font-family: var(--font-display);
+    font-size: 14px;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--color-primary);
+}
+
+.sunburst-details .selected-category {
+    font-family: var(--font-display);
+    font-size: 20px;
+    color: var(--color-primary);
+    margin-bottom: 8px;
+}
+
+.sunburst-details .selected-count {
+    font-size: 14px;
+    color: var(--color-text-secondary);
+    margin-bottom: 16px;
+}
+
+.sunburst-details .breadcrumb {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.sunburst-details .breadcrumb-item {
+    cursor: pointer;
+    padding: 2px 8px;
+    background: #f0f0f0;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.sunburst-details .breadcrumb-item:hover {
+    background: #e0e0e0;
+}
+
+.sunburst-details .breadcrumb-separator {
+    color: #ccc;
+}
+
+.sunburst-details .prompts-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.sunburst-details .prompt-item {
+    padding: 10px 12px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    font-size: 13px;
+    color: var(--color-text-primary);
+    border-left: 3px solid var(--color-primary);
+}
+
+.sunburst-details .prompt-item:hover {
+    background: #f0f1f3;
+}
+
+/* Legend */
+.sunburst-card .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-top: 16px;
+    justify-content: center;
+}
+
+.sunburst-card .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.sunburst-card .legend-item:hover {
+    opacity: 0.7;
+}
+
+.sunburst-card .legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+}
+
+/* Subcategory chips */
+.subcategory-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.subcategory-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    background: #f0f0f0;
+    border-radius: 16px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.subcategory-chip:hover {
+    background: var(--color-primary);
+    color: white;
+}
+
+.subcategory-chip .chip-count {
+    background: rgba(0,0,0,0.1);
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-size: 11px;
+}
+
+.subcategory-chip:hover .chip-count {
+    background: rgba(255,255,255,0.2);
+}
+
+/* Center label */
+.center-label {
+    font-family: var(--font-display);
+    text-anchor: middle;
+    pointer-events: none;
+}
+
+.center-total {
+    font-size: 28px;
+    fill: var(--color-primary);
+}
+
+.center-text {
+    font-size: 12px;
+    fill: var(--color-text-secondary);
+}
+
+/* Arc hover effect */
+.arc {
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.arc:hover {
+    opacity: 0.8;
+}
+<!-- END CSS -->
+
+<!-- HTML -->
+<div class="container">
+    <div class="sunburst-card">
+    <div class="card-header">
+        <div class="card-title">
+            Prompt Categories
+            <div class="tooltip-icon">
+                <span>?</span>
+                <div class="tooltip-text">Interactive visualization of prompt categories. Click on segments to drill down into subcategories and view related prompts.</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="sunburst-container">
+        <div class="sunburst-chart">
+            <div id="sunburst"></div>
+            <div class="legend" id="legend"></div>
+        </div>
+        <div class="sunburst-details">
+            <div class="details-header">Selected Category</div>
+            <div class="breadcrumb" id="breadcrumb"></div>
+            <div class="selected-category" id="selected-name">All Categories</div>
+            <div class="selected-count" id="selected-count">382 prompts</div>
+            <div class="subcategory-chips" id="subcategories"></div>
+            <div class="details-header" style="margin-top: 20px;">Sample Prompts</div>
+            <div class="prompts-list" id="prompts-list"></div>
+        </div>
+    </div>
+    </div>
+</div>
+<!-- END HTML -->
+
+<!-- SCRIPT -->
+// Sunburst data - replace with actual data
+const sunburstData = {
+    "meta": { "totalPrompts": 382, "totalTags": 58 },
+    "tagTree": {
+        "TV Features": {
+            "children": {
+                "AI": { "children": {}, "count": 6 },
+                "Anti-Glare": { "children": {}, "count": 26 },
+                "Art Mode": { "children": {}, "count": 5 },
+                "Brightness": { "children": {}, "count": 11 },
+                "Connectivity": { "children": {}, "count": 5 },
+                "HDR": { "children": {}, "count": 6 },
+                "Input Lag": { "children": {}, "count": 7 },
+                "Motion Handling": { "children": {}, "count": 16 },
+                "Panel Technology": { "children": {}, "count": 8 },
+                "Picture Settings": { "children": {}, "count": 18 },
+                "Refresh Rate": { "children": {}, "count": 12 },
+                "Resolution": { "children": { "4K": { "children": {}, "count": 11 }, "8K": { "children": {}, "count": 1 } }, "count": 31 },
+                "Smart Features": { "children": {}, "count": 3 },
+                "Sound": { "children": {}, "count": 1 },
+                "Streaming": { "children": {}, "count": 1 },
+                "Viewing Angles": { "children": {}, "count": 3 }
+            },
+            "count": 301
+        },
+        "TV Models": {
+            "children": {
+                "Art TV": { "children": {}, "count": 1 },
+                "Gaming TVs": { "children": {}, "count": 40 },
+                "Micro RGB": { "children": {}, "count": 16 },
+                "Mini-LED": { "children": {}, "count": 22 },
+                "Movies & Cinema": { "children": {}, "count": 11 },
+                "OLED": { "children": {}, "count": 26 },
+                "Outdoor TV": { "children": {}, "count": 2 },
+                "QLED": { "children": {}, "count": 31 },
+                "Smart TV": { "children": {}, "count": 7 },
+                "Sports TVs": { "children": {}, "count": 33 }
+            },
+            "count": 347
+        },
+        "TV Reviews & Brand": {
+            "children": {
+                "Affordable": { "children": {}, "count": 5 },
+                "Best Of": { "children": {}, "count": 85 },
+                "Brand": { "children": {}, "count": 109 },
+                "Brand TV Model Reviews": { "children": {}, "count": 37 },
+                "Buying Guides": { "children": {}, "count": 57 },
+                "Comparison": { "children": {}, "count": 38 },
+                "Deals": { "children": {}, "count": 4 },
+                "Year Reviews": { "children": { "2025": { "children": {}, "count": 10 }, "2026": { "children": {}, "count": 33 } }, "count": 84 }
+            },
+            "count": 621
+        },
+        "TV Sizes": {
+            "children": {
+                "Large Size": { "children": {}, "count": 28 },
+                "Medium Size": { "children": {}, "count": 16 },
+                "Small Size": { "children": {}, "count": 6 },
+                "Super Size": { "children": {}, "count": 3 },
+                "Viewing Distance": { "children": {}, "count": 10 }
+            },
+            "count": 130
+        }
+    },
+    "prompts": [
+        { "text": "best 75 inch tv for sports", "tags": ["TV Reviews & Brand", "TV Reviews & Brand__Best Of", "TV Sizes", "TV Sizes__Large Size", "TV Models", "TV Models__Sports TVs"] },
+        { "text": "4K AI upscaling tv", "tags": ["TV Features", "TV Features__AI", "TV Features__Resolution", "TV Features__Resolution__4K"] },
+        { "text": "best gaming tv 2026", "tags": ["TV Models", "TV Models__Gaming TVs", "TV Reviews & Brand", "TV Reviews & Brand__Best Of", "TV Reviews & Brand__Year Reviews", "TV Reviews & Brand__Year Reviews__2026"] },
+        { "text": "OLED vs QLED for movies", "tags": ["TV Models", "TV Models__OLED", "TV Models__QLED", "TV Models__Movies & Cinema", "TV Reviews & Brand", "TV Reviews & Brand__Comparison"] },
+        { "text": "best anti-glare tv 2026", "tags": ["TV Features", "TV Features__Anti-Glare", "TV Reviews & Brand", "TV Reviews & Brand__Best Of", "TV Reviews & Brand__Year Reviews", "TV Reviews & Brand__Year Reviews__2026"] }
+    ]
+};
+
+// Sunburst initialization
+(function() {
+    const data = sunburstData;
+    const width = 550;
+    const height = 550;
+    const radius = Math.min(width, height) / 2;
+
+    const colorPalette = {
+        'TV Features': '#1428A0',
+        'TV Models': '#4285f4',
+        'TV Reviews & Brand': '#10a37f',
+        'TV Sizes': '#8e44ad'
+    };
+
+    function convertToHierarchy(tagTree) {
+        const root = { name: 'All Categories', children: [] };
+        for (const [category, data] of Object.entries(tagTree)) {
+            const categoryNode = { name: category, count: data.count, children: [] };
+            if (data.children && Object.keys(data.children).length > 0) {
+                for (const [subcat, subdata] of Object.entries(data.children)) {
+                    const subcatNode = { name: subcat, count: subdata.count, parent: category, children: [] };
+                    if (subdata.children && Object.keys(subdata.children).length > 0) {
+                        for (const [subsubcat, subsubdata] of Object.entries(subdata.children)) {
+                            subcatNode.children.push({ name: subsubcat, count: subsubdata.count, value: subsubdata.count });
+                        }
+                    }
+                    if (subcatNode.children.length === 0) subcatNode.value = subdata.count;
+                    categoryNode.children.push(subcatNode);
+                }
+            }
+            if (categoryNode.children.length === 0) categoryNode.value = data.count;
+            root.children.push(categoryNode);
+        }
+        return root;
+    }
+
+    const hierarchyData = convertToHierarchy(data.tagTree);
+    const partition = d3.partition().size([2 * Math.PI, radius]);
+    const root = d3.hierarchy(hierarchyData).sum(d => d.value || 0).sort((a, b) => b.value - a.value);
+    partition(root);
+
+    const arc = d3.arc()
+        .startAngle(d => d.x0)
+        .endAngle(d => d.x1)
+        .innerRadius(d => d.y0 * 0.8)
+        .outerRadius(d => d.y1 * 0.8 - 1)
+        .padAngle(0.01)
+        .padRadius(radius / 2);
+
+    const svg = d3.select('#sunburst')
+        .append('svg')
+        .attr('width', width)
+        .attr('height', height)
+        .append('g')
+        .attr('transform', `translate(${width / 2}, ${height / 2})`);
+
+    function getColor(d) {
+        if (d.depth === 0) return '#fff';
+        let node = d;
+        while (node.depth > 1) node = node.parent;
+        const baseColor = colorPalette[node.data.name] || '#666';
+        if (d.depth === 1) return baseColor;
+        if (d.depth === 2) return d3.color(baseColor).brighter(0.5).toString();
+        return d3.color(baseColor).brighter(1).toString();
+    }
+
+    const paths = svg.selectAll('path')
+        .data(root.descendants().filter(d => d.depth > 0))
+        .enter()
+        .append('path')
+        .attr('class', 'arc')
+        .attr('d', arc)
+        .attr('fill', d => getColor(d))
+        .attr('stroke', '#fff')
+        .attr('stroke-width', 2)
+        .on('click', (event, d) => selectCategory(d));
+
+    svg.append('circle')
+        .attr('r', radius * 0.35)
+        .attr('fill', '#fff')
+        .attr('stroke', '#e0e0e0')
+        .attr('stroke-width', 2)
+        .style('cursor', 'pointer')
+        .on('click', () => selectCategory(root));
+
+    svg.append('text').attr('class', 'center-label center-total').attr('dy', '-0.2em').text(data.meta.totalPrompts);
+    svg.append('text').attr('class', 'center-label center-text').attr('dy', '1.2em').text('prompts');
+
+    const legend = d3.select('#legend');
+    for (const [name, color] of Object.entries(colorPalette)) {
+        const item = legend.append('div').attr('class', 'legend-item').on('click', () => {
+            const node = root.descendants().find(d => d.data.name === name);
+            if (node) selectCategory(node);
+        });
+        item.append('div').attr('class', 'legend-color').style('background', color);
+        item.append('span').text(name);
+    }
+
+    function selectCategory(d) {
+        document.getElementById('selected-name').textContent = d.data.name;
+        document.getElementById('selected-count').textContent = `${d.value} prompts`;
+
+        const breadcrumb = document.getElementById('breadcrumb');
+        breadcrumb.innerHTML = '';
+        d.ancestors().reverse().forEach((node, i) => {
+            if (i > 0) {
+                const sep = document.createElement('span');
+                sep.className = 'breadcrumb-separator';
+                sep.textContent = '›';
+                breadcrumb.appendChild(sep);
+            }
+            const item = document.createElement('span');
+            item.className = 'breadcrumb-item';
+            item.textContent = node.data.name;
+            item.onclick = () => selectCategory(node);
+            breadcrumb.appendChild(item);
+        });
+
+        const subcatsDiv = document.getElementById('subcategories');
+        subcatsDiv.innerHTML = '';
+        if (d.children) {
+            d.children.forEach(child => {
+                const chip = document.createElement('div');
+                chip.className = 'subcategory-chip';
+                chip.innerHTML = `${child.data.name} <span class="chip-count">${child.value}</span>`;
+                chip.onclick = () => selectCategory(child);
+                subcatsDiv.appendChild(chip);
+            });
+        }
+
+        const promptsList = document.getElementById('prompts-list');
+        promptsList.innerHTML = '';
+        const name = d.data.name;
+        let tagFilter = () => true;
+        if (d.depth === 1) tagFilter = (p) => p.tags.some(t => t === name || t.startsWith(name + '__'));
+        else if (d.depth === 2) tagFilter = (p) => p.tags.some(t => t === `${d.parent.data.name}__${name}` || t.startsWith(`${d.parent.data.name}__${name}__`));
+
+        data.prompts.filter(tagFilter).slice(0, 15).forEach(prompt => {
+            const item = document.createElement('div');
+            item.className = 'prompt-item';
+            item.textContent = prompt.text;
+            promptsList.appendChild(item);
+        });
+
+        paths.attr('opacity', node => {
+            if (d.depth === 0) return 1;
+            let current = node;
+            while (current) { if (current === d) return 1; current = current.parent; }
+            current = d;
+            while (current) { if (current === node) return 1; current = current.parent; }
+            return 0.3;
+        });
+
+        // Filter the prompt rankings table if available
+        if (typeof window.renderRankingsTable === 'function') {
+            window.renderRankingsTable(d.data.name);
+        }
+    }
+
+    selectCategory(root);
+})();
+<!-- END SCRIPT -->

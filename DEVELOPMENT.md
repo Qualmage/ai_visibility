@@ -17,11 +17,22 @@ Multi-client GTM & Google Analytics management project. Uses MCP servers to inte
 General Analytics/
 ├── clients/              # Per-client folders
 │   ├── _template/        # Template for new clients
-│   └── changan-auto/     # Changan Auto client
-│       ├── gtm/          # GTM configs, exports
-│       ├── ga/           # GA reports, queries
-│       ├── looker/       # Looker Studio
-│       └── docs/         # Client documentation
+│   ├── changan-auto/     # Changan Auto client
+│   │   ├── gtm/          # GTM configs, exports
+│   │   ├── ga/           # GA reports, queries
+│   │   ├── looker/       # Looker Studio
+│   │   └── docs/         # Client documentation
+│   └── samsung/          # Samsung client
+│       ├── templates/    # Immutable HTML components
+│       │   ├── base/     # fonts.html, tokens.html
+│       │   ├── header.html
+│       │   ├── kpi-cards.html
+│       │   └── line-charts.html
+│       ├── configs/      # Dashboard JSON configs
+│       ├── scripts/      # Assembly and utility scripts
+│       ├── dashboards/   # Generated dashboard HTML
+│       ├── assets/       # Images, fonts
+│       └── prompts/      # LLM prompt specifications
 ├── scripts/              # Utility scripts
 │   ├── ga_add_user.py    # Add users to GA properties
 │   └── ga_auth_admin.ps1 # Auth with admin scope
@@ -40,6 +51,174 @@ General Analytics/
 ---
 
 ## Session Progress
+
+### 2026-01-21: DigitalOcean Deployment Workflow
+
+**Summary:** Established a deployment workflow for syncing Samsung dashboard files from local development to a DigitalOcean droplet at robotproof.io. Reorganized local folder structure to mirror server paths, updated asset references, and configured Nginx for static file serving.
+
+#### What Was Done
+
+1. **SSH Configuration:**
+   - Using existing SSH config at `C:\Users\rober\.ssh\config` with host alias `digitalocean`
+   - Key file: `~/.ssh/digitalocean`
+   - Droplet IP: 104.248.11.188
+
+2. **Deployment Command:**
+   ```bash
+   scp clients/samsung/dashboards/scom-overview.html digitalocean:/var/www/html/samsung/ai-visibility/index.html
+   ```
+
+3. **Local Folder Reorganization:**
+   - Added `fonts/` and `images/` subdirectories to `clients/samsung/dashboards/`
+   - Copied fonts from `assets/fonts/` to `dashboards/fonts/`
+   - Copied images (logo.jpg, sov.jpg, source_visi.jpg, referral.jpg, ai-visi.jpg) to `dashboards/images/`
+   - Renamed `ai visi.jpg` to `ai-visi.jpg` (removed space for URL compatibility)
+
+4. **File Path Updates in Dashboard HTML:**
+   - Font paths: `../assets/fonts/` to `./fonts/`
+   - Image paths: `../assets/` to `./images/`
+
+5. **Nginx Configuration:**
+   - Updated `/etc/nginx/sites-enabled/robotproof.io`
+   - Added static asset location block for images, fonts, CSS, JS
+   - Added `/samsung/` location with `index index.html;` directive
+
+#### Live URL
+Dashboard accessible at: https://robotproof.io/samsung/ai-visibility/
+
+---
+
+### 2026-01-20: Sunburst Prompts Visualization & Prompt Rankings Table
+
+**Summary:** Created two new interactive dashboard components for the Samsung S.com Overview dashboard: a D3.js sunburst chart for visualizing prompt categories with drill-down navigation, and a full-width data table showing prompt performance metrics. Both components work together as a filter system.
+
+#### What Was Done
+
+1. **Sunburst Prompts Visualization** (`templates/sunburst-prompts.html`):
+   - Interactive D3.js sunburst chart (550x550px, fills half container width)
+   - Drill-down navigation by clicking on segments
+   - Breadcrumb navigation to go back up hierarchy
+   - Subcategory chips for quick navigation
+   - Sample prompts list that filters based on selection
+   - Color-coded legend for 4 main categories: TV Features, TV Models, TV Reviews & Brand, TV Sizes
+   - Acts as a filter for the prompt rankings table below
+
+2. **Prompt Rankings Table** (`templates/prompt-rankings-table.html`):
+   - Full-width data table showing prompt performance metrics
+   - Columns: Prompt, Model, Topic, Topic Vol., Visibility (bar), Position (2 dates), Change, Product (2 dates)
+   - Model icons: ChatGPT (green), Gemini (blue), Perplexity (dark), AI Overview (red)
+   - Position color coding: green (1-3), amber (4-6), gray (7+)
+   - Change indicators: up/down arrows, "New", "Lost" badges
+   - Samsung products highlighted in blue
+   - 600px max-height with scroll and sticky header
+   - 20 sample prompts with category tags
+   - Global `window.renderRankingsTable(filter)` function for filtering
+
+3. **Dashboard Config Updated** - Added both components to `configs/scom-overview.json`
+
+4. **Bug Fixes:**
+   - Added `.container` wrapper to both templates for proper layout spacing
+   - Added scoped tooltip CSS (`.sunburst-card .tooltip-icon`, `.prompt-rankings-card .tooltip-icon`) to fix tooltip conflicts in assembled dashboard
+
+#### Test Files Created
+- `dashboards/test-sunburst-prompts.html` - Standalone sunburst test
+- `dashboards/test-prompt-rankings-table.html` - Standalone table test
+- `dashboards/test-prompt-rankings.html` - Combined view (prototype)
+
+#### Dashboard Component Count
+The S.com Overview dashboard now has 6 components: header, kpi-cards, line-charts, platform-tables, sunburst-prompts, prompt-rankings-table
+
+---
+
+### 2026-01-20: Component-First Workflow Clarification (3 Stages)
+
+**Summary:** Corrected the Component-First Development Workflow documentation to accurately reflect the 3-stage process: Test File -> Template -> Assembly. The previous 2-stage documentation was incomplete.
+
+#### The Corrected 3-Stage Workflow
+
+1. **Edit test file** (e.g., `dashboards/test-line-chart.html`) - Development sandbox for experimenting
+2. **Approve and update template** (e.g., `templates/line-charts.html`) - Locked-in source of truth
+3. **Run assembly script** - Generates final dashboard from templates
+
+#### File Hierarchy
+```
+dashboards/test-*.html     <- Development sandbox (edit first)
+        | (approve)
+templates/*.html           <- Approved components (source of truth)
+        | (assembly)
+dashboards/scom-*.html     <- Generated output (never edit directly)
+```
+
+#### Key Lesson
+The mistake made was editing `templates/line-charts.html` directly without first updating `dashboards/test-line-chart.html`. This skipped the testing stage. Always start changes in the test file.
+
+---
+
+### 2026-01-20: Samsung Template Assembly System
+
+**Summary:** Created a template-first assembly system for Samsung dashboards. Templates are immutable HTML components stored in `clients/samsung/templates/`, with dashboard layouts defined by JSON configs. An assembly script combines templates into complete dashboards.
+
+#### What Was Done
+
+1. **Created template structure** at `clients/samsung/templates/`:
+   - `base/fonts.html` - Samsung font declarations (@font-face rules)
+   - `base/tokens.html` - CSS variables and base styles (colors, spacing, typography)
+   - `header.html` - Header component with logo and title
+   - `kpi-cards.html` - KPI cards component with tooltips
+   - `line-charts.html` - Line charts component with insights boxes
+
+2. **Created dashboard config** at `clients/samsung/configs/`:
+   - `scom-overview.json` - Defines component order and assembly settings
+
+3. **Created assembly script** at `clients/samsung/scripts/`:
+   - `assemble_dashboard.py` - Reads config, combines templates, outputs complete HTML
+
+4. **Key design principles:**
+   - Templates are immutable once approved (no LLM regeneration)
+   - Component order controlled via JSON config array
+   - Easy to add future components (donut, stacked-bar, leaderboard, data-table)
+
+#### How to Use
+
+```bash
+uv run clients/samsung/scripts/assemble_dashboard.py clients/samsung/configs/scom-overview.json
+```
+
+---
+
+### 2026-01-20: Samsung KPI Cards Element (Client Specification)
+
+**Summary:** Implemented 4 KPI cards for the Samsung S.com Overview dashboard based on client specification ("Ai reporting Client ask from Jason.pdf"). Added custom icons, tooltips, and 4-state change indicators.
+
+#### What Was Done
+
+1. **Created 4 KPI card designs:**
+   - Share of Voice (65%) - Speech bubble with bar chart icon
+   - Source Visibility (42%) - Monitor with eye icon
+   - Referral Traffic (106,445) - Arrows converging to center icon
+   - AI Visibility (91) - Brain with gear and sparkles icon
+
+2. **Custom icon assets** (created by user with Nano Baana):
+   - `clients/samsung/assets/sov.jpg` - Share of Voice icon
+   - `clients/samsung/assets/source_visi.jpg` - Source Visibility icon
+   - `clients/samsung/assets/referral.jpg` - Referral Traffic icon
+   - `clients/samsung/assets/ai visi.jpg` - AI Visibility icon
+
+3. **Styling implementation:**
+   - Icons enlarged to 64x64px
+   - Card content centered with flexbox
+   - Labels bold using Samsung Sharp Sans font
+   - Min-height 160px for consistent card sizing
+
+4. **Tooltip feature:** CSS-only info tooltip (question mark icon, #8091df accent, hover reveals description modal with smooth fade)
+
+5. **4-state change indicators** for period-over-period comparison:
+   - N/A (grey #666666) - No comparison data
+   - No Change (yellow #feb447) - Value unchanged
+   - Increase (green #96d551) - Value went up
+   - Decrease (red #ff4438) - Value went down
+
+---
 
 ### 2026-01-20: Samsung TV Prompts CSV to JSON Parser
 
@@ -234,6 +413,16 @@ General Analytics/
 
 | Date | Decision | Why | Alternatives Rejected |
 |------|----------|-----|----------------------|
+| 2026-01-21 | SCP-based deployment to DigitalOcean droplet | Simple, direct file transfer; uses existing SSH config; no CI/CD overhead for single-file dashboards | rsync (overkill for single files), Git-based deployment (unnecessary complexity), FTP (less secure) |
+| 2026-01-21 | Mirror local folder structure to server structure | Enables scp of entire directories without path translation; same relative paths work locally and on server | Keep assets separate (requires path changes per environment), symlinks (platform-dependent) |
+| 2026-01-21 | Remove spaces from filenames (ai visi.jpg to ai-visi.jpg) | Spaces in URLs cause encoding issues (%20); hyphens are URL-safe and more readable | URL encoding (ugly URLs), underscores (less common convention) |
+| 2026-01-20 | D3.js sunburst chart for prompt category visualization | Enables hierarchical drill-down navigation, compact display of nested categories, intuitive click-to-explore interaction | Flat dropdown (cannot show hierarchy), tree view (takes more space), nested accordions (requires more clicks) |
+| 2026-01-20 | Global `window.renderRankingsTable(filter)` function for cross-component filtering | Allows sunburst to filter table without tight coupling, simple function call interface | Custom events (more complex), direct DOM manipulation (brittle), shared state object (overkill) |
+| 2026-01-20 | Scoped tooltip CSS selectors (`.sunburst-card .tooltip-icon`) | Prevents tooltip style conflicts when multiple components assembled into single dashboard | Global tooltip classes (cause conflicts), inline styles (hard to maintain), unique class prefixes (verbose) |
+| 2026-01-20 | Component-First Development Workflow (3 stages): Test File -> Template -> Assembly | Test files are sandboxes for experimentation; templates are locked-in source of truth; assembly generates output; skipping stages leads to untested code or lost changes | Editing templates directly (skips testing), editing generated dashboards (changes lost on reassembly) |
+| 2026-01-20 | Template-first assembly system with immutable templates | Prevents unintended changes to approved components, enables reproducible builds, separates layout (config) from content (templates) | LLM regeneration each time (inconsistent results), monolithic HTML files (hard to maintain) |
+| 2026-01-20 | CSS-only tooltips for KPI cards | No JavaScript required, simpler implementation, works in static HTML | JavaScript-based tooltips (unnecessary complexity for hover effect) |
+| 2026-01-20 | 4-state change indicators (N/A, No Change, Increase, Decrease) | Covers all real-world comparison scenarios clearly | 2-state (up/down only, cannot represent missing data or unchanged) |
 | 2026-01-20 | Modular prompt system with separate element files | Enables generating individual components without full context, easier maintenance | Single monolithic prompt file (requires full context for any change) |
 | 2026-01-20 | CSS Grid for KPI cards instead of Flexbox | Guarantees equal-width cards regardless of content | Flexbox (width varies with content) |
 | 2026-01-20 | Relative asset paths (`../assets/`) | Enables static file usage without server | Absolute paths (requires specific deployment location) |
@@ -256,6 +445,47 @@ General Analytics/
 ### [Unreleased]
 
 #### Added
+- DigitalOcean deployment workflow for Samsung dashboards
+  - SSH config using `digitalocean` host alias
+  - Deployment via `scp` to `/var/www/html/samsung/ai-visibility/`
+  - Local folder structure mirrors server structure (`dashboards/fonts/`, `dashboards/images/`)
+- Live dashboard URL: https://robotproof.io/samsung/ai-visibility/
+
+#### Changed
+- Reorganized `clients/samsung/dashboards/` to include `fonts/` and `images/` subdirectories
+- Updated asset paths in `scom-overview.html` from `../assets/` to `./fonts/` and `./images/`
+- Renamed `ai visi.jpg` to `ai-visi.jpg` (removed space for URL compatibility)
+
+#### Infrastructure
+- Nginx configuration updated on robotproof.io to serve `/samsung/` directory with static assets
+
+#### Added (previous session)
+- Sunburst Prompts Visualization (`clients/samsung/templates/sunburst-prompts.html`) - Interactive D3.js sunburst chart for prompt category hierarchy with drill-down navigation, breadcrumbs, subcategory chips, and sample prompts list
+- Prompt Rankings Table (`clients/samsung/templates/prompt-rankings-table.html`) - Full-width performance table with model icons, position color coding, change indicators, visibility bars, and sticky header
+- Cross-component filtering: sunburst chart filters prompt rankings table via `window.renderRankingsTable(filter)` function
+- Test files: `test-sunburst-prompts.html`, `test-prompt-rankings-table.html`, `test-prompt-rankings.html`
+
+#### Changed
+- Updated `configs/scom-overview.json` to include sunburst-prompts and prompt-rankings-table components
+- Clarified Component-First Development Workflow to 3 stages: Test File -> Template -> Assembly (see build-log.md for full documentation)
+
+#### Fixed
+- Added `.container` wrapper to sunburst and prompt-rankings templates for proper layout spacing
+- Scoped tooltip CSS selectors (`.sunburst-card .tooltip-icon`, `.prompt-rankings-card .tooltip-icon`) to fix style conflicts in assembled dashboard
+
+#### Added (previous session)
+- Samsung template assembly system (`clients/samsung/templates/`, `configs/`, `scripts/assemble_dashboard.py`) - Template-first dashboard generation with immutable components
+  - `templates/base/fonts.html` - Samsung font declarations
+  - `templates/base/tokens.html` - CSS variables and base styles
+  - `templates/header.html` - Header component
+  - `templates/kpi-cards.html` - KPI cards with tooltips
+  - `templates/line-charts.html` - Line charts with insights boxes
+  - `configs/scom-overview.json` - S.com Overview dashboard configuration
+- Samsung KPI Cards element specification (`clients/samsung/prompts/elements/kpi-cards.md`) - 4 KPI cards for S.com Overview dashboard
+- KPI card test page (`clients/samsung/dashboards/test-kpi-cards-client.html`) - Test page demonstrating all 4 change states
+- Custom KPI icons at `clients/samsung/assets/` - sov.jpg, source_visi.jpg, referral.jpg, ai visi.jpg
+- CSS-only tooltip feature for KPI cards with hover reveal and smooth fade transition
+- 4-state change indicators: N/A (grey), No Change (yellow), Increase (green), Decrease (red)
 - TV prompts CSV to JSON parser (`clients/samsung/scripts/parse_prompts_csv.py`) - Converts Semrush prompts CSV to hierarchical JSON for dashboard tag filtering
 - Samsung TV prompts JSON (`clients/samsung/assets/tv_prompts.json`) - 382 prompts with nested tag tree (58 unique tags)
 - Modular prompt system for Samsung dashboards (`clients/samsung/prompts/`) - Enables generating individual components

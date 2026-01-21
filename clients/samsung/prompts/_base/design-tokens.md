@@ -8,7 +8,18 @@ Single source of truth for all visual values in the Samsung AI Visibility Dashbo
 | Token | Value | Usage |
 |-------|-------|-------|
 | `--color-primary` | `#1428A0` | Samsung Blue - headings, links, active states, primary buttons |
-| `--color-primary-light` | `#8091df` | Light blue accent |
+| `--color-primary-light` | `#8091df` | Light blue accent, tooltip icons |
+
+### Accent Colors
+| Token | Value | Usage |
+|-------|-------|-------|
+| `--color-accent-blue` | `#0277c6` | Secondary blue |
+| `--color-accent-cyan` | `#02b2e4` | Cyan highlights |
+| `--color-accent-teal` | `#01c3b0` | Teal highlights |
+| `--color-accent-purple` | `#8091df` | Purple accent (same as primary-light) |
+| `--color-accent-green` | `#96d551` | KPI increase state |
+| `--color-accent-yellow` | `#feb447` | KPI no-change state |
+| `--color-accent-red` | `#ff4438` | KPI decrease state |
 
 ### Semantic Colors
 | Token | Value | Usage |
@@ -138,6 +149,15 @@ When generating components, include this `:root` block at the start of the `<sty
     /* Brand */
     --color-primary: #1428A0;
     --color-primary-light: #8091df;
+
+    /* Accent Palette */
+    --color-accent-blue: #0277c6;
+    --color-accent-cyan: #02b2e4;
+    --color-accent-teal: #01c3b0;
+    --color-accent-purple: #8091df;
+    --color-accent-green: #96d551;
+    --color-accent-yellow: #feb447;
+    --color-accent-red: #ff4438;
 
     /* Semantic */
     --color-success: #4caf50;

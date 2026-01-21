@@ -28,5 +28,8 @@ tmpclaude-*
 .DS_Store
 Thumbs.db
 
+# PDFs
+*.pdf
+
 # Local settings (keep in repo but not local overrides)
 .claude/settings.local.json

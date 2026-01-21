@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test: Prompt Rankings with Sunburst</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        /* ============================================
+           FONTS
+           ============================================ */
+        @font-face {
+            font-family: 'SamsungOne';
+            src: url('../assets/fonts/SamsungOne-400.woff2') format('woff2');
+            font-weight: 400;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: 'SamsungOne';
+            src: url('../assets/fonts/SamsungOne-700.woff2') format('woff2');
+            font-weight: 700;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: 'SamsungSharpSans';
+            src: url('../assets/fonts/SamsungSharpSans-Bold.woff2') format('woff2');
+            font-weight: 700;
+            font-style: normal;
+        }
+
+        /* ============================================
+           DESIGN TOKENS
+           ============================================ */
+        :root {
+            --font-primary: 'SamsungOne', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-display: 'SamsungSharpSans', 'SamsungOne', sans-serif;
+            --color-bg-page: #f5f5f7;
+            --color-bg-card: #ffffff;
+            --color-bg-header: #1a1a2e;
+            --color-text-primary: #1e1e1e;
+            --color-text-secondary: #6b7280;
+            --color-text-muted: #9ca3af;
+            --color-border: #e5e7eb;
+            --color-border-accent: #1428a0;
+            --color-brand-blue: #1428a0;
+            --color-brand-light: #e8ebf7;
+            --color-positive: #10b981;
+            --color-negative: #ef4444;
+            --color-warning: #f59e0b;
+            --spacing-xs: 4px;
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+            --spacing-xl: 32px;
+            --spacing-2xl: 48px;
+            --radius-sm: 6px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+            --max-width: 1800px;
+        }
+
+        /* ============================================
+           BASE STYLES
+           ============================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: var(--font-primary);
+            background: var(--color-bg-page);
+            color: var(--color-text-primary);
+            line-height: 1.5;
+            min-height: 100vh;
+        }
+
+        /* ============================================
+           HEADER
+           ============================================ */
+        header {
+            background: var(--color-bg-header);
+            border-bottom: 3px solid var(--color-border-accent);
+            box-shadow: var(--shadow-sm);
+        }
+        .header-content {
+            max-width: var(--max-width);
+            margin: 0 auto;
+            padding: var(--spacing-lg) var(--spacing-2xl);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header-title {
+            font-family: var(--font-display);
+            font-size: 24px;
+            color: #fff;
+        }
+        .header-subtitle {
+            font-size: 14px;
+            color: rgba(255,255,255,0.7);
+            margin-top: 4px;
+        }
+
+        /* ============================================
+           MAIN CONTENT
+           ============================================ */
+        main {
+            max-width: var(--max-width);
+            margin: 0 auto;
+            padding: var(--spacing-xl) var(--spacing-2xl);
+        }
+
+        /* ============================================
+           FILTER BAR
+           ============================================ */
+        .filter-bar {
+            display: flex;
+            gap: var(--spacing-sm);
+            flex-wrap: wrap;
+            margin-bottom: var(--spacing-lg);
+            align-items: center;
+        }
+        .filter-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: 20px;
+            font-size: 13px;
+            color: var(--color-text-primary);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .filter-chip:hover {
+            border-color: var(--color-brand-blue);
+        }
+        .filter-chip.active {
+            background: var(--color-brand-blue);
+            color: white;
+            border-color: var(--color-brand-blue);
+        }
+        .filter-chip .icon {
+            width: 16px;
+            height: 16px;
+        }
+        .filter-chip .close {
+            margin-left: 4px;
+            opacity: 0.7;
+        }
+        .refresh-btn {
+            margin-left: auto;
+            padding: 8px 16px;
+            background: var(--color-brand-blue);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* ============================================
+           KPI ROW
+           ============================================ */
+        .kpi-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-xl);
+        }
+        .kpi-card {
+            background: var(--color-bg-card);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-lg);
+            box-shadow: var(--shadow-sm);
+        }
+        .kpi-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-md);
+        }
+        .kpi-label {
+            font-size: 13px;
+            color: var(--color-text-secondary);
+            font-weight: 500;
+        }
+        .kpi-value {
+            font-family: var(--font-display);
+            font-size: 36px;
+            color: var(--color-text-primary);
+        }
+        .kpi-change {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 13px;
+            padding: 2px 8px;
+            border-radius: 12px;
+        }
+        .kpi-change.positive {
+            color: var(--color-positive);
+            background: rgba(16, 185, 129, 0.1);
+        }
+        .kpi-change.negative {
+            color: var(--color-negative);
+            background: rgba(239, 68, 68, 0.1);
+        }
+        .kpi-sub {
+            display: flex;
+            gap: var(--spacing-lg);
+            margin-top: var(--spacing-md);
+            padding-top: var(--spacing-md);
+            border-top: 1px solid var(--color-border);
+        }
+        .kpi-sub-item {
+            font-size: 12px;
+        }
+        .kpi-sub-label {
+            color: var(--color-text-muted);
+        }
+        .kpi-sub-value {
+            font-weight: 600;
+            color: var(--color-text-primary);
+        }
+
+        /* ============================================
+           VISUALIZATION ROW
+           ============================================ */
+        .viz-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-xl);
+        }
+        .viz-card {
+            background: var(--color-bg-card);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-lg);
+            box-shadow: var(--shadow-sm);
+        }
+        .viz-title {
+            font-family: var(--font-display);
+            font-size: 16px;
+            margin-bottom: var(--spacing-md);
+        }
+
+        /* ============================================
+           SUNBURST
+           ============================================ */
+        #sunburst-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 350px;
+        }
+        #sunburst-container svg {
+            font-family: var(--font-primary);
+        }
+        .sunburst-breadcrumb {
+            display: flex;
+            gap: var(--spacing-xs);
+            margin-bottom: var(--spacing-md);
+            flex-wrap: wrap;
+        }
+        .breadcrumb-item {
+            font-size: 12px;
+            color: var(--color-text-secondary);
+            cursor: pointer;
+        }
+        .breadcrumb-item:hover {
+            color: var(--color-brand-blue);
+        }
+        .breadcrumb-item:not(:last-child)::after {
+            content: ' / ';
+            margin-left: var(--spacing-xs);
+            color: var(--color-text-muted);
+        }
+
+        /* ============================================
+           POSITION DISTRIBUTION (Donut)
+           ============================================ */
+        #position-chart {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .position-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--spacing-sm);
+            justify-content: center;
+            margin-top: var(--spacing-md);
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: var(--color-text-secondary);
+        }
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        /* ============================================
+           PROMPT RANKINGS TABLE
+           ============================================ */
+        .table-section {
+            background: var(--color-bg-card);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+        }
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-lg);
+            border-bottom: 1px solid var(--color-border);
+        }
+        .table-title {
+            font-family: var(--font-display);
+            font-size: 16px;
+        }
+        .table-actions {
+            display: flex;
+            gap: var(--spacing-sm);
+        }
+        .table-action-btn {
+            padding: 6px 12px;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            background: white;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .table-action-btn:hover {
+            border-color: var(--color-brand-blue);
+        }
+        .rankings-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .rankings-table th {
+            background: #f9fafb;
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--color-text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--color-border);
+            white-space: nowrap;
+        }
+        .rankings-table th.sortable {
+            cursor: pointer;
+        }
+        .rankings-table th.sortable:hover {
+            color: var(--color-brand-blue);
+        }
+        .rankings-table th .sort-icon {
+            margin-left: 4px;
+            opacity: 0.5;
+        }
+        .rankings-table td {
+            padding: 14px 16px;
+            font-size: 13px;
+            border-bottom: 1px solid var(--color-border);
+            vertical-align: middle;
+        }
+        .rankings-table tbody tr:hover {
+            background: #f9fafb;
+        }
+
+        /* Prompt column */
+        .prompt-link {
+            color: var(--color-brand-blue);
+            text-decoration: none;
+            font-weight: 500;
+            max-width: 280px;
+            display: block;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .prompt-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Model icon */
+        .model-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 600;
+            color: white;
+        }
+        .model-icon.chatgpt { background: #10a37f; }
+        .model-icon.gemini { background: #4285f4; }
+        .model-icon.perplexity { background: #1a1a2e; }
+        .model-icon.ai-overview { background: #ea4335; }
+
+        /* Topic */
+        .topic-text {
+            max-width: 180px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: var(--color-text-secondary);
+        }
+
+        /* Volume */
+        .volume-value {
+            font-weight: 500;
+        }
+
+        /* Visibility bar */
+        .visibility-cell {
+            min-width: 100px;
+        }
+        .visibility-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .visibility-bar-container {
+            flex: 1;
+            height: 6px;
+            background: #e5e7eb;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .visibility-bar-fill {
+            height: 100%;
+            background: var(--color-brand-blue);
+            border-radius: 3px;
+            transition: width 0.3s;
+        }
+        .visibility-value {
+            font-size: 12px;
+            font-weight: 500;
+            min-width: 35px;
+            text-align: right;
+        }
+
+        /* Position columns */
+        .position-value {
+            font-weight: 600;
+            text-align: center;
+        }
+        .position-value.top-3 {
+            color: var(--color-positive);
+        }
+        .position-value.mid {
+            color: var(--color-warning);
+        }
+        .position-value.low {
+            color: var(--color-text-secondary);
+        }
+        .position-na {
+            color: var(--color-text-muted);
+            font-style: italic;
+        }
+
+        /* Position change */
+        .position-change {
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .position-change.up {
+            color: var(--color-positive);
+            background: rgba(16, 185, 129, 0.1);
+        }
+        .position-change.down {
+            color: var(--color-negative);
+            background: rgba(239, 68, 68, 0.1);
+        }
+        .position-change.neutral {
+            color: var(--color-text-muted);
+            background: #f3f4f6;
+        }
+        .position-change.new {
+            color: var(--color-brand-blue);
+            background: var(--color-brand-light);
+        }
+        .change-arrow {
+            font-size: 10px;
+        }
+
+        /* Product columns */
+        .product-name {
+            font-size: 12px;
+            max-width: 150px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .product-samsung {
+            color: var(--color-brand-blue);
+            font-weight: 500;
+        }
+        .product-competitor {
+            color: var(--color-text-secondary);
+        }
+
+        /* Column groups */
+        .col-group-header {
+            text-align: center !important;
+            background: #f3f4f6 !important;
+            border-left: 2px solid var(--color-border);
+        }
+        .col-subheader {
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        /* Responsive */
+        @media (max-width: 1400px) {
+            .kpi-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .viz-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div>
+                <div class="header-title">TV Panel Performance</div>
+                <div class="header-subtitle">Prompt Rankings by Panel Type & Platform</div>
+            </div>
+            <img src="../assets/logo.jpg" alt="Samsung" height="36">
+        </div>
+    </header>
+
+    <main>
+        <!-- Filter Bar -->
+        <div class="filter-bar">
+            <div class="filter-chip active">
+                <span>Last 30 days</span>
+            </div>
+            <div class="filter-chip active">
+                <span>Samsung</span>
+                <span class="close">×</span>
+            </div>
+            <div class="filter-chip active">
+                <span>Product Name</span>
+                <span class="close">×</span>
+            </div>
+            <div class="filter-chip">
+                <span>Google AI Overview</span>
+                <span class="close">×</span>
+            </div>
+            <div class="filter-chip">
+                <span>TV Models</span>
+                <span class="close">×</span>
+            </div>
+            <div class="filter-chip">
+                <span>Segment: US Pages</span>
+                <span class="close">×</span>
+            </div>
+            <button class="refresh-btn">
+                <span>↻</span> Refresh data
+            </button>
+        </div>
+
+        <!-- KPI Row -->
+        <div class="kpi-row">
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-label">Prompts with mentions</span>
+                </div>
+                <div class="kpi-value">15</div>
+                <span class="kpi-change positive">↑ +15</span>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-label">Top product position trend</span>
+                </div>
+                <div class="kpi-sub" style="border-top: none; padding-top: 0;">
+                    <div class="kpi-sub-item">
+                        <div class="kpi-sub-label">Best</div>
+                        <div class="kpi-sub-value" style="font-size: 24px;">8 <span class="kpi-change positive" style="font-size: 12px;">+67%</span></div>
+                    </div>
+                    <div class="kpi-sub-item">
+                        <div class="kpi-sub-label">Last</div>
+                        <div class="kpi-sub-value" style="font-size: 24px;">5 <span class="kpi-change negative" style="font-size: 12px;">-26%</span></div>
+                    </div>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-label">Average position</span>
+                </div>
+                <div class="kpi-value">3</div>
+                <span class="kpi-change positive">↑ +0.4</span>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-label">Position distribution</span>
+                </div>
+                <div id="position-chart"></div>
+                <div class="position-legend">
+                    <div class="legend-item"><span class="legend-dot" style="background: #10b981;"></span> 1-3</div>
+                    <div class="legend-item"><span class="legend-dot" style="background: #3b82f6;"></span> 4-6</div>
+                    <div class="legend-item"><span class="legend-dot" style="background: #f59e0b;"></span> 7-10</div>
+                    <div class="legend-item"><span class="legend-dot" style="background: #9ca3af;"></span> 10+</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Visualization Row -->
+        <div class="viz-row">
+            <div class="viz-card">
+                <div class="viz-title">Category Distribution (Sunburst)</div>
+                <div class="sunburst-breadcrumb" id="breadcrumb">
+                    <span class="breadcrumb-item">All Categories</span>
+                </div>
+                <div id="sunburst-container"></div>
+            </div>
+            <div class="viz-card">
+                <div class="viz-title">Panel Type Performance</div>
+                <div id="panel-chart"></div>
+            </div>
+        </div>
+
+        <!-- Prompt Rankings Table -->
+        <div class="table-section">
+            <div class="table-header">
+                <h3 class="table-title">Prompt Rankings (Top Products)</h3>
+                <div class="table-actions">
+                    <button class="table-action-btn">
+                        <span>↓</span> Export
+                    </button>
+                </div>
+            </div>
+            <div style="overflow-x: auto;">
+                <table class="rankings-table">
+                    <thead>
+                        <tr>
+                            <th class="sortable">Prompt <span class="sort-icon">↕</span></th>
+                            <th>Model</th>
+                            <th class="sortable">Topic <span class="sort-icon">↕</span></th>
+                            <th class="sortable">Topic Volume <span class="sort-icon">↕</span></th>
+                            <th class="sortable">Visibility <span class="sort-icon">↕</span></th>
+                            <th class="col-group-header" colspan="2" style="border-left: 2px solid #e5e7eb;">Position</th>
+                            <th>Change</th>
+                            <th class="col-group-header" colspan="2" style="border-left: 2px solid #e5e7eb;">Product</th>
+                        </tr>
+                        <tr>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th class="col-subheader" style="border-left: 2px solid #e5e7eb;">Dec 10, 2023</th>
+                            <th class="col-subheader">Jan 8, 2025</th>
+                            <th></th>
+                            <th class="col-subheader" style="border-left: 2px solid #e5e7eb;">Dec 10, 2023</th>
+                            <th class="col-subheader">Jan 8, 2025</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rankings-body">
+                        <!-- Populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // ============================================
+        // SAMPLE DATA
+        // ============================================
+        const promptRankings = [
+            {
+                prompt: "what tv should I buy?",
+                model: "chatgpt",
+                topic: "TV Purchase and Specification",
+                topicVolume: 5324,
+                visibility: 89,
+                positionPrev: null,
+                positionCurr: 3,
+                productPrev: null,
+                productCurr: { name: "OLED S90F 4K TV", isSamsung: true }
+            },
+            {
+                prompt: "What are the best OLED TVs available right now?",
+                model: "chatgpt",
+                topic: "OLED TV Comparison and Reviews",
+                topicVolume: 4890,
+                visibility: 94,
+                positionPrev: 3,
+                positionCurr: 3,
+                change: "up",
+                changeValue: 1,
+                productPrev: { name: "OLED 4K S95F TV", isSamsung: true },
+                productCurr: { name: "OLED 4K S90F TV", isSamsung: true }
+            },
+            {
+                prompt: "What are the most reliable OLED TVs for movie lovers?",
+                model: "chatgpt",
+                topic: "OLED TV Comparison and Reviews",
+                topicVolume: 4890,
+                visibility: 92,
+                positionPrev: 1,
+                positionCurr: 4,
+                change: "down",
+                changeValue: 3,
+                productPrev: { name: "OLED 4K S95F TV", isSamsung: true },
+                productCurr: { name: "OLED 4K S90F TV", isSamsung: true }
+            },
+            {
+                prompt: "Which TVs offer both OLED and 4K resolution?",
+                model: "gemini",
+                topic: "OLED TV Models Comparison",
+                topicVolume: 4820,
+                visibility: 85,
+                positionPrev: 4,
+                positionCurr: 4,
+                change: "neutral",
+                changeValue: 0,
+                productPrev: { name: "S95F OLED", isSamsung: true },
+                productCurr: { name: "OLED 4K S90F TV", isSamsung: true }
+            },
+            {
+                prompt: "Which TVs are best for bright rooms: OLED or mini LED?",
+                model: "chatgpt",
+                topic: "QD Mini-LED TVs",
+                topicVolume: 4354,
+                visibility: 81,
+                positionPrev: 9,
+                positionCurr: 7,
+                change: "up",
+                changeValue: 2,
+                productPrev: { name: "S95F OLED TV", isSamsung: true },
+                productCurr: { name: "Neo OLED", isSamsung: true }
+            },
+            {
+                prompt: "What are the best reviewed mini LED TVs?",
+                model: "perplexity",
+                topic: "RGB LED and Mini-LED TVs",
+                topicVolume: 4210,
+                visibility: 78,
+                positionPrev: null,
+                positionCurr: 8,
+                change: "new",
+                productPrev: null,
+                productCurr: { name: "Neo OLED Mini-LED TV", isSamsung: true }
+            },
+            {
+                prompt: "What are the main differences between OLED and mini LED TVs?",
+                model: "ai-overview",
+                topic: "RGB LED and Mini-LED TVs",
+                topicVolume: 4210,
+                visibility: 71,
+                positionPrev: 1,
+                positionCurr: null,
+                change: "lost",
+                productPrev: { name: "LG OLED C3", isSamsung: false },
+                productCurr: null
+            },
+            {
+                prompt: "What are the most recommended gaming TVs for new consoles?",
+                model: "chatgpt",
+                topic: "Elite TVs and HD TVs",
+                topicVolume: 3794,
+                visibility: 88,
+                positionPrev: 3,
+                positionCurr: 6,
+                change: "down",
+                changeValue: 3,
+                productPrev: { name: "S95F QD-OLED", isSamsung: true },
+                productCurr: { name: "Neo OLED QN70F 144Hz TV", isSamsung: true }
+            },
+            {
+                prompt: "Which gaming TVs are best for PS5 or Xbox Series X?",
+                model: "gemini",
+                topic: "4K TVs with FreeSync",
+                topicVolume: 3738,
+                visibility: 82,
+                positionPrev: 1,
+                positionCurr: 2,
+                change: "down",
+                changeValue: 1,
+                productPrev: { name: "S90F OLED 4K TV", isSamsung: true },
+                productCurr: { name: "OLED 4K S90F TV", isSamsung: true }
+            },
+            {
+                prompt: "What are the differences between mini LED and micro RGB TVs?",
+                model: "chatgpt",
+                topic: "LG Micro LED and Large TV Display",
+                topicVolume: 3067,
+                visibility: 68,
+                positionPrev: 3,
+                positionCurr: 1,
+                change: "up",
+                changeValue: 2,
+                productPrev: null,
+                productCurr: { name: "Micro RGB", isSamsung: true }
+            }
+        ];
+
+        // Sunburst data from tv_prompts.json structure
+        const sunburstData = {
+            name: "TV Prompts",
+            children: [
+                {
+                    name: "TV Models",
+                    children: [
+                        { name: "OLED", value: 26 },
+                        { name: "QLED", value: 31 },
+                        { name: "Mini-LED", value: 22 },
+                        { name: "Micro RGB", value: 16 },
+                        { name: "Gaming TVs", value: 40 },
+                        { name: "Sports TVs", value: 33 }
+                    ]
+                },
+                {
+                    name: "TV Features",
+                    children: [
+                        { name: "Resolution", value: 31 },
+                        { name: "Refresh Rate", value: 12 },
+                        { name: "HDR", value: 6 },
+                        { name: "Motion Handling", value: 16 },
+                        { name: "Anti-Glare", value: 26 }
+                    ]
+                },
+                {
+                    name: "TV Reviews",
+                    children: [
+                        { name: "Best Of", value: 85 },
+                        { name: "Comparison", value: 52 },
+                        { name: "Buying Guides", value: 57 },
+                        { name: "Brand", value: 109 }
+                    ]
+                },
+                {
+                    name: "TV Sizes",
+                    children: [
+                        { name: "Small", value: 6 },
+                        { name: "Medium", value: 16 },
+                        { name: "Large", value: 79 },
+                        { name: "Super Size", value: 3 }
+                    ]
+                }
+            ]
+        };
+
+        const positionDistribution = [
+            { range: "1-3", count: 8, color: "#10b981" },
+            { range: "4-6", count: 4, color: "#3b82f6" },
+            { range: "7-10", count: 2, color: "#f59e0b" },
+            { range: "10+", count: 1, color: "#9ca3af" }
+        ];
+
+        const panelTypeData = [
+            { panel: "OLED", visibility: 89, mentions: 47 },
+            { panel: "QLED", visibility: 76, mentions: 38 },
+            { panel: "Mini-LED", visibility: 68, mentions: 29 },
+            { panel: "Micro RGB", visibility: 52, mentions: 18 }
+        ];
+
+        // ============================================
+        // RENDER FUNCTIONS
+        // ============================================
+
+        // Position Distribution Donut
+        function renderPositionChart() {
+            const width = 100;
+            const height = 100;
+            const radius = Math.min(width, height) / 2;
+
+            const svg = d3.select("#position-chart")
+                .append("svg")
+                .attr("width", width)
+                .attr("height", height)
+                .append("g")
+                .attr("transform", `translate(${width/2},${height/2})`);
+
+            const pie = d3.pie()
+                .value(d => d.count)
+                .sort(null);
+
+            const arc = d3.arc()
+                .innerRadius(radius * 0.6)
+                .outerRadius(radius);
+
+            svg.selectAll("path")
+                .data(pie(positionDistribution))
+                .enter()
+                .append("path")
+                .attr("d", arc)
+                .attr("fill", d => d.data.color)
+                .style("stroke", "white")
+                .style("stroke-width", 2);
+        }
+
+        // Sunburst Chart
+        function renderSunburst() {
+            const width = 350;
+            const height = 350;
+            const radius = Math.min(width, height) / 2;
+
+            const color = d3.scaleOrdinal()
+                .domain(["TV Models", "TV Features", "TV Reviews", "TV Sizes"])
+                .range(["#1428a0", "#10b981", "#f59e0b", "#8b5cf6"]);
+
+            const svg = d3.select("#sunburst-container")
+                .append("svg")
+                .attr("width", width)
+                .attr("height", height)
+                .append("g")
+                .attr("transform", `translate(${width/2},${height/2})`);
+
+            const partition = d3.partition()
+                .size([2 * Math.PI, radius]);
+
+            const root = d3.hierarchy(sunburstData)
+                .sum(d => d.value || 0)
+                .sort((a, b) => b.value - a.value);
+
+            partition(root);
+
+            const arc = d3.arc()
+                .startAngle(d => d.x0)
+                .endAngle(d => d.x1)
+                .innerRadius(d => d.y0)
+                .outerRadius(d => d.y1 - 1);
+
+            const paths = svg.selectAll("path")
+                .data(root.descendants().filter(d => d.depth))
+                .enter()
+                .append("path")
+                .attr("d", arc)
+                .style("fill", d => {
+                    let node = d;
+                    while (node.depth > 1) node = node.parent;
+                    return color(node.data.name);
+                })
+                .style("fill-opacity", d => 1 - (d.depth - 1) * 0.2)
+                .style("stroke", "white")
+                .style("stroke-width", 1)
+                .style("cursor", "pointer")
+                .on("mouseover", function(event, d) {
+                    d3.select(this).style("fill-opacity", 1);
+                })
+                .on("mouseout", function(event, d) {
+                    d3.select(this).style("fill-opacity", 1 - (d.depth - 1) * 0.2);
+                })
+                .on("click", function(event, d) {
+                    updateBreadcrumb(d);
+                });
+
+            // Add labels for main categories
+            svg.selectAll("text")
+                .data(root.descendants().filter(d => d.depth === 1))
+                .enter()
+                .append("text")
+                .attr("transform", d => {
+                    const angle = (d.x0 + d.x1) / 2 * 180 / Math.PI - 90;
+                    const r = (d.y0 + d.y1) / 2;
+                    return `rotate(${angle}) translate(${r},0) rotate(${angle > 90 ? 180 : 0})`;
+                })
+                .attr("text-anchor", "middle")
+                .attr("dy", "0.35em")
+                .style("font-size", "10px")
+                .style("fill", "white")
+                .style("font-weight", "600")
+                .style("pointer-events", "none")
+                .text(d => d.data.name.replace("TV ", ""));
+        }
+
+        function updateBreadcrumb(d) {
+            const path = d.ancestors().reverse();
+            const breadcrumb = document.getElementById("breadcrumb");
+            breadcrumb.innerHTML = path.map((node, i) =>
+                `<span class="breadcrumb-item">${node.data.name}</span>`
+            ).join("");
+        }
+
+        // Panel Type Bar Chart
+        function renderPanelChart() {
+            const container = document.getElementById("panel-chart");
+            const margin = { top: 20, right: 30, bottom: 40, left: 80 };
+            const width = 500 - margin.left - margin.right;
+            const height = 250 - margin.top - margin.bottom;
+
+            const svg = d3.select("#panel-chart")
+                .append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform", `translate(${margin.left},${margin.top})`);
+
+            const y = d3.scaleBand()
+                .domain(panelTypeData.map(d => d.panel))
+                .range([0, height])
+                .padding(0.3);
+
+            const x = d3.scaleLinear()
+                .domain([0, 100])
+                .range([0, width]);
+
+            // Bars
+            svg.selectAll(".bar")
+                .data(panelTypeData)
+                .enter()
+                .append("rect")
+                .attr("class", "bar")
+                .attr("y", d => y(d.panel))
+                .attr("width", d => x(d.visibility))
+                .attr("height", y.bandwidth())
+                .attr("fill", "#1428a0")
+                .attr("rx", 4);
+
+            // Y Axis
+            svg.append("g")
+                .call(d3.axisLeft(y))
+                .selectAll("text")
+                .style("font-size", "12px");
+
+            // X Axis
+            svg.append("g")
+                .attr("transform", `translate(0,${height})`)
+                .call(d3.axisBottom(x).ticks(5).tickFormat(d => d + "%"))
+                .selectAll("text")
+                .style("font-size", "11px");
+
+            // Values
+            svg.selectAll(".value")
+                .data(panelTypeData)
+                .enter()
+                .append("text")
+                .attr("x", d => x(d.visibility) + 8)
+                .attr("y", d => y(d.panel) + y.bandwidth() / 2)
+                .attr("dy", "0.35em")
+                .style("font-size", "12px")
+                .style("font-weight", "600")
+                .text(d => d.visibility + "%");
+        }
+
+        // Render Rankings Table
+        function renderRankingsTable() {
+            const tbody = document.getElementById("rankings-body");
+
+            const modelIcons = {
+                chatgpt: '<div class="model-icon chatgpt">G</div>',
+                gemini: '<div class="model-icon gemini">G</div>',
+                perplexity: '<div class="model-icon perplexity">P</div>',
+                "ai-overview": '<div class="model-icon ai-overview">A</div>'
+            };
+
+            tbody.innerHTML = promptRankings.map(row => {
+                const positionClass = (pos) => {
+                    if (pos === null) return 'position-na';
+                    if (pos <= 3) return 'position-value top-3';
+                    if (pos <= 6) return 'position-value mid';
+                    return 'position-value low';
+                };
+
+                const changeHtml = () => {
+                    if (row.change === 'new') return '<span class="position-change new">New</span>';
+                    if (row.change === 'lost') return '<span class="position-change down">Lost</span>';
+                    if (!row.change || row.change === 'neutral') return '<span class="position-change neutral">—</span>';
+                    if (row.change === 'up') return `<span class="position-change up"><span class="change-arrow">▲</span> ${row.changeValue}</span>`;
+                    if (row.change === 'down') return `<span class="position-change down"><span class="change-arrow">▼</span> ${row.changeValue}</span>`;
+                    return '';
+                };
+
+                const productHtml = (product) => {
+                    if (!product) return '<span class="position-na">—</span>';
+                    return `<span class="product-name ${product.isSamsung ? 'product-samsung' : 'product-competitor'}">${product.name}</span>`;
+                };
+
+                return `
+                    <tr>
+                        <td><a href="#" class="prompt-link">${row.prompt}</a></td>
+                        <td>${modelIcons[row.model]}</td>
+                        <td><span class="topic-text" title="${row.topic}">${row.topic}</span></td>
+                        <td><span class="volume-value">${row.topicVolume.toLocaleString()}</span></td>
+                        <td class="visibility-cell">
+                            <div class="visibility-bar">
+                                <div class="visibility-bar-container">
+                                    <div class="visibility-bar-fill" style="width: ${row.visibility}%"></div>
+                                </div>
+                                <span class="visibility-value">${row.visibility}%</span>
+                            </div>
+                        </td>
+                        <td style="border-left: 2px solid #e5e7eb;"><span class="${positionClass(row.positionPrev)}">${row.positionPrev ?? '—'}</span></td>
+                        <td><span class="${positionClass(row.positionCurr)}">${row.positionCurr ?? '—'}</span></td>
+                        <td>${changeHtml()}</td>
+                        <td style="border-left: 2px solid #e5e7eb;">${productHtml(row.productPrev)}</td>
+                        <td>${productHtml(row.productCurr)}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // ============================================
+        // INITIALIZE
+        // ============================================
+        document.addEventListener('DOMContentLoaded', () => {
+            renderPositionChart();
+            renderSunburst();
+            renderPanelChart();
+            renderRankingsTable();
+        });
+    </script>
+</body>
+</html>

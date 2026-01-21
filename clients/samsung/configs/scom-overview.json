@@ -1,0 +1,17 @@
+{
+  "title": "Samsung HE AI Visibility and Performance Dashboard",
+  "output": "dashboards/scom-overview.html",
+  "base": [
+    "base/fonts.html",
+    "base/tokens.html"
+  ],
+  "components": [
+    "header.html",
+    "kpi-cards.html",
+    "line-charts.html",
+    "platform-tables.html",
+    "sunburst-prompts.html",
+    "kpi-cards-dual.html",
+    "prompt-rankings-table.html"
+  ]
+}

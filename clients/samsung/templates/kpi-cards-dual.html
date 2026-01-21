@@ -1,0 +1,448 @@
+<!-- CSS -->
+.kpi-row-dual {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-2xl);
+}
+
+/* Dual Metric KPI Card */
+.kpi-card-dual {
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-xl);
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.kpi-card-dual .kpi-tooltip {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 18px;
+    height: 18px;
+    background: var(--color-accent-purple);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: help;
+}
+
+.kpi-card-dual .kpi-tooltip span {
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.kpi-card-dual .kpi-tooltip-text {
+    visibility: hidden;
+    opacity: 0;
+    position: absolute;
+    top: 28px;
+    right: 0;
+    width: 220px;
+    background: #333;
+    color: white;
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 400;
+    padding: 10px 12px;
+    border-radius: 6px;
+    line-height: 1.4;
+    text-align: left;
+    z-index: 100;
+    transition: opacity 0.2s, visibility 0.2s;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.kpi-card-dual .kpi-tooltip-text::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    right: 12px;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-bottom: 6px solid #333;
+}
+
+.kpi-card-dual .kpi-tooltip:hover .kpi-tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}
+
+.kpi-card-dual .kpi-label {
+    font-family: var(--font-display);
+    font-size: var(--font-size-xs);
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+    letter-spacing: 0.5px;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: var(--spacing-md);
+}
+
+.kpi-dual-metrics {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--spacing-lg);
+    flex: 1;
+}
+
+.kpi-dual-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.kpi-dual-item-label {
+    font-family: var(--font-display);
+    font-size: var(--font-size-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 700;
+    margin-bottom: var(--spacing-xs);
+}
+
+.kpi-dual-item.with .kpi-dual-item-label {
+    color: var(--color-accent-green);
+}
+
+.kpi-dual-item.without .kpi-dual-item-label {
+    color: var(--color-accent-red);
+}
+
+.kpi-dual-item-value {
+    font-family: var(--font-display);
+    font-size: var(--font-size-metric);
+    font-weight: var(--font-weight-bold);
+    line-height: var(--line-height-tight);
+}
+
+.kpi-dual-item.with .kpi-dual-item-value {
+    color: var(--color-accent-green);
+}
+
+.kpi-dual-item.without .kpi-dual-item-value {
+    color: var(--color-accent-red);
+}
+
+.kpi-dual-item-change {
+    font-size: 13px;
+    font-weight: 600;
+    margin-top: var(--spacing-xs);
+}
+
+.kpi-dual-item.with .kpi-dual-item-change {
+    color: var(--color-accent-green);
+}
+
+.kpi-dual-item.without .kpi-dual-item-change {
+    color: var(--color-accent-red);
+}
+
+.kpi-dual-divider {
+    width: 1px;
+    height: 50px;
+    background: var(--color-border);
+}
+
+/* Donut Chart KPI Card */
+.kpi-card-donut {
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-xl);
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.kpi-card-donut .kpi-tooltip {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 18px;
+    height: 18px;
+    background: var(--color-accent-purple);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: help;
+}
+
+.kpi-card-donut .kpi-tooltip span {
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.kpi-card-donut .kpi-tooltip-text {
+    visibility: hidden;
+    opacity: 0;
+    position: absolute;
+    top: 28px;
+    right: 0;
+    width: 220px;
+    background: #333;
+    color: white;
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 400;
+    padding: 10px 12px;
+    border-radius: 6px;
+    line-height: 1.4;
+    text-align: left;
+    z-index: 100;
+    transition: opacity 0.2s, visibility 0.2s;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.kpi-card-donut .kpi-tooltip-text::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    right: 12px;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-bottom: 6px solid #333;
+}
+
+.kpi-card-donut .kpi-tooltip:hover .kpi-tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}
+
+.kpi-card-donut .kpi-label {
+    font-family: var(--font-display);
+    font-size: var(--font-size-xs);
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+    letter-spacing: 0.5px;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: var(--spacing-sm);
+}
+
+.kpi-donut-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-lg);
+    flex: 1;
+}
+
+.kpi-donut-chart {
+    position: relative;
+    width: 100px;
+    height: 100px;
+}
+
+.kpi-donut-chart svg {
+    transform: rotate(-90deg);
+    overflow: visible;
+}
+
+.kpi-donut-chart svg circle {
+    cursor: pointer;
+    transition: transform 0.2s ease, filter 0.2s ease;
+    transform-origin: 50px 50px;
+}
+
+.kpi-donut-chart svg circle:hover {
+    transform: scale(1.08);
+    filter: brightness(1.1) drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+}
+
+.kpi-donut-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+.kpi-donut-total {
+    font-family: var(--font-display);
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-primary);
+    line-height: 1;
+}
+
+.kpi-donut-total-label {
+    font-size: 9px;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+}
+
+.kpi-donut-legend {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.kpi-donut-legend-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    font-size: 12px;
+}
+
+.kpi-donut-legend-color {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+}
+
+.kpi-donut-legend-color.pos1 { background: var(--color-accent-green); }
+.kpi-donut-legend-color.pos2 { background: var(--color-accent-blue); }
+.kpi-donut-legend-color.pos3 { background: var(--color-accent-yellow); }
+.kpi-donut-legend-color.pos4 { background: var(--color-accent-red); }
+
+.kpi-donut-legend-value {
+    font-weight: 700;
+    min-width: 24px;
+}
+
+.kpi-donut-legend-label {
+    color: var(--color-text-secondary);
+}
+<!-- END CSS -->
+
+<!-- HTML -->
+<div class="container">
+    <div class="kpi-row-dual">
+        <!-- Dual Metric Card: Prompt Mentions -->
+        <div class="kpi-card-dual">
+            <div class="kpi-tooltip">
+                <span>?</span>
+                <div class="kpi-tooltip-text">Prompts where your brand is mentioned vs. not mentioned in AI responses.</div>
+            </div>
+            <div class="kpi-label">Prompt Mentions</div>
+            <div class="kpi-dual-metrics">
+                <div class="kpi-dual-item with">
+                    <div class="kpi-dual-item-label">With</div>
+                    <div class="kpi-dual-item-value">847</div>
+                    <div class="kpi-dual-item-change">↑ +52</div>
+                </div>
+                <div class="kpi-dual-divider"></div>
+                <div class="kpi-dual-item without">
+                    <div class="kpi-dual-item-label">Without</div>
+                    <div class="kpi-dual-item-value">153</div>
+                    <div class="kpi-dual-item-change">↓ -18</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dual Metric Card: Top Product Position -->
+        <div class="kpi-card-dual">
+            <div class="kpi-tooltip">
+                <span>?</span>
+                <div class="kpi-tooltip-text">Number of products that improved (win) or declined (lose) in ranking position.</div>
+            </div>
+            <div class="kpi-label">Top Product Position</div>
+            <div class="kpi-dual-metrics">
+                <div class="kpi-dual-item with">
+                    <div class="kpi-dual-item-label">Win</div>
+                    <div class="kpi-dual-item-value">24</div>
+                    <div class="kpi-dual-item-change">↑ +8</div>
+                </div>
+                <div class="kpi-dual-divider"></div>
+                <div class="kpi-dual-item without">
+                    <div class="kpi-dual-item-label">Lose</div>
+                    <div class="kpi-dual-item-value">12</div>
+                    <div class="kpi-dual-item-change">↓ -3</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dual Metric Card: Products Win/Lose -->
+        <div class="kpi-card-dual">
+            <div class="kpi-tooltip">
+                <span>?</span>
+                <div class="kpi-tooltip-text">Products gaining vs. losing visibility in AI responses compared to last period.</div>
+            </div>
+            <div class="kpi-label">Products Win/Lose</div>
+            <div class="kpi-dual-metrics">
+                <div class="kpi-dual-item with">
+                    <div class="kpi-dual-item-label">Gaining</div>
+                    <div class="kpi-dual-item-value">38</div>
+                    <div class="kpi-dual-item-change">↑ +12</div>
+                </div>
+                <div class="kpi-dual-divider"></div>
+                <div class="kpi-dual-item without">
+                    <div class="kpi-dual-item-label">Losing</div>
+                    <div class="kpi-dual-item-value">9</div>
+                    <div class="kpi-dual-item-change">↓ -5</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Donut Chart Card: Position Distribution -->
+        <div class="kpi-card-donut">
+            <div class="kpi-tooltip">
+                <span>?</span>
+                <div class="kpi-tooltip-text">Distribution of products by ranking position in AI responses.</div>
+            </div>
+            <div class="kpi-label">Position Distribution</div>
+            <div class="kpi-donut-content">
+                <div class="kpi-donut-chart">
+                    <svg width="100" height="100" viewBox="0 0 100 100">
+                        <!-- Pos 1: 35% (green) -->
+                        <circle cx="50" cy="50" r="40" fill="none" stroke="#10b981" stroke-width="18"
+                            stroke-dasharray="87.96 251.33" stroke-dashoffset="0"/>
+                        <!-- Pos 2: 28% (blue) -->
+                        <circle cx="50" cy="50" r="40" fill="none" stroke="#3b82f6" stroke-width="18"
+                            stroke-dasharray="70.37 251.33" stroke-dashoffset="-87.96"/>
+                        <!-- Pos 3: 22% (yellow) -->
+                        <circle cx="50" cy="50" r="40" fill="none" stroke="#f59e0b" stroke-width="18"
+                            stroke-dasharray="55.29 251.33" stroke-dashoffset="-158.33"/>
+                        <!-- Pos 4+: 15% (red) -->
+                        <circle cx="50" cy="50" r="40" fill="none" stroke="#ef4444" stroke-width="18"
+                            stroke-dasharray="37.70 251.33" stroke-dashoffset="-213.62"/>
+                    </svg>
+                    <div class="kpi-donut-center">
+                        <div class="kpi-donut-total">108</div>
+                        <div class="kpi-donut-total-label">Total</div>
+                    </div>
+                </div>
+                <div class="kpi-donut-legend">
+                    <div class="kpi-donut-legend-item">
+                        <div class="kpi-donut-legend-color pos1"></div>
+                        <span class="kpi-donut-legend-value">38</span>
+                        <span class="kpi-donut-legend-label">Pos 1</span>
+                    </div>
+                    <div class="kpi-donut-legend-item">
+                        <div class="kpi-donut-legend-color pos2"></div>
+                        <span class="kpi-donut-legend-value">30</span>
+                        <span class="kpi-donut-legend-label">Pos 2</span>
+                    </div>
+                    <div class="kpi-donut-legend-item">
+                        <div class="kpi-donut-legend-color pos3"></div>
+                        <span class="kpi-donut-legend-value">24</span>
+                        <span class="kpi-donut-legend-label">Pos 3</span>
+                    </div>
+                    <div class="kpi-donut-legend-item">
+                        <div class="kpi-donut-legend-color pos4"></div>
+                        <span class="kpi-donut-legend-value">16</span>
+                        <span class="kpi-donut-legend-label">Pos 4+</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- END HTML -->
+
+<!-- SCRIPT -->
+<!-- END SCRIPT -->

@@ -1,0 +1,165 @@
+<!-- CSS -->
+.kpi-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-2xl);
+}
+
+.kpi-card {
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-xl);
+    min-height: 160px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    position: relative;
+}
+
+.kpi-tooltip {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 18px;
+    height: 18px;
+    background: var(--color-accent-purple);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: help;
+}
+
+.kpi-tooltip span {
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.kpi-tooltip-text {
+    visibility: hidden;
+    opacity: 0;
+    position: absolute;
+    top: 28px;
+    right: 0;
+    width: 220px;
+    background: #333;
+    color: white;
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 400;
+    padding: 10px 12px;
+    border-radius: 6px;
+    line-height: 1.4;
+    text-align: left;
+    z-index: 100;
+    transition: opacity 0.2s, visibility 0.2s;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.kpi-tooltip-text::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    right: 12px;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-bottom: 6px solid #333;
+}
+
+.kpi-tooltip:hover .kpi-tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}
+
+.kpi-icon {
+    width: 64px;
+    height: 64px;
+    margin-bottom: var(--spacing-md);
+    object-fit: contain;
+}
+
+.kpi-label {
+    font-family: var(--font-display);
+    font-size: var(--font-size-xs);
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+    letter-spacing: 0.5px;
+    font-weight: 700;
+    margin-bottom: var(--spacing-xs);
+}
+
+.kpi-value {
+    font-family: var(--font-display);
+    font-size: var(--font-size-metric);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-primary);
+    line-height: var(--line-height-tight);
+}
+
+.kpi-change {
+    font-size: 13px;
+    font-weight: 600;
+    margin-top: var(--spacing-xs);
+    color: var(--color-text-secondary);
+}
+
+.kpi-change.na { color: var(--color-text-secondary); }
+.kpi-change.no-change { color: var(--color-accent-yellow); }
+.kpi-change.increase { color: var(--color-accent-green); }
+.kpi-change.decrease { color: var(--color-accent-red); }
+<!-- END CSS -->
+
+<!-- HTML -->
+<div class="container">
+    <div class="kpi-row">
+        <div class="kpi-card">
+            <div class="kpi-tooltip">
+                <span>?</span>
+                <div class="kpi-tooltip-text">Estimated share of audience likely to notice your brand in AI search results, based on prompt popularity and ranking position.</div>
+            </div>
+            <img class="kpi-icon" src="../assets/sov.jpg" alt="Share of Voice">
+            <div class="kpi-label">Share of Voice</div>
+            <div class="kpi-value">65%</div>
+            <div class="kpi-change increase">↑ +5%</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-tooltip">
+                <span>?</span>
+                <div class="kpi-tooltip-text">Percentage of AI responses that cite your website as a source.</div>
+            </div>
+            <img class="kpi-icon" src="../assets/source_visi.jpg" alt="Source Visibility">
+            <div class="kpi-label">Source Visibility</div>
+            <div class="kpi-value">42%</div>
+            <div class="kpi-change increase">↑ +8%</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-tooltip">
+                <span>?</span>
+                <div class="kpi-tooltip-text">Total visits to your website from AI platforms.</div>
+            </div>
+            <img class="kpi-icon" src="../assets/referral.jpg" alt="Referral Traffic">
+            <div class="kpi-label">Referral Traffic</div>
+            <div class="kpi-value">106,445</div>
+            <div class="kpi-change increase">↑ +10,989 (+10.3%)</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-tooltip">
+                <span>?</span>
+                <div class="kpi-tooltip-text">Overall visibility score measuring your brand's presence across AI platforms.</div>
+            </div>
+            <img class="kpi-icon" src="../assets/ai visi.jpg" alt="AI Visibility">
+            <div class="kpi-label">AI Visibility</div>
+            <div class="kpi-value">91</div>
+            <div class="kpi-change increase">↑ +12</div>
+        </div>
+    </div>
+</div>
+<!-- END HTML -->
+
+<!-- SCRIPT -->
+<!-- END SCRIPT -->

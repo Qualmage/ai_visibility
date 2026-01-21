@@ -1,52 +1,71 @@
-# KPI Cards Row
+# Element: KPI Cards (Client Spec)
 
-Row of 4 KPI metric cards displayed below the filters.
+> 4 KPI cards across the top row for S.com Overview performance metrics.
+> Based on: "Ai reporting Client ask from Jason.pdf" - Section 1
 
-> **Dependencies:** `../_base/design-tokens.md`, `../_base/fonts.md`, `../_base/components.md`
+## Required Tokens
+```
+--color-primary, --color-success, --color-bg-card, --color-border,
+--color-text-secondary, --font-display, --font-size-xs, --font-size-metric,
+--font-weight-bold, --spacing-xs, --spacing-md, --spacing-xl, --radius-xl, --line-height-tight
+```
+
+---
+
+## Icon Assets
+
+| Card | File | Description |
+|------|------|-------------|
+| Share of Voice | `../assets/sov.jpg` | Speech bubble with bar chart |
+| Source Visibility | `../assets/source_visi.jpg` | Monitor with eye |
+| Referral Traffic | `../assets/referral.jpg` | Arrows converging to center |
+| AI Visibility | `../assets/ai visi.jpg` | Brain with gear and sparkles |
 
 ---
 
 ## Visual Specification
 
 ```
-┌──────────────┐ ┌──────────────┐ ┌─────────────────────────┐ ┌─────────────────────────┐
-│ SHARE OF     │ │ BRAND        │ │ PROMPTS                 │ │ MENTIONS BY SENTIMENT   │
-│ VOICE        │ │ VISIBILITY   │ │ With mention: 240 +182  │ │ [DONUT]  3K             │
-│ 57%          │ │ 63%          │ │ Without: 143 -123       │ │                         │
-│ ↓ -1%        │ │ ↓ -12%       │ │                         │ │                         │
-└──────────────┘ └──────────────┘ └─────────────────────────┘ └─────────────────────────┘
+┌──────────────────┐ ┌──────────────────┐ ┌──────────────────┐ ┌──────────────────┐
+│  [sov.jpg]       │ │  [source_visi]   │ │  [referral]      │ │  [ai visi]       │
+│  SHARE OF VOICE  │ │  SOURCE          │ │  REFERRAL        │ │  AI VISIBILITY   │
+│  65%             │ │  VISIBILITY      │ │  TRAFFIC         │ │  91              │
+│  N/A             │ │  42%             │ │  106,445         │ │                  │
+│                  │ │  N/A             │ │  +10,989         │ │                  │
+└──────────────────┘ └──────────────────┘ └──────────────────┘ └──────────────────┘
 ```
 
 ---
 
 ## Layout
 
-- CSS Grid: `grid-template-columns: repeat(4, 1fr)`
-- Gap: `--spacing-lg` (16px)
-- Cards have equal widths, uniform height (`align-items: stretch`)
-
----
-
-## Card Structure
-
-### Base Card Styles
 ```css
 .kpi-row {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: var(--spacing-lg);
     margin-bottom: var(--spacing-2xl);
-    align-items: stretch;
 }
+```
 
+---
+
+## Card Structure
+
+```css
 .kpi-card {
     background: var(--color-bg-card);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-xl);
     padding: var(--spacing-xl);
-    display: grid;
-    grid-template-rows: auto 1fr;
-    min-height: 120px;
+    min-height: 140px;
+}
+
+.kpi-icon {
+    width: 40px;
+    height: 40px;
+    margin-bottom: var(--spacing-md);
+    object-fit: contain;
 }
 
 .kpi-label {
@@ -55,6 +74,7 @@ Row of 4 KPI metric cards displayed below the filters.
     color: var(--color-text-secondary);
     letter-spacing: 0.5px;
     font-weight: 500;
+    margin-bottom: var(--spacing-xs);
 }
 
 .kpi-value {
@@ -65,16 +85,10 @@ Row of 4 KPI metric cards displayed below the filters.
     line-height: var(--line-height-tight);
 }
 
-.kpi-content {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: flex-start;
-}
-
 .kpi-change {
     font-size: 13px;
     margin-top: var(--spacing-xs);
+    color: var(--color-text-secondary);
 }
 
 .kpi-change.positive { color: var(--color-success); }
@@ -83,119 +97,129 @@ Row of 4 KPI metric cards displayed below the filters.
 
 ---
 
-## Card Types
+## Card 1: Share of Voice
 
-### Card 1: Share of Voice
-Simple metric with change indicator.
+**Icon:** `sov.jpg` - Speech bubble with bar chart
+**Value:** Percentage (e.g., 65%)
+**Change:** May be N/A
 
 ```html
 <div class="kpi-card">
+    <img class="kpi-icon" src="../assets/sov.jpg" alt="Share of Voice">
     <div class="kpi-label">Share of Voice</div>
-    <div class="kpi-content">
-        <div class="kpi-value">57%</div>
-        <div class="kpi-change negative">↓ -1%</div>
-    </div>
+    <div class="kpi-value">65%</div>
+    <div class="kpi-change">N/A</div>
 </div>
 ```
-
-### Card 2: Brand Visibility
-Simple metric with change indicator.
-
-```html
-<div class="kpi-card">
-    <div class="kpi-label">Brand Visibility</div>
-    <div class="kpi-content">
-        <div class="kpi-value">63%</div>
-        <div class="kpi-change negative">↓ -12%</div>
-    </div>
-</div>
-```
-
-### Card 3: Prompts
-Two-row display with inline badges.
-
-```html
-<div class="kpi-card">
-    <div class="kpi-label">Prompts</div>
-    <div class="kpi-content" style="justify-content:flex-start;gap:12px;padding-top:8px">
-        <div style="display:flex;justify-content:space-between;align-items:center;width:100%">
-            <span style="font-size:14px">Responses with brand mention</span>
-            <span class="badge new">240 <span style="color:var(--color-success)">+182</span></span>
-        </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;width:100%">
-            <span style="font-size:14px">Responses without brand mention</span>
-            <span class="badge lost">143 <span style="color:var(--color-error)">-123</span></span>
-        </div>
-    </div>
-</div>
-```
-
-### Card 4: Mentions by Sentiment
-Donut chart with total count.
-
-```html
-<div class="kpi-card">
-    <div class="kpi-label">Mentions by Sentiment</div>
-    <div class="kpi-content" style="flex-direction:row;align-items:center;gap:16px">
-        <svg id="donutChart" width="80" height="80"></svg>
-        <div style="font-family:var(--font-display);font-size:32px;font-weight:700;color:var(--color-primary)">3K</div>
-    </div>
-</div>
-```
-
-> See `donut-chart.md` for the D3.js code to populate `#donutChart`
 
 ---
 
-## Complete Row HTML
+## Card 2: Source Visibility
+
+**Icon:** `source_visi.jpg` - Monitor with eye
+**Value:** Percentage (e.g., 42%)
+**Change:** May be N/A
+
+```html
+<div class="kpi-card">
+    <img class="kpi-icon" src="../assets/source_visi.jpg" alt="Source Visibility">
+    <div class="kpi-label">Source Visibility</div>
+    <div class="kpi-value">42%</div>
+    <div class="kpi-change">N/A</div>
+</div>
+```
+
+---
+
+## Card 3: Referral Traffic
+
+**Icon:** `referral.jpg` - Arrows converging to center
+**Value:** Number with commas (e.g., 106,445)
+**Change:** Absolute number with +/- (e.g., +10,989)
+
+```html
+<div class="kpi-card">
+    <img class="kpi-icon" src="../assets/referral.jpg" alt="Referral Traffic">
+    <div class="kpi-label">Referral Traffic</div>
+    <div class="kpi-value">106,445</div>
+    <div class="kpi-change positive">+10,989</div>
+</div>
+```
+
+---
+
+## Card 4: AI Visibility
+
+**Icon:** `ai visi.jpg` - Brain with gear and sparkles
+**Value:** Score number (e.g., 91)
+
+```html
+<div class="kpi-card">
+    <img class="kpi-icon" src="../assets/ai visi.jpg" alt="AI Visibility">
+    <div class="kpi-label">AI Visibility</div>
+    <div class="kpi-value">91</div>
+</div>
+```
+
+---
+
+## Complete Row Assembly
 
 ```html
 <div class="kpi-row">
+    <!-- Card 1: Share of Voice -->
     <div class="kpi-card">
+        <img class="kpi-icon" src="../assets/sov.jpg" alt="Share of Voice">
         <div class="kpi-label">Share of Voice</div>
-        <div class="kpi-content">
-            <div class="kpi-value">57%</div>
-            <div class="kpi-change negative">↓ -1%</div>
-        </div>
+        <div class="kpi-value">65%</div>
+        <div class="kpi-change">N/A</div>
     </div>
+
+    <!-- Card 2: Source Visibility -->
     <div class="kpi-card">
-        <div class="kpi-label">Brand Visibility</div>
-        <div class="kpi-content">
-            <div class="kpi-value">63%</div>
-            <div class="kpi-change negative">↓ -12%</div>
-        </div>
+        <img class="kpi-icon" src="../assets/source_visi.jpg" alt="Source Visibility">
+        <div class="kpi-label">Source Visibility</div>
+        <div class="kpi-value">42%</div>
+        <div class="kpi-change">N/A</div>
     </div>
+
+    <!-- Card 3: Referral Traffic -->
     <div class="kpi-card">
-        <div class="kpi-label">Prompts</div>
-        <div class="kpi-content" style="justify-content:flex-start;gap:12px;padding-top:8px">
-            <div style="display:flex;justify-content:space-between;align-items:center;width:100%">
-                <span style="font-size:14px">Responses with brand mention</span>
-                <span class="badge new">240 <span style="color:#4caf50">+182</span></span>
-            </div>
-            <div style="display:flex;justify-content:space-between;align-items:center;width:100%">
-                <span style="font-size:14px">Responses without brand mention</span>
-                <span class="badge lost">143 <span style="color:#f44336">-123</span></span>
-            </div>
-        </div>
+        <img class="kpi-icon" src="../assets/referral.jpg" alt="Referral Traffic">
+        <div class="kpi-label">Referral Traffic</div>
+        <div class="kpi-value">106,445</div>
+        <div class="kpi-change positive">+10,989</div>
     </div>
+
+    <!-- Card 4: AI Visibility -->
     <div class="kpi-card">
-        <div class="kpi-label">Mentions by Sentiment</div>
-        <div class="kpi-content" style="flex-direction:row;align-items:center;gap:16px">
-            <svg id="donutChart" width="80" height="80"></svg>
-            <div style="font-family:'Samsung Sharp Sans',sans-serif;font-size:32px;font-weight:700;color:#1428A0">3K</div>
-        </div>
+        <img class="kpi-icon" src="../assets/ai visi.jpg" alt="AI Visibility">
+        <div class="kpi-label">AI Visibility</div>
+        <div class="kpi-value">91</div>
     </div>
 </div>
 ```
 
 ---
 
-## Mock Data
+## Data Binding Reference
 
-| Metric | Value | Change | Direction |
-|--------|-------|--------|-----------|
-| Share of Voice | 57% | -1% | negative |
-| Brand Visibility | 63% | -12% | negative |
-| Prompts with mention | 240 | +182 | positive |
-| Prompts without mention | 143 | -123 | negative |
-| Total Mentions | 3,000 | - | - |
+| Card | Data Field | Format | Example |
+|------|------------|--------|---------|
+| Share of Voice | `sov` | Percentage with % | 65% |
+| Source Visibility | `sourceVisibility` | Percentage with % | 42% |
+| Referral Traffic | `referralTraffic` | Number with commas | 106,445 |
+| AI Visibility | `aiVisibility` | Integer score (0-100) | 91 |
+
+**Change values:**
+- `N/A` when no comparison data available
+- `+X%` or `-X%` with `.positive` or `.negative` class for percentage metrics
+- Referral Traffic shows both absolute and percentage: `+10,989 (+10.3%)`
+
+**Change state colors:**
+| State | Class | Color | Display |
+|-------|-------|-------|---------|
+| N/A | `.na` | `#666666` (grey) | N/A |
+| No Change | `.no-change` | `#feb447` (yellow) | — 0% |
+| Increase | `.increase` | `#96d551` (green) | ↑ +X% |
+| Decrease | `.decrease` | `#ff4438` (red) | ↓ -X% |

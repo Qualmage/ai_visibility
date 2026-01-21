@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test: Line Chart Styling</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        @font-face {
+            font-family: 'Samsung Sharp Sans';
+            src: url('../assets/fonts/SamsungSharpSansBd.woff2') format('woff2'),
+                 url('../assets/fonts/SamsungSharpSans-Bold.ttf') format('truetype');
+            font-weight: 700;
+        }
+        @font-face {
+            font-family: 'Samsung One';
+            src: url('../assets/fonts/SamsungOneLatinWeb-400.woff2') format('woff2'),
+                 url('../assets/fonts/SamsungOneLatinCompact-400.ttf') format('truetype');
+            font-weight: 400;
+        }
+
+        :root {
+            --color-primary: #1428A0;
+            --color-bg-page: #f5f5f5;
+            --color-bg-card: #ffffff;
+            --color-border: #e0e0e0;
+            --color-text-secondary: #666666;
+            --color-grid: #e8e8e8;
+            --font-display: 'Samsung Sharp Sans', sans-serif;
+            --font-body: 'Samsung One', -apple-system, sans-serif;
+            --spacing-lg: 16px;
+            --spacing-xl: 20px;
+            --spacing-2xl: 24px;
+            --radius-xl: 12px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: var(--font-body);
+            background: var(--color-bg-page);
+            padding: var(--spacing-2xl);
+        }
+
+        h2 {
+            color: var(--color-primary);
+            font-family: var(--font-display);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        h3 {
+            color: var(--color-text-secondary);
+            font-size: 14px;
+            margin: var(--spacing-2xl) 0 var(--spacing-lg);
+        }
+
+        .charts-row {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-2xl);
+        }
+
+        .chart-card {
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-xl);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .chart-title {
+            font-family: var(--font-display);
+            font-size: 16px;
+            font-weight: 700;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .chart-tooltip-icon {
+            position: relative;
+            width: 18px;
+            height: 18px;
+            background: #8091df;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: help;
+            flex-shrink: 0;
+        }
+
+        .chart-tooltip-icon span {
+            color: white;
+            font-size: 12px;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .chart-tooltip-text {
+            visibility: hidden;
+            opacity: 0;
+            position: absolute;
+            top: 28px;
+            left: 0;
+            width: 240px;
+            background: #333;
+            color: white;
+            font-family: var(--font-body);
+            font-size: 12px;
+            font-weight: 400 !important;
+            padding: 10px 12px;
+            border-radius: 6px;
+            line-height: 1.4;
+            text-align: left;
+            z-index: 100;
+            transition: opacity 0.2s, visibility 0.2s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .chart-tooltip-text::before {
+            content: '';
+            position: absolute;
+            top: -6px;
+            left: 12px;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-bottom: 6px solid #333;
+        }
+
+        .chart-tooltip-icon:hover .chart-tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .download-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+            color: var(--color-text-secondary);
+        }
+
+        .download-btn:hover {
+            color: var(--color-primary);
+        }
+
+        /* Chart + Insights Layout */
+        .chart-content {
+            display: flex;
+            gap: 16px;
+        }
+
+        /* D3 Chart Styles */
+        .chart-area {
+            flex: 1;
+            min-width: 0;
+            height: 200px;
+            overflow: hidden;
+        }
+
+        .chart-area svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Insights Box */
+        .chart-insights {
+            width: 220px;
+            flex-shrink: 0;
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .insight-item {
+            margin-bottom: 12px;
+            opacity: 0;
+            animation: fadeInUp 0.5s ease forwards;
+        }
+
+        .insight-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .insight-item:nth-child(1) { animation-delay: 0.2s; }
+        .insight-item:nth-child(2) { animation-delay: 0.6s; }
+        .insight-item:nth-child(3) { animation-delay: 1.0s; }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .insight-label {
+            font-size: 11px;
+            color: var(--color-text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .insight-value {
+            font-family: var(--font-display);
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--color-primary);
+        }
+
+        .insight-value.positive {
+            color: #96d551;
+        }
+
+        .insight-value.negative {
+            color: #ff4438;
+        }
+
+        .insight-change {
+            font-size: 12px;
+            color: var(--color-text-secondary);
+        }
+
+        .grid-line {
+            stroke: var(--color-grid);
+            stroke-width: 1;
+        }
+
+        .axis-line {
+            stroke: #ccc;
+            stroke-width: 1;
+        }
+
+        .axis text {
+            font-family: var(--font-body);
+            font-size: 11px;
+            fill: var(--color-text-secondary);
+        }
+
+        .axis path,
+        .axis line {
+            stroke: #ccc;
+        }
+
+        .data-line {
+            fill: none;
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .data-point {
+            stroke-width: 2;
+            stroke: white;
+        }
+
+        .chart-legend {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px 16px;
+            margin-top: 16px;
+            padding-top: 12px;
+            border-top: 1px solid var(--color-border);
+            margin-right: 236px; /* align with chart area (220px insights + 16px gap) */
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: var(--color-text-secondary);
+        }
+
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        /* Tooltip */
+        .chart-tooltip {
+            position: absolute;
+            background: #333;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.15s;
+            z-index: 100;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .chart-tooltip.visible {
+            opacity: 1;
+        }
+
+        .source {
+            color: var(--color-text-secondary);
+            margin-top: 24px;
+            font-size: 13px;
+        }
+        code {
+            background: #e0e0e0;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h2>Test: Line Charts (2-Column Grid)</h2>
+
+    <!-- ROW 1: Share of Voice + Source Visibility -->
+    <div class="charts-row">
+        <!-- CHART 1: Share of Voice -->
+        <div class="chart-card">
+            <div class="chart-header">
+                <div class="chart-title">
+                    Share of Voice
+                    <div class="chart-tooltip-icon">
+                        <span>?</span>
+                        <div class="chart-tooltip-text">Estimated share of audience likely to notice your brand in AI search results, based on prompt popularity and ranking position.</div>
+                    </div>
+                </div>
+                <button class="download-btn" title="Download">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7 10 12 15 17 10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="chart-content">
+                <div class="chart-area">
+                    <svg id="chart-sov"></svg>
+                </div>
+                <div class="chart-insights">
+                    <div class="insight-item">
+                        <div class="insight-label">Leader</div>
+                        <div class="insight-value">Samsung</div>
+                        <div class="insight-change">65% share</div>
+                    </div>
+                    <div class="insight-item">
+                        <div class="insight-label">Trend</div>
+                        <div class="insight-value positive">↑ +3%</div>
+                        <div class="insight-change">vs last period</div>
+                    </div>
+                    <div class="insight-item">
+                        <div class="insight-label">Gap to #2</div>
+                        <div class="insight-value">37pts</div>
+                        <div class="insight-change">ahead of LG</div>
+                    </div>
+                </div>
+            </div>
+            <div class="chart-legend">
+                <div class="legend-item"><span class="legend-dot" style="background: #1428A0"></span>Samsung</div>
+                <div class="legend-item"><span class="legend-dot" style="background: #A50034"></span>LG</div>
+                <div class="legend-item"><span class="legend-dot" style="background: #000000"></span>Sony</div>
+                <div class="legend-item"><span class="legend-dot" style="background: #E31937"></span>TCL</div>
+                <div class="legend-item"><span class="legend-dot" style="background: #00A0DF"></span>Hisense</div>
+            </div>
+        </div>
+
+        <!-- CHART 2: Source Visibility -->
+        <div class="chart-card">
+            <div class="chart-header">
+                <div class="chart-title">
+                    Source Visibility
+                    <div class="chart-tooltip-icon">
+                        <span>?</span>
+                        <div class="chart-tooltip-text">Percentage of AI responses that cite your website as a source.</div>
+                    </div>
+                </div>
+                <button class="download-btn" title="Download">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7 10 12 15 17 10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="chart-content">
+                <div class="chart-area">
+                    <svg id="chart-source"></svg>
+                </div>
+                <div class="chart-insights">
+                    <div class="insight-item">
+                        <div class="insight-label">Top Source</div>
+                        <div class="insight-value">Samsung</div>
+                        <div class="insight-change">42% cited</div>
+                    </div>
+                    <div class="insight-item">
+                        <div class="insight-label">Growth</div>
+                        <div class="insight-value positive">↑ +4%</div>
+                        <div class="insight-change">this month</div>
+                    </div>
+                    <div class="insight-item">
+                        <div class="insight-label">Citations</div>
+                        <div class="insight-value">1,847</div>
+                        <div class="insight-change">total mentions</div>
+                    </div>
+                </div>
+            </div>
+            <div class="chart-legend">
+                <div class="legend-item"><span class="legend-dot" style="background: #1428A0"></span>Samsung</div>
+                <div class="legend-item"><span class="legend-dot" style="background: #A50034"></span>LG</div>
+                <div class="legend-item"><span class="legend-dot" style="background: #000000"></span>Sony</div>
+                <div class="legend-item"><span class="legend-dot" style="background: #E31937"></span>TCL</div>
+                <div class="legend-item"><span class="legend-dot" style="background: #00A0DF"></span>Hisense</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ROW 2: Referral Traffic + AI Visibility -->
+    <div class="charts-row">
+        <!-- CHART 3: Referral Traffic -->
+        <div class="chart-card">
+            <div class="chart-header">
+                <div class="chart-title">
+                    Referral Traffic
+                    <div class="chart-tooltip-icon">
+                        <span>?</span>
+                        <div class="chart-tooltip-text">Total visits to your website from AI platforms.</div>
+                    </div>
+                </div>
+                <button class="download-btn" title="Download">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7 10 12 15 17 10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="chart-content">
+                <div class="chart-area">
+                    <svg id="chart-traffic"></svg>
+                </div>
+                <div class="chart-insights">
+                    <div class="insight-item">
+                        <div class="insight-label">Total Visits</div>
+                        <div class="insight-value">106,445</div>
+                        <div class="insight-change">from AI platforms</div>
+                    </div>
+                    <div class="insight-item">
+                        <div class="insight-label">Change</div>
+                        <div class="insight-value positive">↑ +10,989</div>
+                        <div class="insight-change">+10.3% growth</div>
+                    </div>
+                    <div class="insight-item">
+                        <div class="insight-label">Top Platform</div>
+                        <div class="insight-value">ChatGPT</div>
+                        <div class="insight-change">65,054 visits</div>
+                    </div>
+                </div>
+            </div>
+            <div class="chart-legend">
+                <div class="legend-item"><span class="legend-dot" style="background: #1428A0"></span>Samsung</div>
+                <div class="legend-item"><span class="legend-dot" style="background: #A50034"></span>LG</div>
+                <div class="legend-item"><span class="legend-dot" style="background: #000000"></span>Sony</div>
+                <div class="legend-item"><span class="legend-dot" style="background: #E31937"></span>TCL</div>
+                <div class="legend-item"><span class="legend-dot" style="background: #00A0DF"></span>Hisense</div>
+            </div>
+        </div>
+
+        <!-- CHART 4: AI Visibility -->
+        <div class="chart-card">
+            <div class="chart-header">
+                <div class="chart-title">
+                    AI Visibility
+                    <div class="chart-tooltip-icon">
+                        <span>?</span>
+                        <div class="chart-tooltip-text">Overall visibility score measuring your brand's presence across AI platforms.</div>
+                    </div>
+                </div>
+                <button class="download-btn" title="Download">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7 10 12 15 17 10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="chart-content">
+                <div class="chart-area">
+                    <svg id="chart-visibility"></svg>
+                </div>
+                <div class="chart-insights">
+                    <div class="insight-item">
+                        <div class="insight-label">Score</div>
+                        <div class="insight-value">91</div>
+                        <div class="insight-change">out of 100</div>
+                    </div>
+                    <div class="insight-item">
+                        <div class="insight-label">Rank</div>
+                        <div class="insight-value">#1</div>
+                        <div class="insight-change">in TV category</div>
+                    </div>
+                    <div class="insight-item">
+                        <div class="insight-label">Momentum</div>
+                        <div class="insight-value positive">↑ +6</div>
+                        <div class="insight-change">points gained</div>
+                    </div>
+                </div>
+            </div>
+            <div class="chart-legend">
+                <div class="legend-item"><span class="legend-dot" style="background: #1428A0"></span>Samsung</div>
+                <div class="legend-item"><span class="legend-dot" style="background: #A50034"></span>LG</div>
+                <div class="legend-item"><span class="legend-dot" style="background: #000000"></span>Sony</div>
+                <div class="legend-item"><span class="legend-dot" style="background: #E31937"></span>TCL</div>
+                <div class="legend-item"><span class="legend-dot" style="background: #00A0DF"></span>Hisense</div>
+            </div>
+        </div>
+    </div>
+
+    <p class="source">Source: Client spec from <code>Ai reporting Client ask from Jason.pdf</code></p>
+
+    <!-- Tooltip element -->
+    <div class="chart-tooltip" id="tooltip"></div>
+
+    <script>
+        // Chart configuration
+        const chartConfig = {
+            width: 540,
+            height: 220,
+            margin: { top: 20, right: 20, bottom: 35, left: 50 }
+        };
+
+        // Color palette - brand colors
+        const colors = {
+            samsung: '#1428A0',
+            lg: '#A50034',
+            sony: '#000000',
+            tcl: '#E31937',
+            hisense: '#00A0DF',
+            grid: '#e8e8e8',
+            axis: '#999'
+        };
+
+        // Tooltip element
+        const tooltip = d3.select('#tooltip');
+
+        /**
+         * Create a line chart
+         */
+        function createLineChart(selector, data, options = {}) {
+            const { width, height, margin } = chartConfig;
+            const innerWidth = width - margin.left - margin.right;
+            const innerHeight = height - margin.top - margin.bottom;
+
+            const svg = d3.select(selector)
+                .attr('viewBox', `0 0 ${width} ${height}`)
+                .attr('preserveAspectRatio', 'xMidYMid meet');
+
+            const g = svg.append('g')
+                .attr('transform', `translate(${margin.left},${margin.top})`);
+
+            // Scales
+            const x = d3.scalePoint()
+                .domain(data.dates)
+                .range([0, innerWidth])
+                .padding(0.1);
+
+            const yMax = options.yMax || d3.max(data.series.flatMap(s => s.values)) * 1.1;
+            const y = d3.scaleLinear()
+                .domain([0, yMax])
+                .range([innerHeight, 0])
+                .nice();
+
+            // Grid lines (horizontal)
+            const gridLines = y.ticks(5);
+            g.selectAll('.grid-line')
+                .data(gridLines)
+                .join('line')
+                .attr('class', 'grid-line')
+                .attr('x1', 0)
+                .attr('x2', innerWidth)
+                .attr('y1', d => y(d))
+                .attr('y2', d => y(d));
+
+            // Line generator
+            const line = d3.line()
+                .x((d, i) => x(data.dates[i]))
+                .y(d => y(d))
+                .curve(d3.curveMonotoneX);
+
+            // Draw lines
+            data.series.forEach((series, seriesIndex) => {
+                // Line path
+                g.append('path')
+                    .datum(series.values)
+                    .attr('class', 'data-line')
+                    .attr('stroke', series.color)
+                    .attr('d', line);
+
+                // Data points
+                g.selectAll(`.point-${seriesIndex}`)
+                    .data(series.values)
+                    .join('circle')
+                    .attr('class', `data-point point-${seriesIndex}`)
+                    .attr('cx', (d, i) => x(data.dates[i]))
+                    .attr('cy', d => y(d))
+                    .attr('r', 4)
+                    .attr('fill', series.color)
+                    .on('mouseenter', function(event, d) {
+                        const i = series.values.indexOf(d);
+                        const formatted = options.format ? options.format(d) : d;
+                        tooltip.html(`<strong>${series.name}</strong><br>${data.dates[i]}: ${formatted}`)
+                            .classed('visible', true)
+                            .style('left', (event.pageX + 10) + 'px')
+                            .style('top', (event.pageY - 10) + 'px');
+                        d3.select(this).attr('r', 6);
+                    })
+                    .on('mouseleave', function() {
+                        tooltip.classed('visible', false);
+                        d3.select(this).attr('r', 4);
+                    });
+            });
+
+            // X Axis
+            g.append('g')
+                .attr('class', 'axis x-axis')
+                .attr('transform', `translate(0,${innerHeight})`)
+                .call(d3.axisBottom(x).tickSize(0).tickPadding(10))
+                .select('.domain').attr('stroke', colors.axis);
+
+            // Y Axis
+            const yAxis = g.append('g')
+                .attr('class', 'axis y-axis')
+                .call(d3.axisLeft(y)
+                    .ticks(5)
+                    .tickSize(0)
+                    .tickPadding(10)
+                    .tickFormat(options.yFormat || (d => d)));
+
+            yAxis.select('.domain').remove();
+        }
+
+        // ========== CHART 1: Share of Voice ==========
+        createLineChart('#chart-sov', {
+            dates: ['Dec 14', 'Dec 21', 'Dec 28', 'Jan 4'],
+            series: [
+                { name: 'Samsung', color: colors.samsung, values: [62, 64, 63, 65] },
+                { name: 'LG', color: colors.lg, values: [28, 27, 29, 28] },
+                { name: 'Sony', color: colors.sony, values: [22, 23, 22, 24] },
+                { name: 'TCL', color: colors.tcl, values: [18, 19, 20, 19] },
+                { name: 'Hisense', color: colors.hisense, values: [15, 16, 15, 17] }
+            ]
+        }, {
+            yMax: 80,
+            yFormat: d => d + '%',
+            format: d => d + '%'
+        });
+
+        // ========== CHART 2: Source Visibility ==========
+        createLineChart('#chart-source', {
+            dates: ['Dec 14', 'Dec 21', 'Dec 28', 'Jan 4'],
+            series: [
+                { name: 'Samsung', color: colors.samsung, values: [38, 40, 41, 42] },
+                { name: 'LG', color: colors.lg, values: [22, 21, 23, 22] },
+                { name: 'Sony', color: colors.sony, values: [18, 19, 18, 20] },
+                { name: 'TCL', color: colors.tcl, values: [12, 13, 14, 13] },
+                { name: 'Hisense', color: colors.hisense, values: [8, 9, 10, 11] }
+            ]
+        }, {
+            yMax: 60,
+            yFormat: d => d + '%',
+            format: d => d + '%'
+        });
+
+        // ========== CHART 3: Referral Traffic ==========
+        createLineChart('#chart-traffic', {
+            dates: ['Dec 14', 'Dec 21', 'Dec 28', 'Jan 4'],
+            series: [
+                { name: 'Samsung', color: colors.samsung, values: [95456, 98200, 102000, 106445] },
+                { name: 'LG', color: colors.lg, values: [48000, 50000, 51500, 53000] },
+                { name: 'Sony', color: colors.sony, values: [40000, 41500, 43000, 44000] },
+                { name: 'TCL', color: colors.tcl, values: [28000, 29500, 31000, 32000] },
+                { name: 'Hisense', color: colors.hisense, values: [22000, 23500, 25000, 26000] }
+            ]
+        }, {
+            yFormat: d => d >= 1000 ? (d/1000) + 'k' : d,
+            format: d => d.toLocaleString()
+        });
+
+        // ========== CHART 4: AI Visibility ==========
+        createLineChart('#chart-visibility', {
+            dates: ['Dec 14', 'Dec 21', 'Dec 28', 'Jan 4'],
+            series: [
+                { name: 'Samsung', color: colors.samsung, values: [85, 87, 89, 91] },
+                { name: 'LG', color: colors.lg, values: [72, 73, 74, 75] },
+                { name: 'Sony', color: colors.sony, values: [68, 69, 70, 71] },
+                { name: 'TCL', color: colors.tcl, values: [55, 57, 58, 60] },
+                { name: 'Hisense', color: colors.hisense, values: [48, 50, 52, 55] }
+            ]
+        }, {
+            yMax: 100,
+            yFormat: d => d,
+            format: d => d
+        });
+    </script>
+</body>
+</html>

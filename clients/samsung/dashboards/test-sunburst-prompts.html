@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test: Sunburst Category Visualization</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        /* Samsung Fonts */
+        @font-face {
+            font-family: 'Samsung Sharp Sans';
+            src: url('../assets/fonts/SamsungSharpSans-Bold.woff2') format('woff2');
+            font-weight: 700;
+        }
+        @font-face {
+            font-family: 'Samsung One';
+            src: url('../assets/fonts/SamsungOne-400.woff2') format('woff2');
+            font-weight: 400;
+        }
+        @font-face {
+            font-family: 'Samsung One';
+            src: url('../assets/fonts/SamsungOne-700.woff2') format('woff2');
+            font-weight: 700;
+        }
+
+        /* Tokens */
+        :root {
+            --color-primary: #1428A0;
+            --color-bg-page: #f8f9fa;
+            --color-bg-card: #ffffff;
+            --color-text-primary: #000000;
+            --color-text-secondary: #666666;
+            --color-border: #e0e0e0;
+            --color-accent-purple: #8091df;
+            --font-display: 'Samsung Sharp Sans', sans-serif;
+            --font-body: 'Samsung One', -apple-system, sans-serif;
+            --spacing-lg: 16px;
+            --spacing-xl: 20px;
+            --spacing-2xl: 24px;
+            --radius-xl: 12px;
+            --max-width: 1400px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: var(--font-body);
+            background: var(--color-bg-page);
+            padding: 24px;
+        }
+        .container {
+            max-width: var(--max-width);
+            margin: 0 auto;
+        }
+        h1 {
+            font-family: var(--font-display);
+            color: var(--color-primary);
+            margin-bottom: 24px;
+        }
+
+        /* Sunburst Card */
+        .sunburst-card {
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-2xl);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .card-title {
+            font-family: var(--font-display);
+            font-size: 16px;
+            font-weight: 700;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tooltip-icon {
+            position: relative;
+            width: 18px;
+            height: 18px;
+            background: var(--color-accent-purple);
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: help;
+            flex-shrink: 0;
+        }
+
+        .tooltip-icon span {
+            color: white;
+            font-size: 12px;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .tooltip-text {
+            visibility: hidden;
+            opacity: 0;
+            position: absolute;
+            top: 28px;
+            left: 0;
+            width: 280px;
+            background: #333;
+            color: white;
+            font-family: var(--font-body);
+            font-size: 12px;
+            font-weight: 400 !important;
+            padding: 10px 12px;
+            border-radius: 6px;
+            line-height: 1.4;
+            text-align: left;
+            z-index: 100;
+            transition: opacity 0.2s, visibility 0.2s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .tooltip-text::before {
+            content: '';
+            position: absolute;
+            top: -6px;
+            left: 12px;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-bottom: 6px solid #333;
+        }
+
+        .tooltip-icon:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* Sunburst layout */
+        .sunburst-container {
+            display: flex;
+            gap: 40px;
+            align-items: flex-start;
+        }
+
+        .sunburst-chart {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .sunburst-details {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .details-header {
+            font-family: var(--font-display);
+            font-size: 14px;
+            color: var(--color-text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--color-primary);
+        }
+
+        .selected-category {
+            font-family: var(--font-display);
+            font-size: 20px;
+            color: var(--color-primary);
+            margin-bottom: 8px;
+        }
+
+        .selected-count {
+            font-size: 14px;
+            color: var(--color-text-secondary);
+            margin-bottom: 16px;
+        }
+
+        .breadcrumb {
+            font-size: 12px;
+            color: var(--color-text-secondary);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .breadcrumb-item {
+            cursor: pointer;
+            padding: 2px 8px;
+            background: #f0f0f0;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        .breadcrumb-item:hover {
+            background: #e0e0e0;
+        }
+
+        .breadcrumb-separator {
+            color: #ccc;
+        }
+
+        .prompts-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .prompt-item {
+            padding: 10px 12px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            font-size: 13px;
+            color: var(--color-text-primary);
+            border-left: 3px solid var(--color-primary);
+        }
+
+        .prompt-item:hover {
+            background: #f0f1f3;
+        }
+
+        /* Legend */
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-top: 16px;
+            justify-content: center;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: var(--color-text-secondary);
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .legend-item:hover {
+            opacity: 0.7;
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+        }
+
+        /* Center label */
+        .center-label {
+            font-family: var(--font-display);
+            text-anchor: middle;
+            pointer-events: none;
+        }
+
+        .center-total {
+            font-size: 28px;
+            fill: var(--color-primary);
+        }
+
+        .center-text {
+            font-size: 12px;
+            fill: var(--color-text-secondary);
+        }
+
+        /* Arc hover effect */
+        .arc {
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .arc:hover {
+            opacity: 0.8;
+        }
+
+        /* Subcategory chips */
+        .subcategory-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .subcategory-chip {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            background: #f0f0f0;
+            border-radius: 16px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .subcategory-chip:hover {
+            background: var(--color-primary);
+            color: white;
+        }
+
+        .subcategory-chip .chip-count {
+            background: rgba(0,0,0,0.1);
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 11px;
+        }
+
+        .subcategory-chip:hover .chip-count {
+            background: rgba(255,255,255,0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Test: Sunburst Category Visualization</h1>
+
+        <div class="sunburst-card">
+            <div class="card-header">
+                <div class="card-title">
+                    Prompt Categories
+                    <div class="tooltip-icon">
+                        <span>?</span>
+                        <div class="tooltip-text">Interactive visualization of prompt categories. Click on segments to drill down into subcategories and view related prompts.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sunburst-container">
+                <div class="sunburst-chart">
+                    <div id="sunburst"></div>
+                    <div class="legend" id="legend"></div>
+                </div>
+                <div class="sunburst-details">
+                    <div class="details-header">Selected Category</div>
+                    <div class="breadcrumb" id="breadcrumb"></div>
+                    <div class="selected-category" id="selected-name">All Categories</div>
+                    <div class="selected-count" id="selected-count">382 prompts</div>
+                    <div class="subcategory-chips" id="subcategories"></div>
+                    <div class="details-header" style="margin-top: 20px;">Sample Prompts</div>
+                    <div class="prompts-list" id="prompts-list"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Embedded data (to avoid CORS issues with local files)
+        const data = {
+            "meta": { "totalPrompts": 382, "totalTags": 58 },
+            "tagTree": {
+                "TV Features": {
+                    "children": {
+                        "AI": { "children": {}, "count": 6 },
+                        "Anti-Glare": { "children": {}, "count": 26 },
+                        "Art Mode": { "children": {}, "count": 5 },
+                        "Brightness": { "children": {}, "count": 11 },
+                        "Connectivity": { "children": {}, "count": 5 },
+                        "HDR": { "children": {}, "count": 6 },
+                        "Input Lag": { "children": {}, "count": 7 },
+                        "Motion Handling": { "children": {}, "count": 16 },
+                        "Panel Technology": { "children": {}, "count": 8 },
+                        "Picture Settings": { "children": {}, "count": 18 },
+                        "Refresh Rate": { "children": {}, "count": 12 },
+                        "Resolution": { "children": { "4K": { "children": {}, "count": 11 }, "8K": { "children": {}, "count": 1 } }, "count": 31 },
+                        "Smart Features": { "children": {}, "count": 3 },
+                        "Sound": { "children": {}, "count": 1 },
+                        "Streaming": { "children": {}, "count": 1 },
+                        "Viewing Angles": { "children": {}, "count": 3 }
+                    },
+                    "count": 301
+                },
+                "TV Models": {
+                    "children": {
+                        "Art TV": { "children": {}, "count": 1 },
+                        "Gaming TVs": { "children": {}, "count": 40 },
+                        "Micro RGB": { "children": {}, "count": 16 },
+                        "Mini-LED": { "children": {}, "count": 22 },
+                        "Movies & Cinema": { "children": {}, "count": 11 },
+                        "OLED": { "children": {}, "count": 26 },
+                        "Outdoor TV": { "children": {}, "count": 2 },
+                        "QLED": { "children": {}, "count": 31 },
+                        "Smart TV": { "children": {}, "count": 7 },
+                        "Sports TVs": { "children": {}, "count": 33 }
+                    },
+                    "count": 347
+                },
+                "TV Reviews & Brand": {
+                    "children": {
+                        "Affordable": { "children": {}, "count": 5 },
+                        "Best Of": { "children": {}, "count": 85 },
+                        "Brand": { "children": { "TV Features": { "children": { "AI": { "children": {}, "count": 3 }, "Smart Features": { "children": {}, "count": 2 }, "Streaming": { "children": {}, "count": 2 } }, "count": 14 }, "TV Models": { "children": { "Crystal UHD": { "children": {}, "count": 2 }, "Micro RGB": { "children": {}, "count": 2 }, "MovingStyle": { "children": {}, "count": 1 }, "Neo QLED": { "children": {}, "count": 3 }, "Smart TV": { "children": {}, "count": 1 }, "The Frame": { "children": {}, "count": 3 } }, "count": 24 } }, "count": 109 },
+                        "Brand TV Model Reviews": { "children": {}, "count": 37 },
+                        "Buying Guides": { "children": {}, "count": 57 },
+                        "Comparison": { "children": {}, "count": 38 },
+                        "Deals": { "children": {}, "count": 4 },
+                        "Year Reviews": { "children": { "2025": { "children": {}, "count": 10 }, "2026": { "children": {}, "count": 33 } }, "count": 84 }
+                    },
+                    "count": 621
+                },
+                "TV Sizes": {
+                    "children": {
+                        "Large Size": { "children": {}, "count": 28 },
+                        "Medium Size": { "children": {}, "count": 16 },
+                        "Small Size": { "children": {}, "count": 6 },
+                        "Super Size": { "children": {}, "count": 3 },
+                        "Viewing Distance": { "children": {}, "count": 10 }
+                    },
+                    "count": 130
+                }
+            },
+            "prompts": [
+                { "text": "best 75 inch tv for sports", "tags": ["TV Reviews & Brand", "TV Reviews & Brand__Best Of", "TV Sizes", "TV Sizes__Large Size", "TV Models", "TV Models__Sports TVs"] },
+                { "text": "4K AI upscaling tv", "tags": ["TV Features", "TV Features__AI", "TV Features__Resolution", "TV Features__Resolution__4K"] },
+                { "text": "best gaming tv 2026", "tags": ["TV Models", "TV Models__Gaming TVs", "TV Reviews & Brand", "TV Reviews & Brand__Best Of", "TV Reviews & Brand__Year Reviews", "TV Reviews & Brand__Year Reviews__2026"] },
+                { "text": "OLED vs QLED for movies", "tags": ["TV Models", "TV Models__OLED", "TV Models__QLED", "TV Models__Movies & Cinema", "TV Reviews & Brand", "TV Reviews & Brand__Comparison"] },
+                { "text": "best anti-glare tv 2026", "tags": ["TV Features", "TV Features__Anti-Glare", "TV Reviews & Brand", "TV Reviews & Brand__Best Of", "TV Reviews & Brand__Year Reviews", "TV Reviews & Brand__Year Reviews__2026"] },
+                { "text": "55 inch tv reviews", "tags": ["TV Reviews & Brand", "TV Reviews & Brand__Buying Guides", "TV Sizes", "TV Sizes__Medium Size"] },
+                { "text": "best Samsung tv 2026", "tags": ["TV Reviews & Brand", "TV Reviews & Brand__Best Of", "TV Reviews & Brand__Brand", "TV Reviews & Brand__Year Reviews", "TV Reviews & Brand__Year Reviews__2026"] },
+                { "text": "120Hz refresh rate for gaming", "tags": ["TV Features", "TV Features__Refresh Rate", "TV Models", "TV Models__Gaming TVs"] },
+                { "text": "Mini-LED vs OLED", "tags": ["TV Models", "TV Models__Mini-LED", "TV Models__OLED", "TV Reviews & Brand", "TV Reviews & Brand__Comparison"] },
+                { "text": "best tv for bright room", "tags": ["TV Features", "TV Features__Brightness", "TV Features__Anti-Glare", "TV Reviews & Brand", "TV Reviews & Brand__Best Of"] },
+                { "text": "HDR tv explained", "tags": ["TV Features", "TV Features__HDR"] },
+                { "text": "98 inch tv reviews", "tags": ["TV Reviews & Brand", "TV Reviews & Brand__Buying Guides", "TV Sizes", "TV Sizes__Super Size"] },
+                { "text": "best QLED tvs 2026", "tags": ["TV Models", "TV Models__QLED", "TV Reviews & Brand", "TV Reviews & Brand__Best Of", "TV Reviews & Brand__Year Reviews", "TV Reviews & Brand__Year Reviews__2026"] },
+                { "text": "motion handling for sports", "tags": ["TV Features", "TV Features__Motion Handling", "TV Models", "TV Models__Sports TVs"] },
+                { "text": "Micro RGB tv benefits", "tags": ["TV Models", "TV Models__Micro RGB"] },
+                { "text": "viewing distance calculator", "tags": ["TV Sizes", "TV Sizes__Viewing Distance"] },
+                { "text": "best 65 inch tv under $1000", "tags": ["TV Reviews & Brand", "TV Reviews & Brand__Best Of", "TV Reviews & Brand__Deals", "TV Sizes", "TV Sizes__Medium Size"] },
+                { "text": "input lag for competitive gaming", "tags": ["TV Features", "TV Features__Input Lag", "TV Models", "TV Models__Gaming TVs"] },
+                { "text": "Samsung Neo QLED reviews", "tags": ["TV Reviews & Brand", "TV Reviews & Brand__Brand", "TV Reviews & Brand__Brand__TV Models", "TV Reviews & Brand__Brand__TV Models__Neo QLED"] },
+                { "text": "best outdoor tv 2026", "tags": ["TV Models", "TV Models__Outdoor TV", "TV Reviews & Brand", "TV Reviews & Brand__Best Of", "TV Reviews & Brand__Year Reviews", "TV Reviews & Brand__Year Reviews__2026"] },
+                { "text": "picture settings for movies", "tags": ["TV Features", "TV Features__Picture Settings", "TV Models", "TV Models__Movies & Cinema"] },
+                { "text": "32 inch tv for bedroom", "tags": ["TV Sizes", "TV Sizes__Small Size"] },
+                { "text": "smart tv streaming apps", "tags": ["TV Features", "TV Features__Streaming", "TV Models", "TV Models__Smart TV"] },
+                { "text": "The Frame TV reviews", "tags": ["TV Reviews & Brand", "TV Reviews & Brand__Brand", "TV Reviews & Brand__Brand__TV Models", "TV Reviews & Brand__Brand__TV Models__The Frame"] },
+                { "text": "8K tv worth it", "tags": ["TV Features", "TV Features__Resolution", "TV Features__Resolution__8K", "TV Reviews & Brand", "TV Reviews & Brand__Buying Guides"] }
+            ]
+        };
+
+        // Process the data
+        {
+            const width = 550;
+            const height = 550;
+            const radius = Math.min(width, height) / 2;
+
+            // Color palette for main categories
+            const colorPalette = {
+                'TV Features': '#1428A0',
+                'TV Models': '#4285f4',
+                'TV Reviews & Brand': '#10a37f',
+                'TV Sizes': '#8e44ad'
+            };
+
+            // Convert tagTree to hierarchical format for D3
+            function convertToHierarchy(tagTree, prompts) {
+                const root = {
+                    name: 'All Categories',
+                    children: []
+                };
+
+                for (const [category, data] of Object.entries(tagTree)) {
+                    const categoryNode = {
+                        name: category,
+                        count: data.count,
+                        children: []
+                    };
+
+                    if (data.children && Object.keys(data.children).length > 0) {
+                        for (const [subcat, subdata] of Object.entries(data.children)) {
+                            const subcatNode = {
+                                name: subcat,
+                                count: subdata.count,
+                                parent: category,
+                                children: []
+                            };
+
+                            // Add sub-subcategories if they exist
+                            if (subdata.children && Object.keys(subdata.children).length > 0) {
+                                for (const [subsubcat, subsubdata] of Object.entries(subdata.children)) {
+                                    subcatNode.children.push({
+                                        name: subsubcat,
+                                        count: subsubdata.count,
+                                        parent: subcat,
+                                        grandparent: category,
+                                        value: subsubdata.count
+                                    });
+                                }
+                            }
+
+                            // If no children, set value for leaf nodes
+                            if (subcatNode.children.length === 0) {
+                                subcatNode.value = subdata.count;
+                            }
+
+                            categoryNode.children.push(subcatNode);
+                        }
+                    }
+
+                    // If no children, set value for leaf nodes
+                    if (categoryNode.children.length === 0) {
+                        categoryNode.value = data.count;
+                    }
+
+                    root.children.push(categoryNode);
+                }
+
+                return root;
+            }
+
+            const hierarchyData = convertToHierarchy(data.tagTree, data.prompts);
+
+            // Create partition layout
+            const partition = d3.partition()
+                .size([2 * Math.PI, radius]);
+
+            const root = d3.hierarchy(hierarchyData)
+                .sum(d => d.value || 0)
+                .sort((a, b) => b.value - a.value);
+
+            partition(root);
+
+            // Arc generator
+            const arc = d3.arc()
+                .startAngle(d => d.x0)
+                .endAngle(d => d.x1)
+                .innerRadius(d => d.y0 * 0.8)
+                .outerRadius(d => d.y1 * 0.8 - 1)
+                .padAngle(0.01)
+                .padRadius(radius / 2);
+
+            // Create SVG
+            const svg = d3.select('#sunburst')
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height)
+                .append('g')
+                .attr('transform', `translate(${width / 2}, ${height / 2})`);
+
+            // Color scale for subcategories
+            function getColor(d) {
+                if (d.depth === 0) return '#fff';
+
+                // Find the root category
+                let node = d;
+                while (node.depth > 1) {
+                    node = node.parent;
+                }
+
+                const baseColor = colorPalette[node.data.name] || '#666';
+
+                // Lighten for deeper levels
+                if (d.depth === 1) return baseColor;
+                if (d.depth === 2) return d3.color(baseColor).brighter(0.5).toString();
+                return d3.color(baseColor).brighter(1).toString();
+            }
+
+            // Draw arcs
+            const paths = svg.selectAll('path')
+                .data(root.descendants().filter(d => d.depth > 0))
+                .enter()
+                .append('path')
+                .attr('class', 'arc')
+                .attr('d', arc)
+                .attr('fill', d => getColor(d))
+                .attr('stroke', '#fff')
+                .attr('stroke-width', 2)
+                .on('click', (event, d) => selectCategory(d))
+                .on('mouseover', function(event, d) {
+                    d3.select(this).attr('opacity', 0.8);
+                    showTooltip(event, d);
+                })
+                .on('mouseout', function() {
+                    d3.select(this).attr('opacity', 1);
+                    hideTooltip();
+                });
+
+            // Center circle with total
+            svg.append('circle')
+                .attr('r', radius * 0.35)
+                .attr('fill', '#fff')
+                .attr('stroke', '#e0e0e0')
+                .attr('stroke-width', 2)
+                .style('cursor', 'pointer')
+                .on('click', () => selectCategory(root));
+
+            svg.append('text')
+                .attr('class', 'center-label center-total')
+                .attr('dy', '-0.2em')
+                .text(data.meta.totalPrompts);
+
+            svg.append('text')
+                .attr('class', 'center-label center-text')
+                .attr('dy', '1.2em')
+                .text('prompts');
+
+            // Create legend
+            const legend = d3.select('#legend');
+            for (const [name, color] of Object.entries(colorPalette)) {
+                const item = legend.append('div')
+                    .attr('class', 'legend-item')
+                    .on('click', () => {
+                        const node = root.descendants().find(d => d.data.name === name);
+                        if (node) selectCategory(node);
+                    });
+
+                item.append('div')
+                    .attr('class', 'legend-color')
+                    .style('background', color);
+
+                item.append('span').text(name);
+            }
+
+            // Tooltip
+            const tooltip = d3.select('body').append('div')
+                .style('position', 'absolute')
+                .style('background', '#333')
+                .style('color', '#fff')
+                .style('padding', '8px 12px')
+                .style('border-radius', '6px')
+                .style('font-size', '12px')
+                .style('pointer-events', 'none')
+                .style('opacity', 0)
+                .style('z-index', 1000);
+
+            function showTooltip(event, d) {
+                tooltip
+                    .style('opacity', 1)
+                    .html(`<strong>${d.data.name}</strong><br>${d.value} prompts`)
+                    .style('left', (event.pageX + 10) + 'px')
+                    .style('top', (event.pageY - 10) + 'px');
+            }
+
+            function hideTooltip() {
+                tooltip.style('opacity', 0);
+            }
+
+            // Category selection
+            function selectCategory(d) {
+                const name = d.data.name;
+                const count = d.value;
+
+                // Update selected display
+                document.getElementById('selected-name').textContent = name;
+                document.getElementById('selected-count').textContent = `${count} prompts`;
+
+                // Build breadcrumb
+                const breadcrumb = document.getElementById('breadcrumb');
+                breadcrumb.innerHTML = '';
+
+                const ancestors = d.ancestors().reverse();
+                ancestors.forEach((node, i) => {
+                    if (i > 0) {
+                        const sep = document.createElement('span');
+                        sep.className = 'breadcrumb-separator';
+                        sep.textContent = '›';
+                        breadcrumb.appendChild(sep);
+                    }
+
+                    const item = document.createElement('span');
+                    item.className = 'breadcrumb-item';
+                    item.textContent = node.data.name;
+                    item.onclick = () => selectCategory(node);
+                    breadcrumb.appendChild(item);
+                });
+
+                // Show subcategories
+                const subcatsDiv = document.getElementById('subcategories');
+                subcatsDiv.innerHTML = '';
+
+                if (d.children) {
+                    d.children.forEach(child => {
+                        const chip = document.createElement('div');
+                        chip.className = 'subcategory-chip';
+                        chip.innerHTML = `${child.data.name} <span class="chip-count">${child.value}</span>`;
+                        chip.onclick = () => selectCategory(child);
+                        subcatsDiv.appendChild(chip);
+                    });
+                }
+
+                // Filter and show prompts
+                const promptsList = document.getElementById('prompts-list');
+                promptsList.innerHTML = '';
+
+                let tagFilter;
+                if (d.depth === 0) {
+                    // Root - show all
+                    tagFilter = () => true;
+                } else if (d.depth === 1) {
+                    // Main category
+                    tagFilter = (prompt) => prompt.tags.some(t => t === name || t.startsWith(name + '__'));
+                } else if (d.depth === 2) {
+                    // Subcategory
+                    const parentName = d.parent.data.name;
+                    tagFilter = (prompt) => prompt.tags.some(t => t === `${parentName}__${name}` || t.startsWith(`${parentName}__${name}__`));
+                } else {
+                    // Sub-subcategory
+                    const parentName = d.parent.data.name;
+                    const grandparentName = d.parent.parent.data.name;
+                    tagFilter = (prompt) => prompt.tags.some(t => t === `${grandparentName}__${parentName}__${name}`);
+                }
+
+                const filteredPrompts = data.prompts.filter(tagFilter).slice(0, 15);
+
+                filteredPrompts.forEach(prompt => {
+                    const item = document.createElement('div');
+                    item.className = 'prompt-item';
+                    item.textContent = prompt.text;
+                    promptsList.appendChild(item);
+                });
+
+                if (filteredPrompts.length === 0) {
+                    promptsList.innerHTML = '<div class="prompt-item" style="color: #999; border-color: #ccc;">No prompts found</div>';
+                }
+
+                // Highlight selected arc
+                paths.attr('opacity', node => {
+                    if (d.depth === 0) return 1;
+                    // Check if this node is an ancestor or descendant
+                    let current = node;
+                    while (current) {
+                        if (current === d) return 1;
+                        current = current.parent;
+                    }
+                    current = d;
+                    while (current) {
+                        if (current === node) return 1;
+                        current = current.parent;
+                    }
+                    return 0.3;
+                });
+            }
+
+            // Initial selection - show all
+            selectCategory(root);
+        }
+    </script>
+</body>
+</html>
