@@ -1,0 +1,3901 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Samsung GEO Performance Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="./js/supabase-data.js"></script>
+    <!-- NOTE: GEO dashboard still uses Chart.js for visualizations
+         D3.js is included for future migration to match scom-overview patterns
+         See DATA-REQUIREMENTS.md for migration plan -->
+    <style>
+/* === Fonts === */
+@font-face {
+    font-family: 'Samsung Sharp Sans';
+    src: url('./fonts/SamsungSharpSansBd.woff2') format('woff2'),
+         url('./fonts/SamsungSharpSans-Bold.ttf') format('truetype');
+    font-weight: 700;
+}
+@font-face {
+    font-family: 'Samsung One';
+    src: url('./fonts/SamsungOneLatinWeb-400.woff2') format('woff2'),
+         url('./fonts/SamsungOneLatinCompact-400.ttf') format('truetype');
+    font-weight: 400;
+}
+
+/* === Design Tokens === */
+:root {
+    /* Brand */
+    --color-primary: #1428A0;
+    --color-primary-light: #8091df;
+
+    /* Accent Palette */
+    --color-accent-blue: #0277c6;
+    --color-accent-cyan: #02b2e4;
+    --color-accent-teal: #01c3b0;
+    --color-accent-purple: #8091df;
+    --color-accent-green: #96d551;
+    --color-accent-yellow: #feb447;
+    --color-accent-red: #ff4438;
+
+    /* Semantic */
+    --color-success: #4caf50;
+    --color-error: #f44336;
+    --color-neutral: #9e9e9e;
+
+    /* Backgrounds */
+    --color-bg-page: #f8f9fa;
+    --color-bg-header: #f7f7f7;
+    --color-bg-card: #ffffff;
+
+    /* Text */
+    --color-text-primary: #000000;
+    --color-text-secondary: #666666;
+
+    /* Borders */
+    --color-border: #e0e0e0;
+    --color-border-accent: #1428A0;
+
+    /* Brand Colors */
+    --color-brand-samsung: #1428A0;
+    --color-brand-lg: #A50034;
+    --color-brand-sony: #000000;
+    --color-brand-tcl: #E31937;
+    --color-brand-hisense: #00a4a0;
+
+    /* Typography */
+    --font-display: 'Samsung Sharp Sans', sans-serif;
+    --font-body: 'Samsung One', -apple-system, sans-serif;
+    --font-size-xs: 11px;
+    --font-size-sm: 12px;
+    --font-size-base: 14px;
+    --font-size-md: 16px;
+    --font-size-lg: 18px;
+    --font-size-xl: 24px;
+    --font-size-2xl: 28px;
+    --font-size-metric: 42px;
+
+    /* Spacing */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 12px;
+    --spacing-lg: 16px;
+    --spacing-xl: 20px;
+    --spacing-2xl: 24px;
+
+    /* Layout */
+    --max-width: 1400px;
+    --radius-sm: 4px;
+    --radius-md: 6px;
+    --radius-lg: 8px;
+    --radius-xl: 12px;
+    --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: var(--font-body);
+    background: var(--color-bg-page);
+    color: var(--color-text-primary);
+}
+
+.container {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: var(--spacing-2xl);
+}
+
+/* === Header === */
+header {
+    background: var(--color-bg-header);
+    border-bottom: 3px solid var(--color-border-accent);
+    box-shadow: var(--shadow-sm);
+}
+
+.header-content {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: var(--spacing-lg) var(--spacing-2xl);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-title {
+    font-family: var(--font-display);
+    font-size: var(--font-size-2xl);
+    font-weight: 700;
+    color: var(--color-primary);
+}
+
+.header-logo {
+    height: 36px;
+}
+
+/* === Filter Bar === */
+.filter-bar {
+    background: var(--color-bg-card);
+    border-bottom: 1px solid var(--color-border);
+    padding: var(--spacing-md) 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.filter-bar-content {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 0 var(--spacing-2xl);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.filter-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.filter-select {
+    font-family: var(--font-body);
+    font-size: 14px;
+    color: var(--color-text-primary);
+    background: var(--color-bg-page);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 8px 32px 8px 12px;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 8L2 4h8z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    min-width: 140px;
+}
+
+.filter-select:hover,
+.filter-select:focus {
+    border-color: var(--color-primary);
+    outline: none;
+}
+
+.filter-divider {
+    width: 1px;
+    height: 24px;
+    background: var(--color-border);
+}
+
+/* === KPI Cards === */
+.kpi-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-2xl);
+}
+
+.kpi-card {
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-xl);
+    min-height: 160px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    position: relative;
+}
+
+.kpi-tooltip {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 18px;
+    height: 18px;
+    background: var(--color-accent-purple);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: help;
+}
+
+.kpi-tooltip span {
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.kpi-tooltip-text {
+    visibility: hidden;
+    opacity: 0;
+    position: absolute;
+    top: 28px;
+    right: 0;
+    width: 220px;
+    background: #333;
+    color: white;
+    font-size: 12px;
+    font-weight: 400;
+    padding: 10px 12px;
+    border-radius: 6px;
+    line-height: 1.4;
+    text-align: left;
+    z-index: 100;
+    transition: opacity 0.2s, visibility 0.2s;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.kpi-tooltip-text::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    right: 12px;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-bottom: 6px solid #333;
+}
+
+.kpi-tooltip:hover .kpi-tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}
+
+.kpi-icon {
+    width: 64px;
+    height: 64px;
+    margin-bottom: var(--spacing-md);
+    object-fit: contain;
+}
+
+.kpi-label {
+    font-family: var(--font-display);
+    font-size: var(--font-size-xs);
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+    letter-spacing: 0.5px;
+    font-weight: 700;
+    margin-bottom: var(--spacing-xs);
+}
+
+.kpi-value {
+    font-family: var(--font-display);
+    font-size: var(--font-size-metric);
+    font-weight: 700;
+    color: var(--color-primary);
+    line-height: 1.1;
+}
+
+.change-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-top: var(--spacing-xs);
+}
+
+.change-badge.increase-good {
+    background: rgba(150, 213, 81, 0.2);
+    color: #2e7d32;
+}
+
+.change-badge.decrease-bad {
+    background: rgba(255, 68, 56, 0.1);
+    color: var(--color-accent-red);
+}
+
+.change-badge.neutral {
+    background: rgba(0, 0, 0, 0.05);
+    color: var(--color-text-secondary);
+}
+
+/* === Chart Cards === */
+.charts-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-2xl);
+}
+
+.chart-card {
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-xl);
+}
+
+.chart-card.full-width {
+    grid-column: span 2;
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-lg);
+}
+
+.chart-title {
+    font-family: var(--font-display);
+    font-size: 16px;
+    font-weight: 700;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.chart-container {
+    position: relative;
+    height: 300px;
+}
+
+.chart-container.small {
+    height: 250px;
+}
+
+/* === Citation Sources Table === */
+.citation-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--font-size-base);
+}
+
+.citation-table th,
+.citation-table td {
+    padding: var(--spacing-md) var(--spacing-lg);
+    text-align: left;
+    border-bottom: 1px solid var(--color-border);
+    vertical-align: middle;
+}
+
+/* Column width consistency */
+.citation-table th:nth-child(1),
+.citation-table td:nth-child(1) {
+    width: 30%;
+}
+
+.citation-table th:nth-child(2),
+.citation-table td:nth-child(2) {
+    width: 12%;
+    text-align: center;
+}
+
+.citation-table th:nth-child(3),
+.citation-table td:nth-child(3),
+.citation-table th:nth-child(4),
+.citation-table td:nth-child(4),
+.citation-table th:nth-child(5),
+.citation-table td:nth-child(5),
+.citation-table th:nth-child(6),
+.citation-table td:nth-child(6),
+.citation-table th:nth-child(7),
+.citation-table td:nth-child(7) {
+    text-align: right;
+}
+
+.citation-table th {
+    font-family: var(--font-display);
+    font-size: var(--font-size-xs);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--color-text-secondary);
+    background: var(--color-bg-page);
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+}
+
+.citation-table th:hover {
+    color: var(--color-primary);
+}
+
+.citation-table th.sort-asc::after,
+.citation-table th.sort-desc::after {
+    margin-left: 6px;
+    font-size: 10px;
+}
+
+.citation-table th.sort-asc::after {
+    content: '\25B2';
+}
+
+.citation-table th.sort-desc::after {
+    content: '\25BC';
+}
+
+.citation-table tbody tr:hover {
+    background: var(--color-bg-page);
+}
+
+.citation-table td.domain {
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+.citation-table td.numeric {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.source-type-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.source-type-badge.owned {
+    background: rgba(20, 40, 160, 0.1);
+    color: var(--color-primary);
+}
+
+.source-type-badge.earned {
+    background: rgba(150, 213, 81, 0.2);
+    color: #2e7d32;
+}
+
+.source-type-badge.social {
+    background: rgba(2, 178, 228, 0.15);
+    color: #0277c6;
+}
+
+.source-type-badge.competitor {
+    background: rgba(255, 68, 56, 0.1);
+    color: var(--color-accent-red);
+}
+
+.source-type-badge.other {
+    background: rgba(0, 0, 0, 0.05);
+    color: var(--color-text-secondary);
+}
+
+.sentiment-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+}
+
+.sentiment-badge.positive {
+    background: rgba(150, 213, 81, 0.2);
+    color: #2e7d32;
+}
+
+.sentiment-badge.negative {
+    background: rgba(255, 68, 56, 0.1);
+    color: var(--color-accent-red);
+}
+
+.sentiment-badge.neutral {
+    background: rgba(0, 0, 0, 0.05);
+    color: var(--color-text-secondary);
+}
+
+/* === Loading State === */
+.loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+    color: var(--color-text-secondary);
+}
+
+.loading::after {
+    content: '';
+    width: 24px;
+    height: 24px;
+    border: 3px solid var(--color-border);
+    border-top-color: var(--color-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-left: 12px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* === Section Headers === */
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin: var(--spacing-2xl) 0 var(--spacing-sm);
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 2px solid var(--color-border-accent);
+}
+
+.section-title {
+    font-family: var(--font-display);
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    color: var(--color-primary);
+    margin: 0;
+}
+
+.section-subtitle {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    margin-left: auto;
+}
+
+/* === Tooltip Icon === */
+.tooltip-icon {
+    position: relative;
+    width: 18px;
+    height: 18px;
+    background: var(--color-accent-purple);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: help;
+}
+
+.tooltip-icon span {
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.tooltip-text {
+    visibility: hidden;
+    opacity: 0;
+    position: absolute;
+    top: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 280px;
+    background: #333;
+    color: white;
+    font-size: 12px;
+    font-weight: 400;
+    padding: 10px 12px;
+    border-radius: 6px;
+    line-height: 1.4;
+    text-align: left;
+    z-index: 100;
+    transition: opacity 0.2s, visibility 0.2s;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.tooltip-text::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-bottom: 6px solid #333;
+}
+
+.tooltip-icon:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* === Questions Display === */
+.section-questions {
+    background: linear-gradient(135deg, rgba(20, 40, 160, 0.03) 0%, rgba(128, 145, 223, 0.05) 100%);
+    border: 1px solid rgba(20, 40, 160, 0.1);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-md) var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+}
+
+.questions-label {
+    font-family: var(--font-display);
+    font-size: var(--font-size-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--color-primary);
+    font-weight: 700;
+    display: block;
+    margin-bottom: var(--spacing-sm);
+}
+
+.questions-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm) var(--spacing-lg);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.questions-list li {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    position: relative;
+    padding-left: 16px;
+}
+
+.questions-list li::before {
+    content: '?';
+    position: absolute;
+    left: 0;
+    color: var(--color-accent-purple);
+    font-weight: 700;
+}
+
+/* === Export Button === */
+.export-btn {
+    background: var(--color-bg-page);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 6px 12px;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.export-btn:hover {
+    background: var(--color-primary);
+    color: white;
+    border-color: var(--color-primary);
+}
+
+/* === Topics Tree Table === */
+.topic-category-row {
+    cursor: pointer;
+    font-weight: 600;
+    background: var(--color-bg-page);
+}
+
+.topic-category-row:hover {
+    background: #e8e8e8;
+}
+
+.topic-category-row td:first-child {
+    font-family: var(--font-display);
+}
+
+.topic-tag-row td:first-child {
+    padding-left: 32px;
+}
+
+.topic-tag-row {
+    background: var(--color-bg-card);
+}
+
+.expand-icon {
+    display: inline-block;
+    width: 16px;
+    font-size: 10px;
+    color: var(--color-text-secondary);
+    transition: transform 0.2s;
+}
+
+.expand-icon.expanded {
+    transform: rotate(90deg);
+}
+
+/* === Quote Cell Styling === */
+.quote-cell {
+    max-width: 400px;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    line-height: 1.4;
+}
+
+.quote-cell.expandable {
+    cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.quote-cell.expanded {
+    white-space: normal;
+}
+
+/* === Table Pagination === */
+.table-pagination {
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-lg) 0;
+}
+
+.pagination-btn {
+    padding: 6px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-bg-card);
+    cursor: pointer;
+    font-family: var(--font-body);
+    font-size: var(--font-size-sm);
+    transition: all 0.2s;
+}
+
+.pagination-btn:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+.pagination-btn.active {
+    background: var(--color-primary);
+    color: white;
+    border-color: var(--color-primary);
+}
+
+.pagination-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* === Data Context Section === */
+.data-context-card {
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-xl);
+    margin-bottom: var(--spacing-2xl);
+}
+
+.data-context-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-md);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.data-context-title {
+    font-family: var(--font-display);
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    color: var(--color-primary);
+    margin: 0;
+}
+
+.data-stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+}
+
+.data-stat {
+    background: linear-gradient(135deg, rgba(20, 40, 160, 0.03) 0%, rgba(128, 145, 223, 0.05) 100%);
+    border: 1px solid rgba(20, 40, 160, 0.1);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    text-align: center;
+}
+
+.data-stat-value {
+    font-family: var(--font-display);
+    font-size: var(--font-size-2xl);
+    font-weight: 700;
+    color: var(--color-primary);
+    line-height: 1.1;
+    margin-bottom: var(--spacing-xs);
+}
+
+.data-stat-label {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+}
+
+.ai-surfaces-row {
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-lg);
+}
+
+.ai-surface-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-xs) var(--spacing-md);
+    border-radius: 20px;
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+}
+
+.ai-surface-pill::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.ai-surface-pill.chatgpt {
+    background: rgba(1, 195, 176, 0.1);
+    color: #01c3b0;
+}
+.ai-surface-pill.chatgpt::before { background: #01c3b0; }
+
+.ai-surface-pill.aio {
+    background: rgba(2, 119, 198, 0.1);
+    color: #0277c6;
+}
+.ai-surface-pill.aio::before { background: #0277c6; }
+
+.ai-surface-pill.aimode {
+    background: rgba(254, 180, 71, 0.1);
+    color: #d97706;
+}
+.ai-surface-pill.aimode::before { background: #feb447; }
+
+.data-context-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-lg);
+}
+
+.caveat-box {
+    background: rgba(254, 180, 71, 0.08);
+    border: 1px solid rgba(254, 180, 71, 0.25);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+}
+
+.caveat-title {
+    font-family: var(--font-display);
+    font-size: var(--font-size-sm);
+    font-weight: 700;
+    color: #b45309;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: var(--spacing-sm);
+}
+
+.caveat-box ul {
+    margin: 0;
+    padding-left: var(--spacing-lg);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    line-height: 1.5;
+}
+
+.caveat-box li {
+    margin-bottom: var(--spacing-xs);
+}
+
+.solution-box {
+    background: rgba(150, 213, 81, 0.08);
+    border: 1px solid rgba(150, 213, 81, 0.25);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+}
+
+.solution-title {
+    font-family: var(--font-display);
+    font-size: var(--font-size-sm);
+    font-weight: 700;
+    color: #15803d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: var(--spacing-sm);
+}
+
+.solution-box p {
+    margin: 0;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    line-height: 1.5;
+}
+
+.solution-box ul {
+    margin: 0;
+    padding-left: var(--spacing-lg);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    line-height: 1.5;
+}
+
+.solution-box li {
+    margin-bottom: var(--spacing-xs);
+}
+
+/* === Responsive === */
+@media (max-width: 1024px) {
+    .kpi-row {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .charts-row {
+        grid-template-columns: 1fr;
+    }
+    .chart-card.full-width {
+        grid-column: span 1;
+    }
+}
+
+@media (max-width: 768px) {
+    .kpi-row {
+        grid-template-columns: 1fr;
+    }
+    .filter-bar-content {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .filter-divider {
+        display: none;
+    }
+}
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div>
+                <span class="header-title">Samsung GEO Performance Dashboard</span>
+                <a href="./data-definitions.html" style="font-size: 12px; color: #666; text-decoration: none; margin-left: 16px;">Data Definitions</a>
+            </div>
+            <img class="header-logo" src="./images/logo.jpg" alt="Samsung">
+        </div>
+    </header>
+
+    <div class="filter-bar">
+        <div class="filter-bar-content">
+            <div class="filter-group">
+                <span class="filter-label">Date Range</span>
+                <select id="dateRange" class="filter-select">
+                    <option value="7">Last 7 days</option>
+                    <option value="14">Last 14 days</option>
+                    <option value="30">Last 30 days</option>
+                    <option value="all" selected>All time</option>
+                </select>
+            </div>
+            <div class="filter-divider"></div>
+            <div class="filter-group">
+                <span class="filter-label">Model</span>
+                <select id="modelFilter" class="filter-select">
+                    <option value="all" selected>All Models</option>
+                    <option value="search-gpt">ChatGPT</option>
+                    <option value="google-ai-overview">Google AI Overview</option>
+                    <option value="google-ai-mode">Google AI Mode</option>
+                </select>
+            </div>
+            <div class="filter-divider"></div>
+            <div class="filter-group">
+                <span class="filter-label">Topic</span>
+                <select id="topicFilter" class="filter-select">
+                    <option value="all" selected>All Topics</option>
+                    <!-- Options populated dynamically from tv_prompts.json -->
+                </select>
+            </div>
+            <div class="filter-divider"></div>
+            <div class="filter-group">
+                <span class="filter-label">Domain Type</span>
+                <select id="domainTypeFilter" class="filter-select">
+                    <option value="all" selected>All Types</option>
+                    <option value="Owned">Owned</option>
+                    <option value="Earned">Earned</option>
+                    <option value="Benchmark Competitors">Competitors</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            <div class="filter-divider"></div>
+            <div class="filter-group">
+                <span class="filter-label">Sentiment</span>
+                <select id="sentimentFilter" class="filter-select">
+                    <option value="all" selected>All Sentiments</option>
+                    <option value="positive">Positive</option>
+                    <option value="neutral">Neutral</option>
+                    <option value="negative">Negative</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- KPI Cards -->
+        <div class="kpi-row" id="kpiCards">
+            <div class="kpi-card">
+                <div class="kpi-tooltip">
+                    <span>?</span>
+                    <div class="kpi-tooltip-text">Samsung's percentage of total brand mentions across all AI models.</div>
+                </div>
+                <img class="kpi-icon" src="./images/sov.jpg" alt="Share of Voice">
+                <div class="kpi-label">Share of Voice</div>
+                <div class="kpi-value" id="kpi-sov">--</div>
+                <span class="change-badge neutral" id="kpi-sov-change">--</span>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-tooltip">
+                    <span>?</span>
+                    <div class="kpi-tooltip-text">Weighted visibility score across AI models based on mention volume.</div>
+                </div>
+                <img class="kpi-icon" src="./images/ai-visi.jpg" alt="Visibility Score">
+                <div class="kpi-label">Visibility Score</div>
+                <div class="kpi-value" id="kpi-visibility">--</div>
+                <span class="change-badge neutral" id="kpi-visibility-change">--</span>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-tooltip">
+                    <span>?</span>
+                    <div class="kpi-tooltip-text">Net sentiment ratio: (positive - negative) / total mentions.</div>
+                </div>
+                <img class="kpi-icon" src="./images/source_visi.jpg" alt="Sentiment Score">
+                <div class="kpi-label">Sentiment Score</div>
+                <div class="kpi-value" id="kpi-sentiment">--</div>
+                <span class="change-badge neutral" id="kpi-sentiment-change">--</span>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-tooltip">
+                    <span>?</span>
+                    <div class="kpi-tooltip-text">Total number of Samsung concept mentions across all AI models.</div>
+                </div>
+                <img class="kpi-icon" src="./images/referral.jpg" alt="Total Mentions">
+                <div class="kpi-label">Total Mentions</div>
+                <div class="kpi-value" id="kpi-mentions">--</div>
+                <span class="change-badge neutral" id="kpi-mentions-change">--</span>
+            </div>
+        </div>
+
+        <!-- Data Context Section -->
+        <div class="data-context-card">
+            <div class="data-context-header">
+                <h3 class="data-context-title">Data Coverage</h3>
+                <div class="tooltip-icon">
+                    <span>?</span>
+                    <div class="tooltip-text">Understanding the scope of AI visibility data in this dashboard.</div>
+                </div>
+            </div>
+
+            <div class="data-stats-row">
+                <div class="data-stat">
+                    <div class="data-stat-value">36,765</div>
+                    <div class="data-stat-label">Samsung Prompts <span style="font-size: 11px; display: block; color: #999;">(from 250M+ Semrush database)</span></div>
+                </div>
+                <div class="data-stat">
+                    <div class="data-stat-value">383</div>
+                    <div class="data-stat-label">Tracked Prompts (TV queries)</div>
+                </div>
+                <div class="data-stat">
+                    <div class="data-stat-value">3</div>
+                    <div class="data-stat-label">AI Surfaces Monitored</div>
+                </div>
+            </div>
+
+            <div class="ai-surfaces-row">
+                <span class="ai-surface-pill chatgpt">ChatGPT</span>
+                <span class="ai-surface-pill aio">Google AI Overview</span>
+                <span class="ai-surface-pill aimode">Google AI Mode</span>
+            </div>
+
+            <div class="data-context-details">
+                <div class="caveat-box">
+                    <div class="caveat-title">Measurement Caveats</div>
+                    <ul>
+                        <li><strong>Sample-based:</strong> 383 prompts represent curated TV queries, not all AI prompts</li>
+                        <li><strong>Surface coverage:</strong> 3 of 6+ major AI surfaces (missing Perplexity, Claude, Copilot)</li>
+                        <li><strong>Response variability:</strong> Same prompt can return different answers each time it's asked</li>
+                        <li><strong>Prompt diversity:</strong> Users phrase questions in infinite ways; fixed prompt tracking captures only exact matches</li>
+                    </ul>
+                </div>
+                <div class="solution-box">
+                    <div class="solution-title">Improving Measurement</div>
+                    <ul>
+                        <li>Model probing</li>
+                        <li>Model mechanistic interpretability analysis</li>
+                        <li>Adobe Analytics referral analysis</li>
+                        <li>Adobe Analytics user journey tracking</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Domain Sentiment Analysis Section -->
+        <div class="section-header">
+            <h2 class="section-title">Domain Sentiment Analysis</h2>
+            <div class="tooltip-icon">
+                <span>?</span>
+                <div class="tooltip-text">How do different sources talk about Samsung? Compare sentiment across review sites, owned media, and competitors.</div>
+            </div>
+        </div>
+
+        <div class="section-questions">
+            <span class="questions-label">Questions this answers:</span>
+            <ul class="questions-list">
+                <li>What is the sentiment breakdown for each review site?</li>
+                <li>How does RTINGS compare to TechRadar?</li>
+                <li>Which domain has the most negative coverage?</li>
+                <li>Is Earned media more positive or negative than Owned?</li>
+            </ul>
+        </div>
+
+        <div class="charts-row">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <span class="chart-title">Sentiment by Domain</span>
+                </div>
+                <div class="chart-container" id="domainSentimentChartContainer">
+                    <canvas id="domainSentimentChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-header">
+                    <span class="chart-title">Owned vs Earned vs Competitor</span>
+                </div>
+                <div class="chart-container" id="domainTypeChartContainer">
+                    <canvas id="domainTypeChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="charts-row">
+            <div class="chart-card full-width">
+                <div class="chart-header">
+                    <span class="chart-title">Domain Performance Summary</span>
+                </div>
+                <table class="citation-table" id="domainSummaryTable">
+                    <thead>
+                        <tr>
+                            <th data-sort="domain">Domain</th>
+                            <th data-sort="domain_type">Type</th>
+                            <th data-sort="unique_urls">URLs</th>
+                            <th data-sort="positive">Positive</th>
+                            <th data-sort="neutral">Neutral</th>
+                            <th data-sort="negative">Negative</th>
+                            <th data-sort="negative_pct">Neg %</th>
+                        </tr>
+                    </thead>
+                    <tbody id="domainSummaryBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Charts Row 1: Share of Voice + Sentiment -->
+        <div class="charts-row">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <span class="chart-title">Share of Voice by Brand</span>
+                </div>
+                <div class="chart-container" id="sovChartContainer">
+                    <canvas id="sovChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-header">
+                    <span class="chart-title">Sentiment Distribution</span>
+                </div>
+                <div class="chart-container" id="sentimentChartContainer">
+                    <canvas id="sentimentChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row 2: Visibility by Model -->
+        <div class="charts-row">
+            <div class="chart-card full-width">
+                <div class="chart-header">
+                    <span class="chart-title">Visibility by AI Model</span>
+                </div>
+                <div class="chart-container" id="modelChartContainer">
+                    <canvas id="modelChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row 3: Trend Line -->
+        <div class="charts-row">
+            <div class="chart-card full-width">
+                <div class="chart-header">
+                    <span class="chart-title">Mentions Trend Over Time</span>
+                </div>
+                <div class="chart-container" id="trendChartContainer">
+                    <canvas id="trendChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- PR Action Center Section -->
+        <div class="section-header">
+            <h2 class="section-title">PR Action Center</h2>
+            <span class="section-subtitle">Negative mentions requiring attention</span>
+        </div>
+
+        <div class="section-questions">
+            <span class="questions-label">Questions this answers:</span>
+            <ul class="questions-list">
+                <li>What negative quotes need immediate response?</li>
+                <li>What's the most common criticism we should address?</li>
+                <li>Which review sites are most critical?</li>
+                <li>Are there factual errors in negative coverage?</li>
+            </ul>
+        </div>
+
+        <!-- Filters for PR Action Center -->
+        <div style="margin-bottom: var(--spacing-lg); display: flex; align-items: center; gap: var(--spacing-lg); flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: var(--spacing-sm);">
+                <span class="filter-label">Domain</span>
+                <select id="prDomainFilter" class="filter-select" style="min-width: 180px;">
+                    <option value="all" selected>All Domains</option>
+                    <!-- Populated dynamically -->
+                </select>
+            </div>
+            <div style="display: flex; align-items: center; gap: var(--spacing-sm);">
+                <span class="filter-label">Concept</span>
+                <select id="prConceptFilter" class="filter-select" style="min-width: 180px;">
+                    <option value="all" selected>All Concepts</option>
+                    <!-- Populated dynamically -->
+                </select>
+            </div>
+            <span id="prQuoteCount" style="font-size: var(--font-size-sm); color: var(--color-text-secondary);"></span>
+        </div>
+
+        <div class="charts-row">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <span class="chart-title">Top Negative Concepts</span>
+                    <div class="tooltip-icon">
+                        <span>?</span>
+                        <div class="tooltip-text">Most frequently mentioned concepts in negative coverage. Click to see quotes.</div>
+                    </div>
+                </div>
+                <div class="chart-container" id="negativeConceptsChartContainer">
+                    <canvas id="negativeConceptsChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-header">
+                    <span class="chart-title">Prompts with Most Negative Quotes</span>
+                </div>
+                <div class="chart-container" id="negativeByDomainChartContainer">
+                    <canvas id="negativeByDomainChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="charts-row">
+            <div class="chart-card full-width">
+                <div class="chart-header">
+                    <span class="chart-title">Negative Quotes</span>
+                    <button class="export-btn" id="exportQuotesBtn">Export CSV</button>
+                </div>
+                <table class="citation-table" id="quoteBrowserTable">
+                    <thead>
+                        <tr>
+                            <th data-sort="prompt">Prompt</th>
+                            <th data-sort="concept">Concept</th>
+                            <th>Quote</th>
+                            <th data-sort="date">Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="quoteBrowserBody"></tbody>
+                </table>
+                <div class="table-pagination" id="quotePagination"></div>
+            </div>
+        </div>
+
+        <!-- Concept Analysis Section -->
+        <div class="section-header">
+            <h2 class="section-title">Concept Analysis</h2>
+            <div class="tooltip-icon">
+                <span>?</span>
+                <div class="tooltip-text">What specific features and attributes are being discussed? Understand which concepts drive positive vs negative sentiment.</div>
+            </div>
+        </div>
+
+        <div class="section-questions">
+            <span class="questions-label">Questions this answers:</span>
+            <ul class="questions-list">
+                <li>What features get the most positive coverage?</li>
+                <li>Which concepts should we amplify in marketing?</li>
+                <li>What's the sentiment around "HDR" or "input lag"?</li>
+                <li>Which concepts are controversial (mixed sentiment)?</li>
+            </ul>
+        </div>
+
+        <div class="charts-row">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <span class="chart-title">Top Positive Concepts</span>
+                </div>
+                <div class="chart-container" id="positiveConceptsChartContainer">
+                    <canvas id="positiveConceptsChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-header">
+                    <span class="chart-title">Concept Sentiment Mix</span>
+                </div>
+                <div class="chart-container" id="conceptMixChartContainer">
+                    <canvas id="conceptMixChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Topic Deep Dive Section -->
+        <div class="section-header">
+            <h2 class="section-title">Topic Deep Dive</h2>
+        </div>
+
+        <div class="section-questions">
+            <span class="questions-label">Questions this answers:</span>
+            <ul class="questions-list">
+                <li>What's the sentiment breakdown for "Gaming TVs"?</li>
+                <li>Is "OLED" coverage more positive than "QLED"?</li>
+                <li>What does RTINGS say specifically about Gaming TVs?</li>
+                <li>Which topics get the most negative coverage?</li>
+            </ul>
+        </div>
+
+        <!-- Charts Row 4: Topics Tree Table -->
+        <div class="charts-row">
+            <div class="chart-card full-width">
+                <div class="chart-header">
+                    <span class="chart-title">Topics Overview</span>
+                    <div style="display:flex;gap:8px;">
+                        <button class="export-btn" id="expandAllTopics">Expand All</button>
+                        <button class="export-btn" id="collapseAllTopics">Collapse All</button>
+                    </div>
+                </div>
+                <table class="citation-table" id="topicsTreeTable">
+                    <thead>
+                        <tr>
+                            <th style="width:30%">Topic</th>
+                            <th style="text-align:right">Prompts</th>
+                            <th style="text-align:right">Citations</th>
+                            <th style="text-align:right">Sources</th>
+                            <th style="text-align:right">Positive</th>
+                            <th style="text-align:right">Neutral</th>
+                            <th style="text-align:right">Negative</th>
+                        </tr>
+                    </thead>
+                    <tbody id="topicsTreeBody">
+                        <!-- Populated dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Citation Sources Table -->
+        <div class="charts-row">
+            <div class="chart-card full-width">
+                <div class="chart-header">
+                    <span class="chart-title">Citation Sources</span>
+                </div>
+                <div id="citationTableContainer">
+                    <table class="citation-table" id="citationTable">
+                        <thead>
+                            <tr>
+                                <th data-sort="domain">Domain</th>
+                                <th data-sort="type">Type</th>
+                                <th data-sort="citations" class="sort-desc">Citations</th>
+                                <th data-sort="mentions">Mentions</th>
+                                <th data-sort="visibility">Visibility</th>
+                            </tr>
+                        </thead>
+                        <tbody id="citationTableBody">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <!-- Cited URLs Table -->
+        <div class="charts-row">
+            <div class="chart-card full-width">
+                <div class="chart-header">
+                    <span class="chart-title">Top Cited URLs</span>
+                </div>
+                <!-- Filters for Cited URLs -->
+                <div style="margin-bottom: var(--spacing-md); display: flex; align-items: center; gap: var(--spacing-lg); flex-wrap: wrap;">
+                    <div style="display: flex; align-items: center; gap: var(--spacing-sm);">
+                        <span class="filter-label">Domain</span>
+                        <select id="citedUrlsDomainFilter" class="filter-select" style="min-width: 180px;">
+                            <option value="all" selected>All Domains</option>
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+                    <span id="citedUrlsCount" style="font-size: var(--font-size-sm); color: var(--color-text-secondary);"></span>
+                </div>
+                <div id="citedUrlsTableContainer">
+                    <table class="citation-table" id="citedUrlsTable">
+                        <thead>
+                            <tr>
+                                <th data-sort="source">URL</th>
+                                <th data-sort="type">Type</th>
+                                <th data-sort="citations" class="sort-desc">Citations</th>
+                                <th data-sort="prompts">Prompts</th>
+                            </tr>
+                        </thead>
+                        <tbody id="citedUrlsTableBody">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                    <div class="table-pagination" id="citedUrlsPagination"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Samsung Country Sites Analysis -->
+        <div class="charts-row">
+            <div class="chart-card full-width">
+                <div class="chart-header">
+                    <span class="chart-title">Samsung Site Citations by Country/Region</span>
+                </div>
+                <p style="font-size:13px;color:#666;margin-bottom:16px;line-height:1.5;">
+                    Shows which Samsung sites (by country code or subdomain) are being cited in AI responses.
+                    For US-focused searches, <strong style="color:#1428A0;">/us/</strong> should dominate.
+                </p>
+                <div id="samsungCountryChartContainer" style="min-height:400px;">
+                    <canvas id="samsungCountryChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+// ============================================
+// SUPABASE CONFIGURATION
+// ============================================
+const SUPABASE_URL = 'https://zozzhptqoclvbfysmopg.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpvenpocHRxb2NsdmJmeXNtb3BnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkwNzA2NzksImV4cCI6MjA4NDY0NjY3OX0.3Q9gv49xrtqdmlesJgYDMVYUwjldy45xZw7O-nkASus';
+
+// Brand colors from tokens.html
+const BRAND_COLORS = {
+    'Samsung': '#1428A0',   // --color-brand-samsung
+    'LG': '#A50034',        // --color-brand-lg
+    'Sony': '#000000',      // --color-brand-sony
+    'TCL': '#E31937',       // --color-brand-tcl
+    'Hisense': '#00a4a0',   // --color-brand-hisense
+    'Xbox': '#107C10',      // --color-brand-xbox
+    'Roku': '#6C3C97',      // --color-brand-roku
+    'Other': '#9e9e9e'      // --color-neutral
+};
+
+// Accent palette from tokens.html (for charts)
+const ACCENT_COLORS = {
+    blue: '#0277c6',        // --color-accent-blue
+    cyan: '#02b2e4',        // --color-accent-cyan
+    teal: '#01c3b0',        // --color-accent-teal
+    purple: '#8091df',      // --color-accent-purple
+    green: '#96d551',       // --color-accent-green
+    yellow: '#feb447',      // --color-accent-yellow
+    red: '#ff4438'          // --color-accent-red
+};
+
+// Semantic colors
+const SEMANTIC_COLORS = {
+    success: '#4caf50',     // --color-success
+    error: '#f44336',       // --color-error
+    neutral: '#9e9e9e'      // --color-neutral
+};
+
+const MODEL_LABELS = {
+    'search-gpt': 'ChatGPT',
+    'google-ai-overview': 'Google AI Overview',
+    'google-ai-mode': 'Google AI Mode'
+};
+
+// Model colors using accent palette - distinct colors for each
+const MODEL_COLORS = {
+    'search-gpt': '#01c3b0',          // Accent Teal (ChatGPT)
+    'google-ai-overview': '#0277c6',  // Accent Blue
+    'google-ai-mode': '#feb447'       // Accent Yellow
+};
+
+// Chart instances
+let sovChart, sentimentChart, modelChart, trendChart, samsungCountryChart;
+
+// ============================================
+// SUPABASE API HELPERS
+// ============================================
+async function supabaseQuery(endpoint, params = {}) {
+    const url = new URL(`${SUPABASE_URL}/rest/v1/${endpoint}`);
+    Object.entries(params).forEach(([key, value]) => {
+        url.searchParams.append(key, value);
+    });
+
+    const response = await fetch(url, {
+        headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+        }
+    });
+
+    if (!response.ok) {
+        throw new Error(`Supabase error: ${response.status}`);
+    }
+
+    return response.json();
+}
+
+function getDateFilter(days) {
+    if (days === 'all') return null;
+    const date = new Date();
+    date.setDate(date.getDate() - parseInt(days));
+    return date.toISOString().split('T')[0];
+}
+
+// ============================================
+// DATA FETCHING (using Supabase RPC functions)
+// ============================================
+async function callRPC(functionName, params = {}) {
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${functionName}`, {
+        method: 'POST',
+        headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(params)
+    });
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Supabase RPC error: ${response.status} - ${errorText}`);
+    }
+
+    return response.json();
+}
+
+async function fetchDailyMentions(dateFrom = null, model = 'all') {
+    const params = {
+        date_from: dateFrom,
+        model_filter: model === 'all' ? null : model
+    };
+
+    const data = await callRPC('get_daily_mentions', params);
+    console.log(`Fetched ${data.length} aggregated rows, date range: ${dateFrom || 'all'}, model: ${model}`);
+    return data;
+}
+
+// Fetch prompts that match a tag filter
+async function fetchPromptsByTag(tag) {
+    if (!tag || tag === 'all') return null; // Return null means no filter
+
+    try {
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_prompts_by_tag`, {
+            method: 'POST',
+            headers: {
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ p_tag: tag })
+        });
+
+        if (!response.ok) return null;
+
+        const data = await response.json();
+        return new Set(data.map(r => r.prompt));
+    } catch (e) {
+        console.error('Error fetching prompts by tag:', e);
+        return null;
+    }
+}
+
+async function fetchTopCategories(dateFrom = null, model = 'all', limit = 10) {
+    const params = {
+        date_from: dateFrom,
+        model_filter: model === 'all' ? null : model,
+        limit_count: limit
+    };
+
+    return callRPC('get_top_categories', params);
+}
+
+// ============================================
+// KPI CALCULATIONS
+// ============================================
+function calculateKPIs(data) {
+    // Sort data by date to split into periods
+    const sortedData = [...data].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    // Get unique dates and find midpoint
+    const dates = [...new Set(sortedData.map(d => d.date))].sort();
+    const midpoint = Math.floor(dates.length / 2);
+    const previousDates = new Set(dates.slice(0, midpoint));
+    const currentDates = new Set(dates.slice(midpoint));
+
+    // Calculate metrics for both periods
+    function calcPeriod(rows) {
+        const brandMentions = {};
+        const modelMentions = {};
+        let totalMentions = 0;
+        let totalPositive = 0;
+        let totalNegative = 0;
+        let totalNeutral = 0;
+
+        rows.forEach(row => {
+            const brand = row.brand || 'Other';
+            const model = row.model || 'unknown';
+
+            if (!brandMentions[brand]) brandMentions[brand] = 0;
+            brandMentions[brand] += row.total_mentions || 0;
+
+            if (!modelMentions[model]) modelMentions[model] = 0;
+            modelMentions[model] += row.total_mentions || 0;
+
+            totalMentions += row.total_mentions || 0;
+            totalPositive += row.sentiment_positive || 0;
+            totalNegative += row.sentiment_negative || 0;
+            totalNeutral += row.sentiment_neutral || 0;
+        });
+
+        const samsungMentions = brandMentions['Samsung'] || 0;
+        const shareOfVoice = totalMentions > 0 ? (samsungMentions / totalMentions * 100) : 0;
+        const visibilityScore = totalMentions > 0 ? Math.min(100, (samsungMentions / totalMentions * 100) * 1.5) : 0;
+        const totalSentiment = totalPositive + totalNegative + totalNeutral;
+        const sentimentScore = totalSentiment > 0 ? ((totalPositive - totalNegative) / totalSentiment * 100) : 0;
+
+        return { shareOfVoice, visibilityScore, sentimentScore, samsungMentions, totalMentions, brandMentions, modelMentions, totalPositive, totalNegative, totalNeutral };
+    }
+
+    const previousData = sortedData.filter(d => previousDates.has(d.date));
+    const currentData = sortedData.filter(d => currentDates.has(d.date));
+
+    const prev = calcPeriod(previousData);
+    const curr = calcPeriod(currentData);
+
+    // Calculate changes
+    const sovChange = prev.shareOfVoice > 0 ? ((curr.shareOfVoice - prev.shareOfVoice) / prev.shareOfVoice * 100).toFixed(1) : 0;
+    const visChange = prev.visibilityScore > 0 ? ((curr.visibilityScore - prev.visibilityScore) / prev.visibilityScore * 100).toFixed(1) : 0;
+    const sentChange = (curr.sentimentScore - prev.sentimentScore).toFixed(1);
+    const mentionsChange = prev.samsungMentions > 0 ? ((curr.samsungMentions - prev.samsungMentions) / prev.samsungMentions * 100).toFixed(1) : 0;
+
+    return {
+        shareOfVoice: curr.shareOfVoice.toFixed(1),
+        shareOfVoiceChange: sovChange,
+        visibilityScore: Math.round(curr.visibilityScore),
+        visibilityChange: visChange,
+        sentimentScore: curr.sentimentScore >= 0 ? `+${curr.sentimentScore.toFixed(0)}` : curr.sentimentScore.toFixed(0),
+        sentimentChange: sentChange,
+        totalMentionsFormatted: curr.samsungMentions.toLocaleString(),
+        mentionsChange: mentionsChange,
+        brandMentions: curr.brandMentions,
+        modelMentions: curr.modelMentions,
+        totalMentions: curr.samsungMentions,
+        sentiment: { positive: curr.totalPositive, negative: curr.totalNegative, neutral: curr.totalNeutral }
+    };
+}
+
+// ============================================
+// CHART RENDERING
+// ============================================
+function renderSOVChart(brandMentions, modelBreakdown) {
+    const ctx = document.getElementById('sovChart').getContext('2d');
+
+    // Check if we have multiple brands
+    const brandCount = Object.keys(brandMentions).length;
+
+    if (brandCount <= 1) {
+        // Single brand mode: show breakdown by AI model instead
+        const sorted = Object.entries(modelBreakdown)
+            .sort((a, b) => b[1] - a[1]);
+
+        const labels = sorted.map(([model]) => MODEL_LABELS[model] || model);
+        const values = sorted.map(([, mentions]) => mentions);
+        const colors = sorted.map(([model]) => MODEL_COLORS[model] || ACCENT_COLORS.purple);
+
+        if (sovChart) sovChart.destroy();
+
+        sovChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: values,
+                    backgroundColor: colors,
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 16,
+                            font: { family: "'Samsung One', sans-serif", size: 12 }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const value = context.raw;
+                                const pct = ((value / total) * 100).toFixed(1);
+                                return `${context.label}: ${value.toLocaleString()} (${pct}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Update chart title
+        document.querySelector('#sovChartContainer').closest('.chart-card').querySelector('.chart-title').textContent = 'Mentions by AI Model';
+    } else {
+        // Multi-brand mode: show brand comparison
+        const sorted = Object.entries(brandMentions)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 6);
+
+        const labels = sorted.map(([brand]) => brand);
+        const values = sorted.map(([, mentions]) => mentions);
+        const colors = labels.map(brand => BRAND_COLORS[brand] || BRAND_COLORS['Other']);
+
+        if (sovChart) sovChart.destroy();
+
+        sovChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: values,
+                    backgroundColor: colors,
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 16,
+                            font: { family: "'Samsung One', sans-serif", size: 12 }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const value = context.raw;
+                                const pct = ((value / total) * 100).toFixed(1);
+                                return `${context.label}: ${value.toLocaleString()} (${pct}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Reset chart title
+        document.querySelector('#sovChartContainer').closest('.chart-card').querySelector('.chart-title').textContent = 'Share of Voice by Brand';
+    }
+}
+
+function renderSentimentChart(sentiment) {
+    const ctx = document.getElementById('sentimentChart').getContext('2d');
+
+    if (sentimentChart) sentimentChart.destroy();
+
+    sentimentChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Positive', 'Neutral', 'Negative'],
+            datasets: [{
+                data: [sentiment.positive, sentiment.neutral, sentiment.negative],
+                backgroundColor: [ACCENT_COLORS.green, SEMANTIC_COLORS.neutral, ACCENT_COLORS.red],
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 16,
+                        font: { family: "'Samsung One', sans-serif", size: 12 }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const value = context.raw;
+                            const pct = ((value / total) * 100).toFixed(1);
+                            return `${context.label}: ${value.toLocaleString()} (${pct}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+function renderModelChart(data) {
+    const ctx = document.getElementById('modelChart').getContext('2d');
+
+    // Group by model and brand (data is already aggregated)
+    const modelBrandData = {};
+    const brands = new Set();
+
+    data.forEach(row => {
+        const model = row.model;
+        const brand = row.brand || 'Other';
+        brands.add(brand);
+
+        if (!modelBrandData[model]) {
+            modelBrandData[model] = {};
+        }
+        if (!modelBrandData[model][brand]) {
+            modelBrandData[model][brand] = 0;
+        }
+        modelBrandData[model][brand] += row.total_mentions || 0;
+    });
+
+    const models = Object.keys(modelBrandData).sort();
+    const brandCount = brands.size;
+
+    let datasets;
+    let showLegend = true;
+
+    if (brandCount <= 1) {
+        // Single brand: show Samsung data with accent colors per model
+        datasets = [{
+            label: 'Samsung',
+            data: models.map(model => modelBrandData[model]?.['Samsung'] || 0),
+            backgroundColor: models.map(m => MODEL_COLORS[m] || BRAND_COLORS['Samsung']),
+            borderRadius: 4
+        }];
+        showLegend = false;
+    } else {
+        // Multiple brands: show grouped bars
+        const brandList = ['Samsung', ...Array.from(brands).filter(b => b !== 'Samsung').sort()];
+        datasets = brandList.map(brand => ({
+            label: brand,
+            data: models.map(model => modelBrandData[model]?.[brand] || 0),
+            backgroundColor: BRAND_COLORS[brand] || BRAND_COLORS['Other'],
+            borderRadius: 4
+        }));
+    }
+
+    if (modelChart) modelChart.destroy();
+
+    modelChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: models.map(m => MODEL_LABELS[m] || m),
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: showLegend,
+                    position: 'top',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 16,
+                        font: { family: "'Samsung One', sans-serif", size: 12 }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: { display: false }
+                },
+                y: {
+                    beginAtZero: true,
+                    grid: { color: '#e8e8e8' },
+                    ticks: {
+                        callback: value => value.toLocaleString()
+                    }
+                }
+            }
+        }
+    });
+}
+
+function renderTrendChart(data) {
+    const ctx = document.getElementById('trendChart').getContext('2d');
+
+    // Group by date (Samsung only for trend, data is already aggregated)
+    const dateData = {};
+
+    data.filter(row => row.brand === 'Samsung').forEach(row => {
+        const date = row.date;
+        if (!dateData[date]) {
+            dateData[date] = 0;
+        }
+        dateData[date] += row.total_mentions || 0;
+    });
+
+    const sortedDates = Object.keys(dateData).sort();
+    const values = sortedDates.map(date => dateData[date]);
+
+    console.log(`Trend chart: ${sortedDates.length} unique dates, from ${sortedDates[0]} to ${sortedDates[sortedDates.length-1]}`);
+
+    // Format dates for display
+    const labels = sortedDates.map(date => {
+        const d = new Date(date + 'T00:00:00');  // Ensure proper date parsing
+        return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    });
+
+    if (trendChart) trendChart.destroy();
+
+    trendChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Samsung Mentions',
+                data: values,
+                borderColor: BRAND_COLORS['Samsung'],
+                backgroundColor: 'rgba(20, 40, 160, 0.1)',  // Samsung blue with opacity
+                fill: true,
+                tension: 0.3,
+                pointRadius: 3,
+                pointHoverRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false
+                }
+            },
+            scales: {
+                x: {
+                    grid: { display: false },
+                    ticks: {
+                        maxTicksLimit: 10
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    grid: { color: '#e8e8e8' },
+                    ticks: {
+                        callback: value => value.toLocaleString()
+                    }
+                }
+            },
+            interaction: {
+                mode: 'nearest',
+                axis: 'x',
+                intersect: false
+            }
+        }
+    });
+}
+
+// ============================================
+// TOPICS TREE TABLE
+// ============================================
+let topicsTreeData = [];
+let expandedCategories = new Set();
+
+async function fetchTopicsTreeData() {
+    try {
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_topics_tree_data`, {
+            method: 'POST',
+            headers: {
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({})
+        });
+
+        if (!response.ok) {
+            throw new Error(`Error fetching topics tree: ${response.status}`);
+        }
+
+        topicsTreeData = await response.json();
+        console.log('Topics tree data loaded:', topicsTreeData.length, 'rows');
+        return topicsTreeData;
+
+    } catch (error) {
+        console.error('Error fetching topics tree data:', error);
+        return [];
+    }
+}
+
+function renderTopicsTree(data) {
+    const tbody = document.getElementById('topicsTreeBody');
+
+    if (!data || data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#666;padding:20px;">No topics data available</td></tr>';
+        return;
+    }
+
+    // Group data by category
+    const categories = {};
+    data.forEach(row => {
+        if (!categories[row.category]) {
+            categories[row.category] = {
+                tags: [],
+                totals: { prompts: 0, citations: 0, sources: 0, positive: 0, neutral: 0, negative: 0, count: 0 }
+            };
+        }
+        categories[row.category].tags.push(row);
+        categories[row.category].totals.prompts += parseInt(row.prompt_count) || 0;
+        categories[row.category].totals.citations += parseInt(row.citations) || 0;
+        categories[row.category].totals.sources += parseInt(row.unique_sources) || 0;
+        categories[row.category].totals.positive += parseFloat(row.positive_pct) || 0;
+        categories[row.category].totals.neutral += parseFloat(row.neutral_pct) || 0;
+        categories[row.category].totals.negative += parseFloat(row.negative_pct) || 0;
+        categories[row.category].totals.count++;
+    });
+
+    let html = '';
+    const categoryOrder = ['TV Features', 'TV Models', 'TV Reviews & Brand', 'TV Sizes'];
+
+    categoryOrder.forEach(categoryName => {
+        const cat = categories[categoryName];
+        if (!cat) return;
+
+        const isExpanded = expandedCategories.has(categoryName);
+        const avgPositive = Math.round(cat.totals.positive / cat.totals.count);
+        const avgNeutral = Math.round(cat.totals.neutral / cat.totals.count);
+        const avgNegative = Math.round(cat.totals.negative / cat.totals.count);
+
+        // Category row
+        html += `
+            <tr class="topic-category-row" data-category="${categoryName}">
+                <td>
+                    <span class="expand-icon ${isExpanded ? 'expanded' : ''}">▶</span>
+                    ${categoryName}
+                </td>
+                <td class="numeric">${cat.totals.prompts.toLocaleString()}</td>
+                <td class="numeric">${cat.totals.citations.toLocaleString()}</td>
+                <td class="numeric">${cat.totals.sources.toLocaleString()}</td>
+                <td class="numeric"><span class="sentiment-badge positive">${avgPositive}%</span></td>
+                <td class="numeric"><span class="sentiment-badge neutral">${avgNeutral}%</span></td>
+                <td class="numeric"><span class="sentiment-badge ${avgNegative > 5 ? 'negative' : 'neutral'}">${avgNegative}%</span></td>
+            </tr>
+        `;
+
+        // Tag rows (only if expanded)
+        if (isExpanded) {
+            cat.tags.forEach(tag => {
+                const positivePct = parseFloat(tag.positive_pct) || 0;
+                const neutralPct = parseFloat(tag.neutral_pct) || 0;
+                const negativePct = parseFloat(tag.negative_pct) || 0;
+
+                html += `
+                    <tr class="topic-tag-row">
+                        <td>${tag.tag}</td>
+                        <td class="numeric">${parseInt(tag.prompt_count).toLocaleString()}</td>
+                        <td class="numeric">${parseInt(tag.citations).toLocaleString()}</td>
+                        <td class="numeric">${parseInt(tag.unique_sources).toLocaleString()}</td>
+                        <td class="numeric"><span class="sentiment-badge positive">${positivePct.toFixed(0)}%</span></td>
+                        <td class="numeric"><span class="sentiment-badge neutral">${neutralPct.toFixed(0)}%</span></td>
+                        <td class="numeric"><span class="sentiment-badge ${negativePct > 5 ? 'negative' : 'neutral'}">${negativePct.toFixed(0)}%</span></td>
+                    </tr>
+                `;
+            });
+        }
+    });
+
+    tbody.innerHTML = html;
+
+    // Attach click handlers to category rows
+    document.querySelectorAll('.topic-category-row').forEach(row => {
+        row.addEventListener('click', () => {
+            toggleTopicCategory(row.dataset.category);
+        });
+    });
+}
+
+function toggleTopicCategory(category) {
+    if (expandedCategories.has(category)) {
+        expandedCategories.delete(category);
+    } else {
+        expandedCategories.add(category);
+    }
+    renderTopicsTree(topicsTreeData);
+}
+
+function expandAllTopics() {
+    const categories = ['TV Features', 'TV Models', 'TV Reviews & Brand', 'TV Sizes'];
+    categories.forEach(cat => expandedCategories.add(cat));
+    renderTopicsTree(topicsTreeData);
+}
+
+function collapseAllTopics() {
+    expandedCategories.clear();
+    renderTopicsTree(topicsTreeData);
+}
+
+// ============================================
+// TOPIC FILTER (from Supabase)
+// ============================================
+let topicsData = [];
+
+async function loadTopicFilter() {
+    try {
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/tv_topics?select=category,tag,prompt_count&order=category,tag`, {
+            headers: {
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`Error fetching topics: ${response.status}`);
+        }
+
+        topicsData = await response.json();
+        const select = document.getElementById('topicFilter');
+
+        // Group by category
+        const categories = {};
+        topicsData.forEach(row => {
+            if (!categories[row.category]) {
+                categories[row.category] = [];
+            }
+            categories[row.category].push(row.tag);
+        });
+
+        // Build options from categories
+        Object.entries(categories).sort().forEach(([category, tags]) => {
+            const optgroup = document.createElement('optgroup');
+            optgroup.label = category;
+
+            tags.forEach(tag => {
+                const option = document.createElement('option');
+                option.value = tag;
+                option.textContent = tag;
+                optgroup.appendChild(option);
+            });
+
+            select.appendChild(optgroup);
+        });
+
+        console.log('Topic filter loaded from Supabase:', topicsData.length, 'topics');
+    } catch (error) {
+        console.warn('Could not load topic filter:', error);
+    }
+}
+
+// ============================================
+// CITATION SOURCES TABLE (via Supabase Edge Function proxy)
+// ============================================
+const SEMRUSH_PROXY_URL = `${SUPABASE_URL}/functions/v1/semrush-proxy`;
+const SEMRUSH_SOURCE_VISIBILITY_ELEMENT = '28977430-d565-4529-97eb-2dfe2959b86b';
+
+// Map SEMrush domain_type to our display types
+function mapDomainType(semrushType) {
+    const typeMap = {
+        'Target Domain': 'owned',
+        'Owned': 'owned',
+        'Earned': 'earned',
+        'Benchmark Competitors': 'competitor',
+        'Competitor': 'competitor',
+        'Other': 'other',
+        'Social': 'social'
+    };
+    return typeMap[semrushType] || 'other';
+}
+
+let citationData = [];
+let currentSort = { column: 'citations', direction: 'desc' };
+
+async function fetchCitationSources(dateFrom = null, model = 'all', topic = 'all') {
+    try {
+        // Use today's date for the API call
+        const today = new Date().toISOString().split('T')[0];
+
+        // Build filters - only add model filter if not "all"
+        const advancedFilters = [];
+        if (model !== 'all') {
+            advancedFilters.push({ op: 'eq', val: model, col: 'CBF_model' });
+        }
+
+        const payload = {
+            element_id: SEMRUSH_SOURCE_VISIBILITY_ELEMENT,
+            filters: {
+                simple: {
+                    start_date: today,
+                    end_date: today
+                }
+            }
+        };
+
+        // Only add advanced filters if we have any
+        if (advancedFilters.length > 0) {
+            payload.filters.advanced = {
+                op: 'and',
+                filters: advancedFilters
+            };
+        }
+
+        const response = await fetch(SEMRUSH_PROXY_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+            throw new Error(`Proxy error: ${response.status}`);
+        }
+
+        const result = await response.json();
+        const rawData = result.blocks?.data || [];
+
+        // Transform SEMrush data to our format
+        citationData = rawData.map(row => ({
+            domain: row.domain,
+            type: mapDomainType(row.domain_type),
+            citations: row.prompts_with_citations || 0,
+            mentions: row.mentions_end || 0,
+            visibility: (row.visibility * 100) || 0  // Convert to percentage
+        }))
+        .filter(d => d.citations > 0 || d.mentions > 0)
+        .sort((a, b) => b.citations - a.citations);
+
+        console.log('Citation data loaded via proxy:', citationData.length, 'domains');
+        return citationData;
+
+    } catch (error) {
+        console.error('Error fetching citation sources:', error);
+        return [];
+    }
+}
+
+// ============================================
+// SAMSUNG COUNTRY SITES ANALYSIS
+// ============================================
+async function fetchSamsungCountryCitations() {
+    try {
+        const data = await callRPC('get_samsung_country_citations', {});
+        console.log('Samsung country citations loaded:', data.length, 'sites');
+        return data;
+    } catch (error) {
+        console.error('Error fetching Samsung country citations:', error);
+        return [];
+    }
+}
+
+function renderSamsungCountryChart(data) {
+    const container = document.getElementById('samsungCountryChartContainer');
+    const ctx = document.getElementById('samsungCountryChart');
+    if (!ctx || !container) return;
+
+    if (samsungCountryChart) {
+        samsungCountryChart.destroy();
+    }
+
+    if (!data || data.length === 0) {
+        container.innerHTML = '<div style="text-align:center;color:#666;padding:40px;">No Samsung country data available</div>';
+        return;
+    }
+
+    // Take top 15 sites
+    const topData = data.slice(0, 15);
+
+    // Calculate total citations across ALL Samsung sites (not just top 15)
+    const totalCitations = data.reduce((sum, d) => sum + d.citation_count, 0);
+
+    // Set container height based on number of bars (36px per bar + padding)
+    const chartHeight = Math.max(450, topData.length * 36 + 80);
+    container.style.height = chartHeight + 'px';
+
+    // Create display labels with citation counts
+    const labels = topData.map(d => {
+        const count = d.citation_count.toLocaleString();
+        return `${d.site_label}  (${count})`;
+    });
+    const citations = topData.map(d => d.citation_count);
+
+    // Color coding: /us/ in Samsung blue, other country codes in lighter blue, subdomains in gray
+    const colors = topData.map(d => {
+        if (d.site_label === '/us/') {
+            return '#1428A0'; // Samsung blue for US
+        } else if (d.site_label.startsWith('/')) {
+            return '#0277c6'; // Accent blue for other countries
+        } else {
+            return '#01c3b0'; // Teal for subdomains
+        }
+    });
+
+    samsungCountryChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Citations',
+                data: citations,
+                backgroundColor: colors,
+                borderRadius: 4,
+                barThickness: 24,
+                maxBarThickness: 28
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            layout: {
+                padding: {
+                    right: 20
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0,0,0,0.8)',
+                    titleFont: { size: 13, weight: 'bold' },
+                    bodyFont: { size: 12 },
+                    padding: 12,
+                    callbacks: {
+                        title: function(context) {
+                            const idx = context[0].dataIndex;
+                            return topData[idx].site_label;
+                        },
+                        label: function(context) {
+                            const idx = context.dataIndex;
+                            const item = topData[idx];
+                            const pct = ((item.citation_count / totalCitations) * 100).toFixed(1);
+                            return [
+                                `Citations: ${item.citation_count.toLocaleString()}`,
+                                `Unique URLs: ${item.unique_urls.toLocaleString()}`,
+                                `Share of Samsung: ${pct}%`
+                            ];
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0,0,0,0.06)'
+                    },
+                    ticks: {
+                        font: { size: 11 },
+                        callback: function(value) {
+                            if (value >= 1000) {
+                                return (value / 1000).toFixed(0) + 'k';
+                            }
+                            return value.toLocaleString();
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Citation Count',
+                        font: { size: 12, weight: '600' },
+                        color: '#666'
+                    }
+                },
+                y: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        font: {
+                            family: "'Samsung One', sans-serif",
+                            size: 13
+                        },
+                        color: function(context) {
+                            const label = context.tick.label;
+                            if (label && label.startsWith('/us/')) {
+                                return '#1428A0';
+                            }
+                            return '#333';
+                        },
+                        callback: function(value, index) {
+                            // Bold the /us/ label
+                            return this.getLabelForValue(value);
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+function renderCitationTable(data) {
+    const tbody = document.getElementById('citationTableBody');
+
+    if (!data || data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#666;padding:20px;">No citation data available</td></tr>';
+        return;
+    }
+
+    // Sort data
+    const sorted = [...data].sort((a, b) => {
+        let aVal = a[currentSort.column];
+        let bVal = b[currentSort.column];
+
+        if (typeof aVal === 'string') {
+            aVal = aVal.toLowerCase();
+            bVal = bVal.toLowerCase();
+        }
+
+        if (currentSort.direction === 'asc') {
+            return aVal > bVal ? 1 : -1;
+        } else {
+            return aVal < bVal ? 1 : -1;
+        }
+    });
+
+    // Take top 10
+    const top10 = sorted.slice(0, 10);
+
+    // Render rows
+    tbody.innerHTML = top10.map(row => {
+        // Visibility score as percentage (higher is better)
+        const visibilityClass = row.visibility > 5 ? 'positive' : row.visibility > 1 ? 'neutral' : 'negative';
+        const visibilityDisplay = row.visibility.toFixed(1) + '%';
+
+        return `
+            <tr>
+                <td class="domain">${row.domain}</td>
+                <td><span class="source-type-badge ${row.type}">${row.type}</span></td>
+                <td class="numeric">${row.citations.toLocaleString()}</td>
+                <td class="numeric">${row.mentions.toLocaleString()}</td>
+                <td><span class="sentiment-badge ${visibilityClass}">${visibilityDisplay}</span></td>
+            </tr>
+        `;
+    }).join('');
+
+    // Update sort indicators
+    document.querySelectorAll('.citation-table th').forEach(th => {
+        th.classList.remove('sort-asc', 'sort-desc');
+        if (th.dataset.sort === currentSort.column) {
+            th.classList.add(currentSort.direction === 'asc' ? 'sort-asc' : 'sort-desc');
+        }
+    });
+}
+
+function setupTableSorting() {
+    document.querySelectorAll('#citationTable th[data-sort]').forEach(th => {
+        th.addEventListener('click', () => {
+            const column = th.dataset.sort;
+
+            if (currentSort.column === column) {
+                currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSort.column = column;
+                currentSort.direction = 'desc';
+            }
+
+            renderCitationTable(citationData);
+        });
+    });
+}
+
+// ============================================
+// CITED URLs TABLE (from Supabase)
+// ============================================
+let citedUrlsData = [];
+let citedUrlsSort = { column: 'citations', direction: 'desc' };
+let citedUrlsCurrentPage = 1;
+const citedUrlsPerPage = 15;
+let citedUrlsTotalCount = 0;
+
+async function fetchCitedUrls(dateFrom = null, dateTo = null, topic = 'all', domainType = 'all', domain = 'all', limit = 100, offset = 0) {
+    try {
+        const params = { p_limit: limit, p_offset: offset };
+
+        if (dateFrom) params.p_date_from = dateFrom;
+        if (dateTo) params.p_date_to = dateTo;
+        if (topic && topic !== 'all') params.p_tag = topic;
+        if (domainType && domainType !== 'all') params.p_domain_type = domainType;
+        if (domain && domain !== 'all') params.p_domain = domain;
+
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_cited_urls`, {
+            method: 'POST',
+            headers: {
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(params)
+        });
+
+        if (!response.ok) {
+            throw new Error(`Error fetching cited URLs: ${response.status}`);
+        }
+
+        const rawData = await response.json();
+
+        citedUrlsData = rawData.map(row => ({
+            source: row.source,
+            domain_type: row.domain_type,
+            type: mapDomainType(row.domain_type),
+            citations: row.citations || 0,
+            prompt_count: row.prompt_count || 0,
+            prompts: row.prompts || []
+        }));
+
+        console.log('Cited URLs loaded from Supabase:', citedUrlsData.length, 'URLs');
+        return citedUrlsData;
+
+    } catch (error) {
+        console.error('Error fetching cited URLs:', error);
+        return [];
+    }
+}
+
+async function fetchCitedUrlsCount(dateFrom = null, dateTo = null, topic = 'all', domainType = 'all', domain = 'all') {
+    try {
+        const params = {};
+        if (dateFrom) params.p_date_from = dateFrom;
+        if (dateTo) params.p_date_to = dateTo;
+        if (topic && topic !== 'all') params.p_tag = topic;
+        if (domainType && domainType !== 'all') params.p_domain_type = domainType;
+        if (domain && domain !== 'all') params.p_domain = domain;
+
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_cited_urls_count`, {
+            method: 'POST',
+            headers: {
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(params)
+        });
+
+        if (!response.ok) {
+            throw new Error(`Error fetching cited URLs count: ${response.status}`);
+        }
+
+        citedUrlsTotalCount = await response.json();
+        return citedUrlsTotalCount;
+
+    } catch (error) {
+        console.error('Error fetching cited URLs count:', error);
+        return 0;
+    }
+}
+
+async function loadCitedUrlsDomainFilter() {
+    try {
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_top_cited_domains`, {
+            method: 'POST',
+            headers: {
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ p_limit: 30 })
+        });
+
+        if (!response.ok) {
+            throw new Error(`Error fetching domains: ${response.status}`);
+        }
+
+        const domains = await response.json();
+        const select = document.getElementById('citedUrlsDomainFilter');
+
+        // Clear and add default option
+        select.innerHTML = '<option value="all" selected>All Domains</option>';
+
+        // Group by domain type
+        const byType = { 'Owned': [], 'Earned': [], 'Benchmark Competitors': [], 'Social': [], 'Other': [] };
+        domains.forEach(d => {
+            const type = d.domain_type || 'Other';
+            if (!byType[type]) byType[type] = [];
+            byType[type].push(d);
+        });
+
+        // Add optgroups
+        Object.entries(byType).forEach(([type, domainList]) => {
+            if (domainList.length === 0) return;
+            const optgroup = document.createElement('optgroup');
+            optgroup.label = type === 'Benchmark Competitors' ? 'Competitors' : type;
+
+            domainList.forEach(d => {
+                const option = document.createElement('option');
+                option.value = d.domain;
+                option.textContent = `${d.domain} (${d.citation_count.toLocaleString()})`;
+                optgroup.appendChild(option);
+            });
+
+            select.appendChild(optgroup);
+        });
+
+        console.log('Cited URLs domain filter loaded:', domains.length, 'domains');
+    } catch (error) {
+        console.warn('Could not load cited URLs domain filter:', error);
+    }
+}
+
+async function reloadCitedUrls() {
+    const dateRange = document.getElementById('dateRange').value;
+    const topicFilter = document.getElementById('topicFilter').value;
+    const domainTypeFilter = document.getElementById('domainTypeFilter').value; // Top-level filter
+    const domainFilter = document.getElementById('citedUrlsDomainFilter').value;
+    const countEl = document.getElementById('citedUrlsCount');
+
+    // Calculate date range
+    let dateFrom = null;
+    let dateTo = new Date().toISOString().split('T')[0];
+    if (dateRange !== 'all') {
+        const days = parseInt(dateRange);
+        const fromDate = new Date();
+        fromDate.setDate(fromDate.getDate() - days);
+        dateFrom = fromDate.toISOString().split('T')[0];
+    }
+
+    countEl.textContent = 'Loading...';
+    citedUrlsCurrentPage = 1;
+
+    try {
+        const [urls, total] = await Promise.all([
+            fetchCitedUrls(dateFrom, dateTo, topicFilter, domainTypeFilter, domainFilter, citedUrlsPerPage, 0),
+            fetchCitedUrlsCount(dateFrom, dateTo, topicFilter, domainTypeFilter, domainFilter)
+        ]);
+
+        countEl.textContent = `${total.toLocaleString()} URLs`;
+        renderCitedUrlsTable(urls);
+    } catch (error) {
+        console.error('Error reloading cited URLs:', error);
+        countEl.textContent = 'Error loading';
+    }
+}
+
+async function changeCitedUrlsPage(page) {
+    const dateRange = document.getElementById('dateRange').value;
+    const topicFilter = document.getElementById('topicFilter').value;
+    const domainTypeFilter = document.getElementById('domainTypeFilter').value; // Top-level filter
+    const domainFilter = document.getElementById('citedUrlsDomainFilter').value;
+
+    // Calculate date range
+    let dateFrom = null;
+    let dateTo = new Date().toISOString().split('T')[0];
+    if (dateRange !== 'all') {
+        const days = parseInt(dateRange);
+        const fromDate = new Date();
+        fromDate.setDate(fromDate.getDate() - days);
+        dateFrom = fromDate.toISOString().split('T')[0];
+    }
+
+    citedUrlsCurrentPage = page;
+    const offset = (page - 1) * citedUrlsPerPage;
+
+    const urls = await fetchCitedUrls(dateFrom, dateTo, topicFilter, domainTypeFilter, domainFilter, citedUrlsPerPage, offset);
+    renderCitedUrlsTable(urls);
+}
+
+function renderCitedUrlsTable(data) {
+    const tbody = document.getElementById('citedUrlsTableBody');
+    const pagination = document.getElementById('citedUrlsPagination');
+
+    if (!data || data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#666;padding:20px;">No cited URL data available</td></tr>';
+        pagination.innerHTML = '';
+        return;
+    }
+
+    // Sort data client-side (already sorted by citations from DB, but allow re-sorting)
+    const sorted = [...data].sort((a, b) => {
+        let aVal = a[citedUrlsSort.column];
+        let bVal = b[citedUrlsSort.column];
+
+        if (typeof aVal === 'string') {
+            aVal = aVal.toLowerCase();
+            bVal = bVal.toLowerCase();
+        }
+
+        if (citedUrlsSort.direction === 'asc') {
+            return aVal > bVal ? 1 : -1;
+        } else {
+            return aVal < bVal ? 1 : -1;
+        }
+    });
+
+    tbody.innerHTML = sorted.map(row => {
+        // Truncate URL for display
+        let displayUrl = row.source;
+        try {
+            const url = new URL(row.source);
+            displayUrl = url.hostname + (url.pathname.length > 30 ? url.pathname.substring(0, 30) + '...' : url.pathname);
+        } catch (e) {}
+
+        // Format prompts as a truncated string
+        const promptsArray = Array.isArray(row.prompts) ? row.prompts : [];
+        const promptsDisplay = promptsArray.length > 0
+            ? promptsArray.slice(0, 2).join(', ') + (promptsArray.length > 2 ? ` (+${promptsArray.length - 2} more)` : '')
+            : '-';
+
+        return `
+            <tr>
+                <td class="domain" title="${row.source}"><a href="${row.source}" target="_blank" style="color:var(--color-primary);text-decoration:none;">${displayUrl}</a></td>
+                <td><span class="source-type-badge ${row.type}">${row.type}</span></td>
+                <td class="numeric">${row.citations.toLocaleString()}</td>
+                <td style="font-size:12px;color:#666;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${promptsArray.join(', ')}">${promptsDisplay}</td>
+            </tr>
+        `;
+    }).join('');
+
+    // Render pagination
+    const totalPages = Math.ceil(citedUrlsTotalCount / citedUrlsPerPage);
+    if (totalPages > 1) {
+        let paginationHtml = '';
+        paginationHtml += `<button class="pagination-btn" ${citedUrlsCurrentPage === 1 ? 'disabled' : ''} onclick="changeCitedUrlsPage(${citedUrlsCurrentPage - 1})">&laquo; Prev</button>`;
+
+        for (let i = 1; i <= totalPages; i++) {
+            if (i === 1 || i === totalPages || (i >= citedUrlsCurrentPage - 1 && i <= citedUrlsCurrentPage + 1)) {
+                paginationHtml += `<button class="pagination-btn ${i === citedUrlsCurrentPage ? 'active' : ''}" onclick="changeCitedUrlsPage(${i})">${i}</button>`;
+            } else if (i === citedUrlsCurrentPage - 2 || i === citedUrlsCurrentPage + 2) {
+                paginationHtml += '<span style="padding: 6px;">...</span>';
+            }
+        }
+
+        paginationHtml += `<button class="pagination-btn" ${citedUrlsCurrentPage === totalPages ? 'disabled' : ''} onclick="changeCitedUrlsPage(${citedUrlsCurrentPage + 1})">Next &raquo;</button>`;
+        pagination.innerHTML = paginationHtml;
+    } else {
+        pagination.innerHTML = '';
+    }
+
+    // Update sort indicators for this table
+    document.querySelectorAll('#citedUrlsTable th').forEach(th => {
+        th.classList.remove('sort-asc', 'sort-desc');
+        if (th.dataset.sort === citedUrlsSort.column) {
+            th.classList.add(citedUrlsSort.direction === 'asc' ? 'sort-asc' : 'sort-desc');
+        }
+    });
+}
+
+function setupCitedUrlsTableSorting() {
+    document.querySelectorAll('#citedUrlsTable th[data-sort]').forEach(th => {
+        th.addEventListener('click', () => {
+            const column = th.dataset.sort;
+
+            if (citedUrlsSort.column === column) {
+                citedUrlsSort.direction = citedUrlsSort.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                citedUrlsSort.column = column;
+                citedUrlsSort.direction = 'desc';
+            }
+
+            renderCitedUrlsTable(citedUrlsData);
+        });
+    });
+}
+
+// ============================================
+// DOMAIN SENTIMENT ANALYSIS
+// ============================================
+let domainSentimentData = [];
+let domainSummarySort = { column: 'negative', direction: 'desc' };
+let domainSentimentChart, domainTypeChart;
+
+async function fetchDomainSentiment(topicFilter = null) {
+    try {
+        // Note: Topic filtering for domain sentiment requires pre-computed summaries
+        // For now, we return all data and filter will be applied at UI level when available
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/summary_domain_sentiment?order=unique_urls.desc`, {
+            headers: {
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`Error fetching domain sentiment: ${response.status}`);
+        }
+
+        const rawData = await response.json();
+
+        // Pivot data: group by domain and create positive/neutral/negative columns
+        const domainMap = {};
+        rawData.forEach(row => {
+            const domain = row.domain;
+            if (!domainMap[domain]) {
+                domainMap[domain] = {
+                    domain: domain,
+                    domain_type: row.domain_type,
+                    unique_urls: row.unique_urls || 0,
+                    positive: 0,
+                    neutral: 0,
+                    negative: 0
+                };
+            }
+            // Add counts based on sentiment type
+            if (row.sentiment === 'positive') {
+                domainMap[domain].positive = row.total_mentions || 0;
+            } else if (row.sentiment === 'neutral') {
+                domainMap[domain].neutral = row.total_mentions || 0;
+            } else if (row.sentiment === 'negative') {
+                domainMap[domain].negative = row.total_mentions || 0;
+            }
+        });
+
+        domainSentimentData = Object.values(domainMap);
+        console.log('Domain sentiment loaded and pivoted:', domainSentimentData.length, 'domains');
+        return domainSentimentData;
+
+    } catch (error) {
+        console.error('Error fetching domain sentiment:', error);
+        return [];
+    }
+}
+
+function renderDomainSentimentChart(data) {
+    const ctx = document.getElementById('domainSentimentChart').getContext('2d');
+
+    if (!data || data.length === 0) {
+        if (domainSentimentChart) domainSentimentChart.destroy();
+        ctx.font = '14px Samsung One';
+        ctx.fillStyle = '#666';
+        ctx.textAlign = 'center';
+        ctx.fillText('No domain sentiment data available', ctx.canvas.width / 2, ctx.canvas.height / 2);
+        return;
+    }
+
+    // Top 10 domains by total mentions, show sentiment breakdown
+    const sorted = [...data]
+        .map(d => ({
+            ...d,
+            total: (d.positive || 0) + (d.neutral || 0) + (d.negative || 0)
+        }))
+        .sort((a, b) => b.total - a.total)
+        .slice(0, 10);
+
+    const labels = sorted.map(d => d.domain);
+    const positiveData = sorted.map(d => d.positive || 0);
+    const neutralData = sorted.map(d => d.neutral || 0);
+    const negativeData = sorted.map(d => d.negative || 0);
+
+    if (domainSentimentChart) domainSentimentChart.destroy();
+
+    domainSentimentChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Positive',
+                    data: positiveData,
+                    backgroundColor: ACCENT_COLORS.green,
+                    borderRadius: 0
+                },
+                {
+                    label: 'Neutral',
+                    data: neutralData,
+                    backgroundColor: SEMANTIC_COLORS.neutral,
+                    borderRadius: 0
+                },
+                {
+                    label: 'Negative',
+                    data: negativeData,
+                    backgroundColor: ACCENT_COLORS.red,
+                    borderRadius: 0
+                }
+            ]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 16,
+                        font: { family: "'Samsung One', sans-serif", size: 12 }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const dataIndex = context.dataIndex;
+                            const total = positiveData[dataIndex] + neutralData[dataIndex] + negativeData[dataIndex];
+                            const value = context.raw;
+                            const pct = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                            return `${context.dataset.label}: ${value.toLocaleString()} (${pct}%)`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    stacked: true,
+                    beginAtZero: true,
+                    grid: { color: '#e8e8e8' }
+                },
+                y: {
+                    stacked: true,
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+}
+
+function renderDomainTypeChart(data) {
+    const ctx = document.getElementById('domainTypeChart').getContext('2d');
+
+    if (!data || data.length === 0) {
+        if (domainTypeChart) domainTypeChart.destroy();
+        ctx.font = '14px Samsung One';
+        ctx.fillStyle = '#666';
+        ctx.textAlign = 'center';
+        ctx.fillText('No domain type data available', ctx.canvas.width / 2, ctx.canvas.height / 2);
+        return;
+    }
+
+    // Aggregate by domain_type
+    const typeAgg = {};
+    data.forEach(d => {
+        const type = d.domain_type || 'Other';
+        if (!typeAgg[type]) {
+            typeAgg[type] = { positive: 0, neutral: 0, negative: 0 };
+        }
+        typeAgg[type].positive += d.positive || 0;
+        typeAgg[type].neutral += d.neutral || 0;
+        typeAgg[type].negative += d.negative || 0;
+    });
+
+    const types = ['Owned', 'Earned', 'Benchmark Competitors', 'Other'].filter(t => typeAgg[t]);
+    const typeLabels = types.map(t => t === 'Benchmark Competitors' ? 'Competitors' : t);
+
+    if (domainTypeChart) domainTypeChart.destroy();
+
+    domainTypeChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: typeLabels,
+            datasets: [
+                {
+                    label: 'Positive',
+                    data: types.map(t => typeAgg[t]?.positive || 0),
+                    backgroundColor: ACCENT_COLORS.green,
+                    borderRadius: 4
+                },
+                {
+                    label: 'Neutral',
+                    data: types.map(t => typeAgg[t]?.neutral || 0),
+                    backgroundColor: SEMANTIC_COLORS.neutral,
+                    borderRadius: 4
+                },
+                {
+                    label: 'Negative',
+                    data: types.map(t => typeAgg[t]?.negative || 0),
+                    backgroundColor: ACCENT_COLORS.red,
+                    borderRadius: 4
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 16,
+                        font: { family: "'Samsung One', sans-serif", size: 12 }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    stacked: true,
+                    grid: { display: false }
+                },
+                y: {
+                    stacked: true,
+                    beginAtZero: true,
+                    grid: { color: '#e8e8e8' }
+                }
+            }
+        }
+    });
+}
+
+function renderDomainSummaryTable(data) {
+    const tbody = document.getElementById('domainSummaryBody');
+
+    if (!data || data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#666;padding:20px;">No domain sentiment data available</td></tr>';
+        return;
+    }
+
+    // Calculate totals and sort
+    const processed = data.map(d => ({
+        ...d,
+        total: (d.positive || 0) + (d.neutral || 0) + (d.negative || 0),
+        negative_pct: d.negative && ((d.positive || 0) + (d.neutral || 0) + (d.negative || 0)) > 0
+            ? (d.negative / ((d.positive || 0) + (d.neutral || 0) + (d.negative || 0)) * 100)
+            : 0
+    }));
+
+    const sorted = [...processed].sort((a, b) => {
+        let aVal = a[domainSummarySort.column];
+        let bVal = b[domainSummarySort.column];
+
+        if (typeof aVal === 'string') {
+            aVal = aVal.toLowerCase();
+            bVal = bVal.toLowerCase();
+        }
+
+        if (domainSummarySort.direction === 'asc') {
+            return aVal > bVal ? 1 : -1;
+        } else {
+            return aVal < bVal ? 1 : -1;
+        }
+    });
+
+    const top15 = sorted.slice(0, 15);
+
+    tbody.innerHTML = top15.map(row => {
+        const domainType = mapDomainType(row.domain_type);
+        const negPctClass = row.negative_pct > 20 ? 'negative' : row.negative_pct > 10 ? 'neutral' : 'positive';
+
+        return `
+            <tr>
+                <td class="domain">${row.domain}</td>
+                <td><span class="source-type-badge ${domainType}">${domainType}</span></td>
+                <td class="numeric">${(row.unique_urls || 0).toLocaleString()}</td>
+                <td class="numeric"><span class="sentiment-badge positive">${(row.positive || 0).toLocaleString()}</span></td>
+                <td class="numeric"><span class="sentiment-badge neutral">${(row.neutral || 0).toLocaleString()}</span></td>
+                <td class="numeric"><span class="sentiment-badge negative">${(row.negative || 0).toLocaleString()}</span></td>
+                <td class="numeric"><span class="sentiment-badge ${negPctClass}">${row.negative_pct.toFixed(1)}%</span></td>
+            </tr>
+        `;
+    }).join('');
+
+    // Update sort indicators
+    document.querySelectorAll('#domainSummaryTable th').forEach(th => {
+        th.classList.remove('sort-asc', 'sort-desc');
+        if (th.dataset.sort === domainSummarySort.column) {
+            th.classList.add(domainSummarySort.direction === 'asc' ? 'sort-asc' : 'sort-desc');
+        }
+    });
+}
+
+function setupDomainSummarySorting() {
+    document.querySelectorAll('#domainSummaryTable th[data-sort]').forEach(th => {
+        th.addEventListener('click', () => {
+            const column = th.dataset.sort;
+
+            if (domainSummarySort.column === column) {
+                domainSummarySort.direction = domainSummarySort.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                domainSummarySort.column = column;
+                domainSummarySort.direction = 'desc';
+            }
+
+            renderDomainSummaryTable(domainSentimentData);
+        });
+    });
+}
+
+// ============================================
+// PR ACTION CENTER (Negative Quotes)
+// ============================================
+let negativeQuotesData = [];
+let quotesCurrentPage = 1;
+const quotesPerPage = 10;
+let negativeConceptsChart, negativeByDomainChart;
+
+async function fetchNegativeQuotes(limit = 100, domain = null, concept = null, tag = null) {
+    try {
+        // Use RPC function for performance
+        const params = { p_limit: limit };
+        if (domain && domain !== 'all') {
+            params.p_domain = domain;
+        }
+        if (concept && concept !== 'all') {
+            params.p_concept = concept;
+        }
+        if (tag && tag !== 'all') {
+            params.p_tag = tag;
+        }
+
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_negative_quotes`, {
+            method: 'POST',
+            headers: {
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(params)
+        });
+
+        if (!response.ok) {
+            throw new Error(`Error fetching negative quotes: ${response.status}`);
+        }
+
+        negativeQuotesData = await response.json();
+        console.log('Negative quotes loaded:', negativeQuotesData.length);
+        return negativeQuotesData;
+
+    } catch (error) {
+        console.error('Error fetching negative quotes:', error);
+        return [];
+    }
+}
+
+// Populate PR Action Center domain filter
+async function loadPRDomainFilter() {
+    try {
+        // Get domains with negative sentiment
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/summary_domain_sentiment?sentiment=eq.negative&total_mentions=gt.10&order=total_mentions.desc&limit=20`, {
+            headers: {
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`Error fetching PR domains: ${response.status}`);
+        }
+
+        const domains = await response.json();
+        const select = document.getElementById('prDomainFilter');
+
+        // Clear existing options except "All Domains"
+        select.innerHTML = '<option value="all" selected>All Domains</option>';
+
+        // Group by domain type
+        const byType = { 'Earned': [], 'Owned': [], 'Benchmark Competitors': [], 'Other': [] };
+        domains.forEach(d => {
+            const type = d.domain_type || 'Other';
+            if (!byType[type]) byType[type] = [];
+            byType[type].push(d);
+        });
+
+        // Add optgroups
+        Object.entries(byType).forEach(([type, domainList]) => {
+            if (domainList.length === 0) return;
+            const optgroup = document.createElement('optgroup');
+            optgroup.label = type === 'Benchmark Competitors' ? 'Competitors' : type;
+
+            domainList.forEach(d => {
+                const option = document.createElement('option');
+                option.value = d.domain;
+                option.textContent = `${d.domain} (${d.total_mentions})`;
+                optgroup.appendChild(option);
+            });
+
+            select.appendChild(optgroup);
+        });
+
+        console.log('PR domain filter loaded:', domains.length, 'domains');
+    } catch (error) {
+        console.warn('Could not load PR domain filter:', error);
+    }
+}
+
+// Populate PR Action Center concept filter
+async function loadPRConceptFilter() {
+    try {
+        // Get top negative concepts
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_concept_sentiment_summary`, {
+            method: 'POST',
+            headers: {
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ p_limit: 50 })
+        });
+
+        if (!response.ok) {
+            throw new Error(`Error fetching PR concepts: ${response.status}`);
+        }
+
+        const concepts = await response.json();
+        const select = document.getElementById('prConceptFilter');
+
+        // Clear existing options except "All Concepts"
+        select.innerHTML = '<option value="all" selected>All Concepts</option>';
+
+        // Filter to concepts with negative mentions and sort by negative count
+        const negativeConcepts = concepts
+            .filter(c => c.negative > 0)
+            .sort((a, b) => b.negative - a.negative)
+            .slice(0, 30);
+
+        negativeConcepts.forEach(c => {
+            const option = document.createElement('option');
+            option.value = c.concept;
+            option.textContent = `${c.concept} (${c.negative} negative)`;
+            select.appendChild(option);
+        });
+
+        console.log('PR concept filter loaded:', negativeConcepts.length, 'concepts');
+    } catch (error) {
+        console.warn('Could not load PR concept filter:', error);
+    }
+}
+
+// Reload just the PR Action Center section when filters change
+async function reloadPRActionCenter() {
+    const domainFilter = document.getElementById('prDomainFilter').value;
+    const conceptFilter = document.getElementById('prConceptFilter').value;
+    const countEl = document.getElementById('prQuoteCount');
+
+    // Show loading indicator
+    countEl.textContent = 'Loading...';
+
+    try {
+        const domain = domainFilter === 'all' ? null : domainFilter;
+        const concept = conceptFilter === 'all' ? null : conceptFilter;
+        const quotes = await fetchNegativeQuotes(100, domain, concept);
+
+        // Update count display
+        let filterDesc = [];
+        if (domain) filterDesc.push(domain);
+        if (concept) filterDesc.push(`"${concept}"`);
+
+        if (filterDesc.length === 0) {
+            countEl.textContent = `${quotes.length} quotes`;
+        } else {
+            countEl.textContent = `${quotes.length} quotes for ${filterDesc.join(' + ')}`;
+        }
+
+        // Re-render the PR Action Center charts and table
+        renderNegativeConceptsChart(quotes);
+        renderNegativeByDomainChart(quotes);
+        renderQuoteBrowser(quotes, 1);
+
+    } catch (error) {
+        console.error('Error reloading PR Action Center:', error);
+        countEl.textContent = 'Error loading';
+    }
+}
+
+function renderNegativeConceptsChart(data) {
+    const ctx = document.getElementById('negativeConceptsChart').getContext('2d');
+
+    if (!data || data.length === 0) {
+        if (negativeConceptsChart) negativeConceptsChart.destroy();
+        ctx.font = '14px Samsung One';
+        ctx.fillStyle = '#666';
+        ctx.textAlign = 'center';
+        ctx.fillText('No negative concepts data', ctx.canvas.width / 2, ctx.canvas.height / 2);
+        return;
+    }
+
+    // Count concepts in negative quotes
+    const conceptCounts = {};
+    data.forEach(q => {
+        const concept = q.concept || 'Unknown';
+        conceptCounts[concept] = (conceptCounts[concept] || 0) + 1;
+    });
+
+    const sorted = Object.entries(conceptCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 10);
+
+    const labels = sorted.map(([concept]) => concept);
+    const values = sorted.map(([, count]) => count);
+
+    if (negativeConceptsChart) negativeConceptsChart.destroy();
+
+    negativeConceptsChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Negative Mentions',
+                data: values,
+                backgroundColor: ACCENT_COLORS.red,
+                borderRadius: 4
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    grid: { color: '#e8e8e8' }
+                },
+                y: {
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+}
+
+function renderNegativeByDomainChart(data) {
+    const ctx = document.getElementById('negativeByDomainChart').getContext('2d');
+
+    if (!data || data.length === 0) {
+        if (negativeByDomainChart) negativeByDomainChart.destroy();
+        ctx.font = '14px Samsung One';
+        ctx.fillStyle = '#666';
+        ctx.textAlign = 'center';
+        ctx.fillText('No negative coverage data', ctx.canvas.width / 2, ctx.canvas.height / 2);
+        return;
+    }
+
+    // Count by prompt (which topics generate negative sentiment)
+    const promptCounts = {};
+    data.forEach(q => {
+        const prompt = q.prompt || 'Unknown';
+        promptCounts[prompt] = (promptCounts[prompt] || 0) + 1;
+    });
+
+    const sorted = Object.entries(promptCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 10);
+
+    // Truncate long prompts for display
+    const labels = sorted.map(([prompt]) => prompt.length > 25 ? prompt.substring(0, 25) + '...' : prompt);
+    const values = sorted.map(([, count]) => count);
+
+    if (negativeByDomainChart) negativeByDomainChart.destroy();
+
+    negativeByDomainChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Negative Quotes',
+                data: values,
+                backgroundColor: ACCENT_COLORS.yellow,
+                borderRadius: 4
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    grid: { color: '#e8e8e8' }
+                },
+                y: {
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+}
+
+function renderQuoteBrowser(data, page = 1) {
+    const tbody = document.getElementById('quoteBrowserBody');
+    const pagination = document.getElementById('quotePagination');
+
+    if (!data || data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#666;padding:20px;">No negative quotes found</td></tr>';
+        pagination.innerHTML = '';
+        return;
+    }
+
+    const totalPages = Math.ceil(data.length / quotesPerPage);
+    const startIdx = (page - 1) * quotesPerPage;
+    const pageData = data.slice(startIdx, startIdx + quotesPerPage);
+
+    tbody.innerHTML = pageData.map(row => {
+        const date = row.date ? new Date(row.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '-';
+        const quote = row.quote || '-';
+        const truncatedQuote = quote.length > 150 ? quote.substring(0, 150) + '...' : quote;
+        const promptDisplay = row.prompt ? (row.prompt.length > 35 ? row.prompt.substring(0, 35) + '...' : row.prompt) : '-';
+
+        return `
+            <tr>
+                <td class="domain" title="${row.prompt || ''}">${promptDisplay}</td>
+                <td>${row.concept || '-'}</td>
+                <td class="quote-cell expandable" title="${quote.replace(/"/g, '&quot;')}">${truncatedQuote}</td>
+                <td>${date}</td>
+            </tr>
+        `;
+    }).join('');
+
+    // Render pagination
+    let paginationHtml = '';
+    paginationHtml += `<button class="pagination-btn" ${page === 1 ? 'disabled' : ''} onclick="changeQuotesPage(${page - 1})">&laquo; Prev</button>`;
+
+    for (let i = 1; i <= totalPages; i++) {
+        if (i === 1 || i === totalPages || (i >= page - 1 && i <= page + 1)) {
+            paginationHtml += `<button class="pagination-btn ${i === page ? 'active' : ''}" onclick="changeQuotesPage(${i})">${i}</button>`;
+        } else if (i === page - 2 || i === page + 2) {
+            paginationHtml += '<span style="padding: 6px;">...</span>';
+        }
+    }
+
+    paginationHtml += `<button class="pagination-btn" ${page === totalPages ? 'disabled' : ''} onclick="changeQuotesPage(${page + 1})">Next &raquo;</button>`;
+
+    pagination.innerHTML = paginationHtml;
+}
+
+function changeQuotesPage(page) {
+    quotesCurrentPage = page;
+    renderQuoteBrowser(negativeQuotesData, page);
+}
+
+function exportQuotesToCSV() {
+    if (!negativeQuotesData || negativeQuotesData.length === 0) {
+        alert('No quotes to export');
+        return;
+    }
+
+    const domainFilter = document.getElementById('prDomainFilter').value;
+    const conceptFilter = document.getElementById('prConceptFilter').value;
+    const headers = ['Prompt', 'Concept', 'Quote', 'Date'];
+
+    // Add filter columns if active
+    if (domainFilter !== 'all') {
+        headers.unshift('Domain');
+    }
+
+    const rows = negativeQuotesData.map(q => {
+        const row = [
+            q.prompt || '',
+            q.concept || '',
+            (q.quote || '').replace(/"/g, '""'),
+            q.date || ''
+        ];
+        if (domainFilter !== 'all') {
+            row.unshift(domainFilter);
+        }
+        return row;
+    });
+
+    const csvContent = [
+        headers.join(','),
+        ...rows.map(r => r.map(cell => `"${cell}"`).join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+
+    // Build filename with active filters
+    let filenameParts = ['samsung_negative_quotes'];
+    if (domainFilter !== 'all') {
+        filenameParts.push(domainFilter.replace(/\./g, '_').replace(/^www_/, ''));
+    }
+    if (conceptFilter !== 'all') {
+        filenameParts.push(conceptFilter.replace(/\s+/g, '_'));
+    }
+    filenameParts.push(new Date().toISOString().split('T')[0]);
+
+    link.download = filenameParts.join('_') + '.csv';
+    link.href = URL.createObjectURL(blob);
+    link.click();
+}
+
+// ============================================
+// CONCEPT ANALYSIS
+// ============================================
+let conceptSentimentData = [];
+let positiveConceptsChart, conceptMixChart;
+
+async function fetchConceptSentiment(tag = null) {
+    try {
+        // Use RPC function for performance
+        const params = { p_limit: 50 };
+        if (tag && tag !== 'all') {
+            params.p_tag = tag;
+        }
+
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_concept_sentiment_summary`, {
+            method: 'POST',
+            headers: {
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(params)
+        });
+
+        if (!response.ok) {
+            throw new Error(`Error fetching concept sentiment: ${response.status}`);
+        }
+
+        const rawData = await response.json();
+        // Ensure numeric types (database returns bigint as string in some cases)
+        conceptSentimentData = rawData.map(d => ({
+            concept: d.concept,
+            positive: Number(d.positive) || 0,
+            neutral: Number(d.neutral) || 0,
+            negative: Number(d.negative) || 0,
+            total: Number(d.total) || 0
+        }));
+        console.log('Concept sentiment loaded:', conceptSentimentData.length, 'concepts');
+        return conceptSentimentData;
+
+    } catch (error) {
+        console.error('Error fetching concept sentiment:', error);
+        return [];
+    }
+}
+
+function renderPositiveConceptsChart(data) {
+    const ctx = document.getElementById('positiveConceptsChart').getContext('2d');
+
+    if (!data || data.length === 0) {
+        if (positiveConceptsChart) positiveConceptsChart.destroy();
+        ctx.font = '14px Samsung One';
+        ctx.fillStyle = '#666';
+        ctx.textAlign = 'center';
+        ctx.fillText('No concept data available', ctx.canvas.width / 2, ctx.canvas.height / 2);
+        return;
+    }
+
+    // Sort by positive count
+    const sorted = [...data]
+        .filter(d => d.positive > 0)
+        .sort((a, b) => b.positive - a.positive)
+        .slice(0, 10);
+
+    const labels = sorted.map(d => d.concept);
+    const values = sorted.map(d => d.positive);
+
+    if (positiveConceptsChart) positiveConceptsChart.destroy();
+
+    positiveConceptsChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Positive Mentions',
+                data: values,
+                backgroundColor: ACCENT_COLORS.green,
+                borderRadius: 4
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    grid: { color: '#e8e8e8' }
+                },
+                y: {
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+}
+
+function renderConceptMixChart(data) {
+    const ctx = document.getElementById('conceptMixChart').getContext('2d');
+
+    if (!data || data.length === 0) {
+        if (conceptMixChart) conceptMixChart.destroy();
+        ctx.font = '14px Samsung One';
+        ctx.fillStyle = '#666';
+        ctx.textAlign = 'center';
+        ctx.fillText('No concept mix data available', ctx.canvas.width / 2, ctx.canvas.height / 2);
+        return;
+    }
+
+    // Sort by total, show sentiment breakdown
+    const sorted = [...data]
+        .sort((a, b) => b.total - a.total)
+        .slice(0, 10);
+
+    const labels = sorted.map(d => d.concept);
+    const positiveData = sorted.map(d => d.positive);
+    const neutralData = sorted.map(d => d.neutral);
+    const negativeData = sorted.map(d => d.negative);
+
+    if (conceptMixChart) conceptMixChart.destroy();
+
+    conceptMixChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Positive',
+                    data: positiveData,
+                    backgroundColor: ACCENT_COLORS.green,
+                    borderRadius: 0
+                },
+                {
+                    label: 'Neutral',
+                    data: neutralData,
+                    backgroundColor: SEMANTIC_COLORS.neutral,
+                    borderRadius: 0
+                },
+                {
+                    label: 'Negative',
+                    data: negativeData,
+                    backgroundColor: ACCENT_COLORS.red,
+                    borderRadius: 0
+                }
+            ]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 16,
+                        font: { family: "'Samsung One', sans-serif", size: 12 }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    stacked: true,
+                    beginAtZero: true,
+                    grid: { color: '#e8e8e8' }
+                },
+                y: {
+                    stacked: true,
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+}
+
+// ============================================
+// UI UPDATES
+// ============================================
+function updateKPICard(id, value, change = null, isPositiveGood = true) {
+    document.getElementById(`kpi-${id}`).textContent = value;
+
+    const changeEl = document.getElementById(`kpi-${id}-change`);
+    if (change !== null) {
+        const isPositive = parseFloat(change) > 0;
+        const isNeutral = parseFloat(change) === 0;
+
+        if (isNeutral) {
+            changeEl.className = 'change-badge neutral';
+            changeEl.textContent = 'No change';
+        } else {
+            changeEl.className = `change-badge ${(isPositive === isPositiveGood) ? 'increase-good' : 'decrease-bad'}`;
+            changeEl.innerHTML = `<span class="arrow">${isPositive ? '&#8599;' : '&#8600;'}</span> ${isPositive ? '+' : ''}${change}`;
+        }
+        changeEl.style.display = '';
+    } else {
+        // Hide change badge when no change data available
+        changeEl.style.display = 'none';
+    }
+}
+
+// ============================================
+// MAIN DASHBOARD LOGIC
+// ============================================
+async function loadDashboard() {
+    const dateRange = document.getElementById('dateRange').value;
+    const modelFilter = document.getElementById('modelFilter').value;
+    const topicFilter = document.getElementById('topicFilter').value;
+    const domainTypeFilter = document.getElementById('domainTypeFilter').value;
+    const sentimentFilter = document.getElementById('sentimentFilter').value;
+
+    const dateFrom = getDateFilter(dateRange);
+
+    try {
+        console.log('Loading dashboard with dateRange:', dateRange, 'model:', modelFilter, 'topic:', topicFilter, 'domainType:', domainTypeFilter, 'sentiment:', sentimentFilter);
+
+        // Show loading state
+        document.querySelectorAll('.chart-container').forEach(el => {
+            if (!el.classList.contains('loading')) {
+                el.classList.add('loading');
+            }
+        });
+
+        // Fetch prompts matching the topic filter (for client-side filtering)
+        const topicPrompts = await fetchPromptsByTag(topicFilter);
+        console.log('Topic filter prompts:', topicPrompts ? topicPrompts.size : 'all');
+
+        // Calculate date range for cited URLs
+        const citedUrlsDomainFilter = document.getElementById('citedUrlsDomainFilter').value;
+        let dateTo = new Date().toISOString().split('T')[0];
+
+        // Fetch aggregated data using RPC functions
+        const [dailyData, topCategories, citations, topicsTree, citedUrls, citedUrlsCount, domainSentiment, negativeQuotes, conceptSentiment, samsungCountryCitations] = await Promise.all([
+            fetchDailyMentions(dateFrom, modelFilter),
+            fetchTopCategories(dateFrom, modelFilter, 10),
+            fetchCitationSources(dateFrom, modelFilter, topicFilter),
+            fetchTopicsTreeData(),
+            fetchCitedUrls(dateFrom, dateTo, topicFilter, domainTypeFilter, citedUrlsDomainFilter, citedUrlsPerPage, 0),
+            fetchCitedUrlsCount(dateFrom, dateTo, topicFilter, domainTypeFilter, citedUrlsDomainFilter),
+            fetchDomainSentiment(topicFilter),
+            fetchNegativeQuotes(100, null, null, topicFilter),
+            fetchConceptSentiment(topicFilter),
+            fetchSamsungCountryCitations()
+        ]);
+
+        // Update cited URLs count display
+        citedUrlsCurrentPage = 1;
+        document.getElementById('citedUrlsCount').textContent = `${citedUrlsCount.toLocaleString()} URLs`;
+
+        console.log('Daily data received:', dailyData.length, 'rows');
+        console.log('Domain sentiment received:', domainSentiment.length, 'domains');
+        console.log('Negative quotes received:', negativeQuotes.length, 'quotes');
+        console.log('Concept sentiment received:', conceptSentiment.length, 'concepts');
+        console.log('Sample daily row:', dailyData[0]);
+        console.log('Sample domain sentiment row:', domainSentiment[0]);
+
+        // Check unique dates and models
+        const uniqueDates = [...new Set(dailyData.map(r => r.date))].sort();
+        const uniqueModels = [...new Set(dailyData.map(r => r.model))];
+        console.log('Unique dates:', uniqueDates.length, 'from', uniqueDates[0], 'to', uniqueDates[uniqueDates.length-1]);
+        console.log('Unique models:', uniqueModels);
+
+        if (dailyData.length === 0) {
+            console.warn('No data returned from Supabase');
+            return;
+        }
+
+        // Apply domain type filter to domain sentiment data
+        let filteredDomainSentiment = domainSentiment;
+        if (domainTypeFilter !== 'all') {
+            filteredDomainSentiment = domainSentiment.filter(d => d.domain_type === domainTypeFilter);
+        }
+        // Update global for sorting functions
+        domainSentimentData = filteredDomainSentiment;
+
+        // Apply sentiment filter to quotes
+        let filteredQuotes = negativeQuotes;
+        if (sentimentFilter !== 'all' && sentimentFilter !== 'negative') {
+            filteredQuotes = []; // PR Action Center only shows negative
+        }
+        // Update global for pagination
+        negativeQuotesData = filteredQuotes;
+
+        // Calculate KPIs
+        const kpis = calculateKPIs(dailyData);
+        console.log('KPIs calculated:', kpis);
+
+        // Update KPI cards with change indicators
+        updateKPICard('sov', `${kpis.shareOfVoice}%`, `${kpis.shareOfVoiceChange}%`, true);
+        updateKPICard('visibility', kpis.visibilityScore, `${kpis.visibilityChange}%`, true);
+        updateKPICard('sentiment', `${kpis.sentimentScore}%`, `${kpis.sentimentChange}pp`, true);
+        updateKPICard('mentions', kpis.totalMentionsFormatted, `${kpis.mentionsChange}%`, true);
+
+        // Remove loading state
+        document.querySelectorAll('.chart-container').forEach(el => {
+            el.classList.remove('loading');
+        });
+
+        // Render charts
+        console.log('Rendering charts...');
+
+        // Domain Sentiment Analysis section
+        renderDomainSentimentChart(filteredDomainSentiment);
+        renderDomainTypeChart(domainSentiment); // Always show all types for comparison
+        renderDomainSummaryTable(filteredDomainSentiment);
+
+        // Original charts
+        renderSOVChart(kpis.brandMentions, kpis.modelMentions);
+        renderSentimentChart(kpis.sentiment);
+        renderModelChart(dailyData);
+        renderTrendChart(dailyData);
+
+        // PR Action Center
+        renderNegativeConceptsChart(filteredQuotes);
+        renderNegativeByDomainChart(filteredQuotes);
+        renderQuoteBrowser(filteredQuotes, 1);
+
+        // Concept Analysis
+        renderPositiveConceptsChart(conceptSentiment);
+        renderConceptMixChart(conceptSentiment);
+
+        // Topics tree table and citation tables
+        renderTopicsTree(topicsTree);
+        renderCitationTable(citations);
+        renderSamsungCountryChart(samsungCountryCitations);
+        renderCitedUrlsTable(citedUrls);
+
+        console.log('Charts rendered');
+
+    } catch (error) {
+        console.error('Error loading dashboard:', error);
+        alert('Error loading data: ' + error.message);
+    }
+}
+
+// Event listeners
+document.getElementById('dateRange').addEventListener('change', loadDashboard);
+document.getElementById('modelFilter').addEventListener('change', loadDashboard);
+document.getElementById('topicFilter').addEventListener('change', loadDashboard);
+document.getElementById('domainTypeFilter').addEventListener('change', loadDashboard);
+document.getElementById('sentimentFilter').addEventListener('change', loadDashboard);
+
+// Initial load
+document.addEventListener('DOMContentLoaded', async () => {
+    await loadTopicFilter();
+    await loadPRDomainFilter();
+    await loadPRConceptFilter();
+    await loadCitedUrlsDomainFilter();
+    setupTableSorting();
+    setupCitedUrlsTableSorting();
+    setupDomainSummarySorting();
+
+    // Export button for quotes
+    document.getElementById('exportQuotesBtn').addEventListener('click', exportQuotesToCSV);
+
+    // PR Action Center filters
+    document.getElementById('prDomainFilter').addEventListener('change', reloadPRActionCenter);
+    document.getElementById('prConceptFilter').addEventListener('change', reloadPRActionCenter);
+
+    // Cited URLs filter
+    document.getElementById('citedUrlsDomainFilter').addEventListener('change', reloadCitedUrls);
+
+    // Topics tree expand/collapse buttons
+    document.getElementById('expandAllTopics').addEventListener('click', expandAllTopics);
+    document.getElementById('collapseAllTopics').addEventListener('click', collapseAllTopics);
+
+    // Make quote cells expandable on click
+    document.getElementById('quoteBrowserBody').addEventListener('click', (e) => {
+        const cell = e.target.closest('.quote-cell.expandable');
+        if (cell) {
+            cell.classList.toggle('expanded');
+        }
+    });
+
+    loadDashboard();
+});
+    </script>
+</body>
+</html>
