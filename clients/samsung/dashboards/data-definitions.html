@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Data Definitions | Samsung GEO Dashboard</title>
+    <style>
+/* === Fonts === */
+@font-face {
+    font-family: 'Samsung Sharp Sans';
+    src: url('./fonts/SamsungSharpSansBd.woff2') format('woff2'),
+         url('./fonts/SamsungSharpSans-Bold.ttf') format('truetype');
+    font-weight: 700;
+}
+@font-face {
+    font-family: 'Samsung One';
+    src: url('./fonts/SamsungOneLatinWeb-400.woff2') format('woff2'),
+         url('./fonts/SamsungOneLatinCompact-400.ttf') format('truetype');
+    font-weight: 400;
+}
+
+/* === Design Tokens === */
+:root {
+    /* Brand */
+    --color-primary: #1428A0;
+    --color-primary-light: #8091df;
+
+    /* Accent Palette */
+    --color-accent-blue: #0277c6;
+    --color-accent-cyan: #02b2e4;
+    --color-accent-teal: #01c3b0;
+    --color-accent-purple: #8091df;
+    --color-accent-green: #96d551;
+    --color-accent-yellow: #feb447;
+    --color-accent-red: #ff4438;
+
+    /* Backgrounds */
+    --color-bg-page: #f8f9fa;
+    --color-bg-header: #f7f7f7;
+    --color-bg-card: #ffffff;
+
+    /* Text */
+    --color-text-primary: #000000;
+    --color-text-secondary: #666666;
+    --color-text-link: #1428A0;
+
+    /* Borders */
+    --color-border: #e0e0e0;
+    --color-border-accent: #1428A0;
+
+    /* Typography */
+    --font-display: 'Samsung Sharp Sans', sans-serif;
+    --font-body: 'Samsung One', -apple-system, sans-serif;
+    --font-size-xs: 11px;
+    --font-size-sm: 12px;
+    --font-size-base: 14px;
+    --font-size-md: 16px;
+    --font-size-lg: 18px;
+    --font-size-xl: 24px;
+    --font-size-2xl: 28px;
+
+    /* Spacing */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 12px;
+    --spacing-lg: 16px;
+    --spacing-xl: 20px;
+    --spacing-2xl: 24px;
+    --spacing-3xl: 32px;
+
+    /* Layout */
+    --max-width: 1000px;
+    --header-logo-height: 36px;
+
+    /* Radius */
+    --radius-sm: 4px;
+    --radius-md: 6px;
+    --radius-lg: 8px;
+    --radius-xl: 12px;
+
+    /* Shadows */
+    --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: var(--font-body);
+    background: var(--color-bg-page);
+    color: var(--color-text-primary);
+    line-height: 1.6;
+}
+
+/* === Header === */
+header {
+    background: var(--color-bg-header);
+    border-bottom: 3px solid var(--color-border-accent);
+    box-shadow: var(--shadow-sm);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.header-content {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: var(--spacing-lg) var(--spacing-2xl);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-title {
+    font-family: var(--font-display);
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    color: var(--color-primary);
+}
+
+.header-logo {
+    height: var(--header-logo-height);
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    font-size: var(--font-size-sm);
+    transition: color 0.2s;
+}
+
+.back-link:hover {
+    color: var(--color-primary);
+}
+
+/* === Container === */
+.container {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: var(--spacing-2xl);
+}
+
+/* === Table of Contents === */
+.toc {
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-xl);
+    margin-bottom: var(--spacing-3xl);
+}
+
+.toc-title {
+    font-family: var(--font-display);
+    font-size: var(--font-size-md);
+    font-weight: 700;
+    color: var(--color-primary);
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 2px solid var(--color-border-accent);
+}
+
+.toc-list {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-sm) var(--spacing-xl);
+}
+
+.toc-list a {
+    color: var(--color-text-primary);
+    text-decoration: none;
+    font-size: var(--font-size-base);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-xs) 0;
+    transition: color 0.2s;
+}
+
+.toc-list a:hover {
+    color: var(--color-primary);
+}
+
+.toc-list a::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: var(--color-accent-purple);
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+/* === Section Styles === */
+.section {
+    margin-bottom: var(--spacing-3xl);
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-xl);
+    padding-bottom: var(--spacing-md);
+    border-bottom: 2px solid var(--color-border-accent);
+}
+
+.section-icon {
+    width: 40px;
+    height: 40px;
+    background: var(--color-primary);
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 18px;
+}
+
+.section-title {
+    font-family: var(--font-display);
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    color: var(--color-primary);
+}
+
+.section-description {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-base);
+    margin-bottom: var(--spacing-xl);
+}
+
+/* === Definition Card === */
+.definition-card {
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-xl);
+    margin-bottom: var(--spacing-lg);
+    transition: box-shadow 0.2s;
+}
+
+.definition-card:hover {
+    box-shadow: var(--shadow-md);
+}
+
+.definition-card:last-child {
+    margin-bottom: 0;
+}
+
+.definition-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-md);
+}
+
+.definition-name {
+    font-family: var(--font-display);
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.definition-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.definition-badge.kpi {
+    background: rgba(20, 40, 160, 0.1);
+    color: var(--color-primary);
+}
+
+.definition-badge.metric {
+    background: rgba(150, 213, 81, 0.2);
+    color: #2e7d32;
+}
+
+.definition-badge.derived {
+    background: rgba(254, 180, 71, 0.2);
+    color: #b47800;
+}
+
+.definition-field {
+    margin-bottom: var(--spacing-md);
+}
+
+.definition-field:last-child {
+    margin-bottom: 0;
+}
+
+.definition-label {
+    font-size: var(--font-size-xs);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--color-text-secondary);
+    margin-bottom: var(--spacing-xs);
+}
+
+.definition-value {
+    font-size: var(--font-size-base);
+    color: var(--color-text-primary);
+    line-height: 1.5;
+}
+
+.definition-value code {
+    background: #f4f4f4;
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+    font-family: 'Monaco', 'Menlo', monospace;
+    font-size: var(--font-size-sm);
+    color: var(--color-primary);
+}
+
+/* Formula display */
+.formula {
+    background: #f8f9fa;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+    font-family: 'Monaco', 'Menlo', monospace;
+    font-size: var(--font-size-sm);
+    color: var(--color-primary);
+    overflow-x: auto;
+}
+
+/* Data source tag */
+.data-source-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    background: #f4f4f4;
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+}
+
+.data-source-tag::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.data-source-tag.semrush::before { background: #ff642d; }
+.data-source-tag.calculated::before { background: var(--color-accent-purple); }
+
+/* === Info Box === */
+.info-box {
+    background: linear-gradient(135deg, rgba(20, 40, 160, 0.03) 0%, rgba(128, 145, 223, 0.05) 100%);
+    border: 1px solid rgba(20, 40, 160, 0.15);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-xl);
+    margin-bottom: var(--spacing-lg);
+}
+
+.info-box-title {
+    font-family: var(--font-display);
+    font-size: var(--font-size-md);
+    font-weight: 700;
+    color: var(--color-primary);
+    margin-bottom: var(--spacing-md);
+}
+
+.info-box ul {
+    margin: 0;
+    padding-left: var(--spacing-xl);
+}
+
+.info-box li {
+    margin-bottom: var(--spacing-sm);
+    color: var(--color-text-secondary);
+}
+
+.info-box li strong {
+    color: var(--color-text-primary);
+}
+
+/* === Model Pills === */
+.model-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-sm);
+}
+
+.model-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-xs) var(--spacing-md);
+    border-radius: 20px;
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+}
+
+.model-pill::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.model-pill.chatgpt {
+    background: rgba(1, 195, 176, 0.1);
+    color: #01c3b0;
+}
+.model-pill.chatgpt::before { background: #01c3b0; }
+
+.model-pill.aio {
+    background: rgba(2, 119, 198, 0.1);
+    color: #0277c6;
+}
+.model-pill.aio::before { background: #0277c6; }
+
+.model-pill.aimode {
+    background: rgba(254, 180, 71, 0.1);
+    color: #d97706;
+}
+.model-pill.aimode::before { background: #feb447; }
+
+/* === Footer === */
+.footer {
+    text-align: center;
+    padding: var(--spacing-xl);
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+    border-top: 1px solid var(--color-border);
+    margin-top: var(--spacing-3xl);
+}
+
+/* === Responsive === */
+@media (max-width: 768px) {
+    .toc-list {
+        grid-template-columns: 1fr;
+    }
+
+    .header-title {
+        font-size: var(--font-size-lg);
+    }
+}
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div>
+                <a href="./geo-dashboard.html" class="back-link">&larr; Back to Dashboard</a>
+                <h1 class="header-title">Data Definitions</h1>
+            </div>
+            <img class="header-logo" src="./images/logo.jpg" alt="Samsung">
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Table of Contents -->
+        <nav class="toc">
+            <h2 class="toc-title">Contents</h2>
+            <ul class="toc-list">
+                <li><a href="#primary-kpis">Primary KPIs</a></li>
+                <li><a href="#domain-sentiment">Domain Sentiment Analysis</a></li>
+                <li><a href="#citation-metrics">Citation Metrics</a></li>
+                <li><a href="#concept-analysis">Concept Analysis</a></li>
+                <li><a href="#platform-metrics">Platform Metrics</a></li>
+                <li><a href="#trend-metrics">Trend Metrics</a></li>
+                <li><a href="#pr-action-center">PR Action Center</a></li>
+                <li><a href="#understanding-data">Understanding the Data</a></li>
+            </ul>
+        </nav>
+
+        <!-- Section 1: Primary KPIs -->
+        <section id="primary-kpis" class="section">
+            <div class="section-header">
+                <div class="section-icon">1</div>
+                <h2 class="section-title">Primary KPIs</h2>
+            </div>
+            <p class="section-description">
+                The 4 KPI cards displayed at the top of the GEO Dashboard.
+            </p>
+
+            <div class="definition-card">
+                <div class="definition-header">
+                    <h3 class="definition-name">Share of Voice</h3>
+                    <span class="definition-badge kpi">KPI</span>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Description</div>
+                    <div class="definition-value">Samsung's percentage of total brand mentions across all AI models. Higher values indicate stronger brand presence in AI-generated responses. This metric shows how often Samsung is mentioned compared to competitors like LG, Sony, TCL, and Hisense.</div>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Calculation</div>
+                    <div class="formula">(Samsung_mentions / Total_brand_mentions) × 100</div>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Data Source</div>
+                    <div class="definition-value">
+                        <span class="data-source-tag semrush">Semrush semrush_concept_mentions via RPC</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="definition-card">
+                <div class="definition-header">
+                    <h3 class="definition-name">Visibility Score</h3>
+                    <span class="definition-badge kpi">KPI</span>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Description</div>
+                    <div class="definition-value">Normalized 0-100 score representing Samsung's visibility relative to total mentions across all AI models. Uses a 1.5x multiplier to scale raw percentages into a more meaningful score. A score of 100 represents maximum possible visibility.</div>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Calculation</div>
+                    <div class="formula">MIN(100, (Samsung_mentions / Total_mentions) × 100 × 1.5)</div>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Data Source</div>
+                    <div class="definition-value">
+                        <span class="data-source-tag semrush">Semrush semrush_concept_mentions via RPC</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="definition-card">
+                <div class="definition-header">
+                    <h3 class="definition-name">Sentiment Score</h3>
+                    <span class="definition-badge kpi">KPI</span>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Description</div>
+                    <div class="definition-value">Net sentiment expressed as a percentage. Positive scores (e.g., +15) indicate more favorable coverage; negative scores indicate more critical coverage. A score of 0 means equal positive and negative mentions.</div>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Calculation</div>
+                    <div class="formula">(positive - negative) / (positive + negative + neutral) × 100</div>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Data Source</div>
+                    <div class="definition-value">
+                        <span class="data-source-tag semrush">Semrush sentiment_positive, sentiment_negative, sentiment_neutral fields</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="definition-card">
+                <div class="definition-header">
+                    <h3 class="definition-name">Total Mentions</h3>
+                    <span class="definition-badge kpi">KPI</span>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Description</div>
+                    <div class="definition-value">Count of all Samsung-related concept mentions in AI responses across all tracked prompts and models. This is the raw volume of times Samsung appears in AI-generated content.</div>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Calculation</div>
+                    <div class="formula">SUM(total_mentions) WHERE brand = 'Samsung'</div>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Data Source</div>
+                    <div class="definition-value">
+                        <span class="data-source-tag semrush">Semrush semrush_concept_mentions</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Domain Sentiment Analysis -->
+        <section id="domain-sentiment" class="section">
+            <div class="section-header">
+                <div class="section-icon">2</div>
+                <h2 class="section-title">Domain Sentiment Analysis</h2>
+            </div>
+            <p class="section-description">
+                Metrics for understanding how different source domains discuss Samsung in AI responses.
+            </p>
+
+            <div class="definition-card">
+                <div class="definition-header">
+                    <h3 class="definition-name">Sentiment by Domain</h3>
+                    <span class="definition-badge metric">Metric</span>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Description</div>
+                    <div class="definition-value">Positive, neutral, and negative mention counts for each source domain cited in AI responses. Shows which domains (e.g., rtings.com, techradar.com) are most favorable or critical of Samsung.</div>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Calculation</div>
+                    <div class="formula">COUNT(*) GROUP BY domain, sentiment</div>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Data Source</div>
+                    <div class="definition-value">
+                        <span class="data-source-tag semrush">Semrush semrush_concept_prompts</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="definition-card">
+                <div class="definition-header">
+                    <h3 class="definition-name">Domain Type Breakdown</h3>
+                    <span class="definition-badge metric">Metric</span>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Description</div>
+                    <div class="definition-value">Distribution of mentions across source type categories:
+                        <ul style="margin-top: 8px; padding-left: 20px;">
+                            <li><strong>Owned:</strong> samsung.com domains</li>
+                            <li><strong>Earned:</strong> Review sites, tech publications (rtings.com, techradar.com)</li>
+                            <li><strong>Social:</strong> Reddit, YouTube, Twitter/X</li>
+                            <li><strong>Competitor:</strong> lg.com, sony.com, tcl.com, hisense.com</li>
+                            <li><strong>Other:</strong> All other domains</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Calculation</div>
+                    <div class="formula">SUM(mentions) GROUP BY domain_type</div>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Data Source</div>
+                    <div class="definition-value">
+                        <span class="data-source-tag semrush">Semrush via domain classification logic</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="definition-card">
+                <div class="definition-header">
+                    <h3 class="definition-name">Domain Performance Summary</h3>
+                    <span class="definition-badge metric">Metric</span>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Description</div>
+                    <div class="definition-value">Table showing each domain's total mentions, unique URLs cited, and sentiment breakdown (positive, neutral, negative counts). The "Neg %" column shows what percentage of that domain's coverage is negative. Used to identify which sources are most/least favorable.</div>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Calculation</div>
+                    <div class="formula">Aggregated per-domain: unique_urls, positive, neutral, negative, negative_pct = negative/(positive+neutral+negative)</div>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Data Source</div>
+                    <div class="definition-value">
+                        <span class="data-source-tag semrush">Semrush semrush_concept_prompts aggregated</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Citation Metrics -->
+        <section id="citation-metrics" class="section">
+            <div class="section-header">
+                <div class="section-icon">3</div>
+                <h2 class="section-title">Citation Metrics</h2>
+            </div>
+            <p class="section-description">
+                Metrics from the Citation Sources and Cited URLs tables.
+            </p>
+
+            <div class="definition-card">
+                <div class="definition-header">
+                    <h3 class="definition-name">Citations</h3>
+                    <span class="definition-badge metric">Metric</span>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Description</div>
+                    <div class="definition-value">Number of times a domain or URL is cited as a source in AI-generated responses. When an AI response includes a link to a domain, that counts as one citation. More citations means the domain is used more frequently as a reference.</div>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Calculation</div>
+                    <div class="formula">COUNT(DISTINCT prompt_url pairs) or prompts_count field</div>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Data Source</div>
+                    <div class="definition-value">
+                        <span class="data-source-tag semrush">Semrush semrush_prompt_urls, semrush_cited_pages</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="definition-card">
+                <div class="definition-header">
+                    <h3 class="definition-name">Mentions (in Citation context)</h3>
+                    <span class="definition-badge metric">Metric</span>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Description</div>
+                    <div class="definition-value">Total mention count for a domain across all prompts where it appears as a cited source. Different from the primary KPI "Total Mentions" - this is domain-specific.</div>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Calculation</div>
+                    <div class="formula">SUM(mentions_end) WHERE domain = x</div>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Data Source</div>
+                    <div class="definition-value">
+                        <span class="data-source-tag semrush">Semrush Source Visibility API</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="definition-card">
+                <div class="definition-header">
+                    <h3 class="definition-name">Visibility % (Citation)</h3>
+                    <span class="definition-badge metric">Metric</span>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Description</div>
+                    <div class="definition-value">Percentage of all AI responses (for tracked prompts) that cite this domain as a source. A domain with 10% visibility appears as a source in 10% of all AI responses.</div>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Calculation</div>
+                    <div class="formula">(domain_citations / total_citations) × 100 or visibility field from API</div>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Data Source</div>
+                    <div class="definition-value">
+                        <span class="data-source-tag semrush">Semrush visibility field</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="definition-card">
+                <div class="definition-header">
+                    <h3 class="definition-name">URLs Cited</h3>
+                    <span class="definition-badge metric">Metric</span>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Description</div>
+                    <div class="definition-value">Count of unique URLs from a specific domain that appear in AI responses. A domain with many cited URLs has diverse content being referenced.</div>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Calculation</div>
+                    <div class="formula">COUNT(DISTINCT url) WHERE domain = x</div>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Data Source</div>
+                    <div class="definition-value">
+                        <span class="data-source-tag semrush">Semrush semrush_cited_pages</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Concept Analysis -->
+        <section id="concept-analysis" class="section">
+            <div class="section-header">
+                <div class="section-icon">4</div>
+                <h2 class="section-title">Concept Analysis</h2>
+            </div>
+            <p class="section-description">
+                Metrics for understanding what features, attributes, and topics are discussed about Samsung.
+            </p>
+
+            <div class="definition-card">
+                <div class="definition-header">
+                    <h3 class="definition-name">Concept Mentions</h3>
+                    <span class="definition-badge metric">Metric</span>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Description</div>
+                    <div class="definition-value">Number of times a specific concept (e.g., "picture quality", "input lag", "HDR", "gaming performance") appears in AI responses about Samsung. Concepts are product features, attributes, or topics that Semrush's AI has identified.</div>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Calculation</div>
+                    <div class="formula">SUM(mentions_end) WHERE concept = x AND brand = 'Samsung'</div>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Data Source</div>
+                    <div class="definition-value">
+                        <span class="data-source-tag semrush">Semrush semrush_concept_mentions</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="definition-card">
+                <div class="definition-header">
+                    <h3 class="definition-name">Top Positive Concepts</h3>
+                    <span class="definition-badge metric">Metric</span>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Description</div>
+                    <div class="definition-value">Most frequently mentioned concepts with positive sentiment. Indicates what Samsung is praised for in AI-generated content. Use these concepts in marketing messaging.</div>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Calculation</div>
+                    <div class="formula">ORDER BY positive_count DESC WHERE brand = 'Samsung'</div>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Data Source</div>
+                    <div class="definition-value">
+                        <span class="data-source-tag semrush">Semrush sentiment fields aggregated by concept</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="definition-card">
+                <div class="definition-header">
+                    <h3 class="definition-name">Top Negative Concepts</h3>
+                    <span class="definition-badge metric">Metric</span>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Description</div>
+                    <div class="definition-value">Most frequently mentioned concepts with negative sentiment. Indicates areas of criticism in AI-generated content. These are topics that may require PR attention or product improvements.</div>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Calculation</div>
+                    <div class="formula">ORDER BY negative_count DESC WHERE brand = 'Samsung'</div>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Data Source</div>
+                    <div class="definition-value">
+                        <span class="data-source-tag semrush">Semrush sentiment fields aggregated by concept</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="definition-card">
+                <div class="definition-header">
+                    <h3 class="definition-name">Concept Sentiment Mix</h3>
+                    <span class="definition-badge metric">Metric</span>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Description</div>
+                    <div class="definition-value">Stacked bar visualization showing the positive/neutral/negative distribution for each concept. Helps identify concepts with mixed sentiment (controversial) vs. consistently positive or negative coverage.</div>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Calculation</div>
+                    <div class="formula">(positive, neutral, negative) / total_mentions per concept</div>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Data Source</div>
+                    <div class="definition-value">
+                        <span class="data-source-tag semrush">Semrush sentiment fields</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 5: Platform Metrics -->
+        <section id="platform-metrics" class="section">
+            <div class="section-header">
+                <div class="section-icon">5</div>
+                <h2 class="section-title">Platform Metrics</h2>
+            </div>
+            <p class="section-description">
+                Performance metrics broken down by AI model/platform.
+            </p>
+
+            <div class="info-box">
+                <div class="info-box-title">AI Models Tracked</div>
+                <div class="model-list">
+                    <span class="model-pill chatgpt">search-gpt &rarr; ChatGPT (SearchGPT)</span>
+                    <span class="model-pill aio">google-ai-overview &rarr; Google AI Overview</span>
+                    <span class="model-pill aimode">google-ai-mode &rarr; Google AI Mode</span>
+                </div>
+            </div>
+
+            <div class="definition-card">
+                <div class="definition-header">
+                    <h3 class="definition-name">Platform Mentions</h3>
+                    <span class="definition-badge metric">Metric</span>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Description</div>
+                    <div class="definition-value">Samsung mention count per AI model. Shows which AI platforms mention Samsung most frequently. Useful for understanding where Samsung has strongest/weakest presence.</div>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Calculation</div>
+                    <div class="formula">SUM(total_mentions) WHERE model = x AND brand = 'Samsung'</div>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Data Source</div>
+                    <div class="definition-value">
+                        <span class="data-source-tag semrush">Semrush semrush_concept_mentions</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="definition-card">
+                <div class="definition-header">
+                    <h3 class="definition-name">Platform Trend</h3>
+                    <span class="definition-badge derived">Derived</span>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Description</div>
+                    <div class="definition-value">Change in mentions compared to previous period, broken down by AI model. Shows which platforms are growing/declining in Samsung coverage. Displayed as percentage change in the change badges.</div>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Calculation</div>
+                    <div class="formula">(current_period - previous_period) / previous_period × 100</div>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Data Source</div>
+                    <div class="definition-value">
+                        <span class="data-source-tag calculated">Calculated from time-series data</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 6: Trend Metrics -->
+        <section id="trend-metrics" class="section">
+            <div class="section-header">
+                <div class="section-icon">6</div>
+                <h2 class="section-title">Trend Metrics</h2>
+            </div>
+            <p class="section-description">
+                Time-series metrics for tracking changes over time.
+            </p>
+
+            <div class="definition-card">
+                <div class="definition-header">
+                    <h3 class="definition-name">Mentions Over Time</h3>
+                    <span class="definition-badge metric">Metric</span>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Description</div>
+                    <div class="definition-value">Daily or weekly count of Samsung mentions across all AI models. The trend line chart shows how mention volume changes over time, with separate lines for Samsung and competitors.</div>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Calculation</div>
+                    <div class="formula">SUM(total_mentions) GROUP BY date WHERE brand = 'Samsung'</div>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Data Source</div>
+                    <div class="definition-value">
+                        <span class="data-source-tag semrush">Semrush semrush_concept_mentions via get_daily_mentions RPC</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="definition-card">
+                <div class="definition-header">
+                    <h3 class="definition-name">Period Comparison</h3>
+                    <span class="definition-badge derived">Derived</span>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Description</div>
+                    <div class="definition-value">Percentage change between current selected period and previous period of equal length. For example, if viewing "Last 30 days", compares to the 30 days before that. Shown in the change badges below each KPI.</div>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Calculation</div>
+                    <div class="formula">(current_sum - previous_sum) / previous_sum × 100</div>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Data Source</div>
+                    <div class="definition-value">
+                        <span class="data-source-tag calculated">Calculated in dashboard JavaScript</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 7: PR Action Center -->
+        <section id="pr-action-center" class="section">
+            <div class="section-header">
+                <div class="section-icon">7</div>
+                <h2 class="section-title">PR Action Center</h2>
+            </div>
+            <p class="section-description">
+                Metrics for identifying issues requiring PR attention and response.
+            </p>
+
+            <div class="definition-card">
+                <div class="definition-header">
+                    <h3 class="definition-name">Negative Quotes</h3>
+                    <span class="definition-badge metric">Metric</span>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Description</div>
+                    <div class="definition-value">Direct quotes extracted from AI responses with negative sentiment about Samsung. These are the actual text snippets that AI models are generating when being critical of Samsung products. Useful for identifying specific criticisms that need addressing.</div>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Calculation</div>
+                    <div class="formula">SELECT quote, prompt, concept, date WHERE sentiment = 'negative' AND brand = 'Samsung'</div>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Data Source</div>
+                    <div class="definition-value">
+                        <span class="data-source-tag semrush">Semrush semrush_concept_prompts</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="definition-card">
+                <div class="definition-header">
+                    <h3 class="definition-name">Negative Concept Frequency</h3>
+                    <span class="definition-badge metric">Metric</span>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Description</div>
+                    <div class="definition-value">How often each concept appears in negative coverage. Prioritizes which issues to address first. The "Top Negative Concepts" chart shows concepts ordered by negative mention count.</div>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Calculation</div>
+                    <div class="formula">COUNT(*) WHERE sentiment = 'negative' GROUP BY concept ORDER BY count DESC</div>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Data Source</div>
+                    <div class="definition-value">
+                        <span class="data-source-tag semrush">Semrush semrush_concept_prompts</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="definition-card">
+                <div class="definition-header">
+                    <h3 class="definition-name">Prompts with Negative Quotes</h3>
+                    <span class="definition-badge metric">Metric</span>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Description</div>
+                    <div class="definition-value">Which user prompts/questions are generating the most negative responses about Samsung. Helps identify the types of questions that lead to unfavorable AI outputs.</div>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Calculation</div>
+                    <div class="formula">COUNT(*) WHERE sentiment = 'negative' GROUP BY prompt ORDER BY count DESC</div>
+                </div>
+                <div class="definition-field">
+                    <div class="definition-label">Data Source</div>
+                    <div class="definition-value">
+                        <span class="data-source-tag semrush">Semrush semrush_concept_prompts</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 8: Understanding the Data -->
+        <section id="understanding-data" class="section">
+            <div class="section-header">
+                <div class="section-icon">?</div>
+                <h2 class="section-title">Understanding the Data</h2>
+            </div>
+            <p class="section-description">
+                Key concepts to understand when interpreting dashboard metrics.
+            </p>
+
+            <div class="info-box">
+                <div class="info-box-title">Mentions vs Citations</div>
+                <ul>
+                    <li><strong>Mention:</strong> When Samsung is discussed in an AI response. The brand is talked about, referenced, or recommended. Example: "Samsung TVs are known for their picture quality."</li>
+                    <li><strong>Citation:</strong> When samsung.com (or any domain) is linked as a source in an AI response. The brand's content is being used as a reference. Example: "According to samsung.com..."</li>
+                </ul>
+            </div>
+
+            <div class="info-box">
+                <div class="info-box-title">Sentiment Classification</div>
+                <ul>
+                    <li><strong>How it works:</strong> Semrush AI analyzes the tone of AI responses discussing Samsung</li>
+                    <li><strong>Positive:</strong> Favorable language, recommendations, praise. Example: "Samsung offers excellent HDR performance"</li>
+                    <li><strong>Negative:</strong> Criticism, warnings, unfavorable comparisons. Example: "Samsung's gaming mode has noticeable input lag"</li>
+                    <li><strong>Neutral:</strong> Factual statements without opinion. Example: "Samsung TVs range from $500 to $5000"</li>
+                </ul>
+            </div>
+
+            <div class="info-box">
+                <div class="info-box-title">Data Freshness</div>
+                <ul>
+                    <li>Data is loaded daily from Semrush Enterprise API</li>
+                    <li>Date range filters in the dashboard apply to the selected period</li>
+                    <li>Historical data is retained for trend analysis</li>
+                </ul>
+            </div>
+
+            <div class="info-box">
+                <div class="info-box-title">Position/Ranking</div>
+                <ul>
+                    <li>Position 1 = first brand/product mentioned in the AI response, or first citation</li>
+                    <li>Lower position numbers are better (appearing earlier = more prominent)</li>
+                    <li>Position affects visibility weighting in some calculations</li>
+                </ul>
+            </div>
+
+            <div class="info-box">
+                <div class="info-box-title">AI Model Coverage</div>
+                <ul>
+                    <li><strong>ChatGPT (SearchGPT):</strong> OpenAI's conversational AI with web search</li>
+                    <li><strong>Google AI Overview:</strong> AI summaries appearing in Google search results</li>
+                    <li><strong>Google AI Mode:</strong> Google's conversational AI experience</li>
+                    <li><strong>Not yet tracked:</strong> Perplexity, Claude, Copilot, Gemini</li>
+                </ul>
+            </div>
+        </section>
+    </div>
+
+    <footer class="footer">
+        <p>Samsung GEO Dashboard | Data Definitions</p>
+    </footer>
+</body>
+</html>

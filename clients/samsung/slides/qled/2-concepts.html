@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QLED - Concepts & Sentiment | Samsung AI Visibility</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link rel="stylesheet" href="../css/slides.css">
+    <style>
+        .quote-card.mini {
+            padding: 8px 12px;
+            border-left-width: 3px;
+        }
+        .quote-card.mini .quote-text {
+            font-size: 11px;
+            line-height: 1.4;
+            padding-left: 0;
+            font-style: normal;
+        }
+        .quote-card.mini::before {
+            display: none;
+        }
+        .quote-card.mini .quote-meta {
+            margin-top: 6px;
+            padding-top: 6px;
+            font-size: 10px;
+        }
+        .quote-card.mini .product-tag {
+            padding: 2px 6px;
+            font-size: 9px;
+        }
+        .quote-card.mini .sentiment-tag {
+            padding: 2px 5px;
+            font-size: 8px;
+        }
+        .quotes-panel.mini {
+            gap: 6px;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <header class="slide-header">
+            <div>
+                <h1>QLED<span class="subtitle">Concepts & Sentiment</span></h1>
+            </div>
+            <span class="slide-badge">Slide 2 of 5</span>
+        </header>
+
+        <div class="slide-grid-60-40">
+            <div class="section">
+                <h2>Top QLED Concepts by Mention Volume</h2>
+                <div id="concept-bars" class="chart-container"></div>
+            </div>
+
+            <div class="section">
+                <h2>What AI Says</h2>
+                <div class="quotes-panel mini">
+                    <div class="quote-card mini" style="border-left-color: var(--color-positive);">
+                        <div class="quote-text">Handles bright rooms and fast sports action with ease due to anti-glare screen and Mini-LED.</div>
+                        <div class="quote-meta">
+                            <span class="product-tag">QN90D</span>
+                            <span class="sentiment-tag positive">Positive</span>
+                        </div>
+                    </div>
+
+                    <div class="quote-card mini" style="border-left-color: var(--color-positive);">
+                        <div class="quote-text">Vision AI with neural networks for precise upscaling and optimization.</div>
+                        <div class="quote-meta">
+                            <span class="product-tag">Neo QLED</span>
+                            <span class="sentiment-tag positive">Positive</span>
+                        </div>
+                    </div>
+
+                    <div class="quote-card mini" style="border-left-color: var(--color-neutral);">
+                        <div class="quote-text">Uses thousands of small LEDs with precise dimming zones.</div>
+                        <div class="quote-meta">
+                            <span class="product-tag">Neo QLED</span>
+                            <span class="sentiment-tag neutral">Neutral</span>
+                        </div>
+                    </div>
+
+                    <div class="quote-card mini" style="border-left-color: var(--color-negative);">
+                        <div class="quote-text">Often exhibits "dirty screen effect" (DSE) — dark spots in gray tests.</div>
+                        <div class="quote-meta">
+                            <span class="product-tag">Q90R</span>
+                            <span class="sentiment-tag negative">Negative</span>
+                        </div>
+                    </div>
+
+                    <div class="quote-card mini" style="border-left-color: var(--color-negative);">
+                        <div class="quote-text">Vignetting: Darkening at corners is common in QLED models.</div>
+                        <div class="quote-meta">
+                            <span class="product-tag">Q60 Series</span>
+                            <span class="sentiment-tag negative">Negative</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="slide-content">
+            <div class="insights horizontal">
+                <div class="insight-card positive">
+                    <strong>Mini-LED/Neo QLED Dominates</strong>
+                    Top concept with <span class="highlight">7,291</span> mentions — 74% positive.
+                </div>
+                <div class="insight-card">
+                    <strong>Strong Overall Sentiment</strong>
+                    QLED concepts average <span class="highlight">73%</span> positive.
+                </div>
+                <div class="insight-card negative">
+                    <strong>Key Negatives: DSE & Uniformity</strong>
+                    <span class="highlight">148</span> negative mentions on screen issues.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/slide-charts.js"></script>
+    <script>
+        // Real concept data from Supabase - QLED-related concepts with sentiment
+        const conceptData = [
+            {"concept":"mini-led / neo qled","sentiment":"positive","mentions":5383},
+            {"concept":"mini-led / neo qled","sentiment":"neutral","mentions":1760},
+            {"concept":"mini-led / neo qled","sentiment":"negative","mentions":148},
+            {"concept":"qled / quantum dot lcd","sentiment":"positive","mentions":2668},
+            {"concept":"qled / quantum dot lcd","sentiment":"neutral","mentions":1015},
+            {"concept":"qled / quantum dot lcd","sentiment":"negative","mentions":7},
+            {"concept":"neo qled","sentiment":"positive","mentions":812},
+            {"concept":"neo qled","sentiment":"neutral","mentions":186},
+            {"concept":"neo qled","sentiment":"negative","mentions":1},
+            {"concept":"qled technology","sentiment":"positive","mentions":564},
+            {"concept":"qled technology","sentiment":"neutral","mentions":234},
+            {"concept":"qled technology","sentiment":"negative","mentions":2},
+            {"concept":"qled","sentiment":"positive","mentions":578},
+            {"concept":"qled","sentiment":"neutral","mentions":166},
+            {"concept":"qled","sentiment":"negative","mentions":1},
+            {"concept":"neo qled technology","sentiment":"positive","mentions":392},
+            {"concept":"neo qled technology","sentiment":"neutral","mentions":157},
+            {"concept":"qled panel","sentiment":"positive","mentions":286},
+            {"concept":"qled panel","sentiment":"neutral","mentions":97},
+            {"concept":"quantum dot technology","sentiment":"positive","mentions":231},
+            {"concept":"quantum dot technology","sentiment":"neutral","mentions":51}
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                renderConceptBars('concept-bars', conceptData);
+            }, 100);
+        });
+    </script>
+</body>
+</html>

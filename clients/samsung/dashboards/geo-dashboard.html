@@ -3187,7 +3187,7 @@ async function loadPRDomainFilter() {
         select.innerHTML = '<option value="all" selected>All Domains</option>';
 
         // Group by domain type
-        const byType = { 'Earned': [], 'Owned': [], 'Benchmark Competitors': [], 'Other': [] };
+        const byType = { 'Earned': [], 'Owned': [], 'Social': [], 'Benchmark Competitors': [], 'Other': [] };
         domains.forEach(d => {
             const type = d.domain_type || 'Other';
             if (!byType[type]) byType[type] = [];

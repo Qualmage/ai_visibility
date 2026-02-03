@@ -2,15 +2,17 @@
   "mcpServers": {
     "chrome-devtools": {
       "command": "npx",
-      "args": ["-y", "chrome-devtools-mcp@latest"]
-    },
-    "gtm-mcp-server": {
-      "command": "npx",
       "args": [
         "-y",
-        "mcp-remote",
-        "https://gtm-mcp.stape.ai/mcp"
+        "chrome-devtools-mcp@latest"
       ]
+    },
+    "gtm-mcp": {
+      "command": "C:\\Users\\rober\\gtm-mcp-py313\\Scripts\\gtm-mcp.exe",
+      "args": [],
+      "env": {
+        "GOOGLE_APPLICATION_CREDENTIALS": "C:\\Users\\rober\\application_default_credentials.json"
+      }
     },
     "analytics-mcp": {
       "command": "C:\\Users\\rober\\analytics-mcp-py313\\Scripts\\analytics-mcp.exe",
@@ -19,6 +21,10 @@
         "GOOGLE_PROJECT_ID": "changan-gsc",
         "GOOGLE_APPLICATION_CREDENTIALS": "C:\\Users\\rober\\application_default_credentials.json"
       }
+    },
+    "supabase": {
+      "type": "http",
+      "url": "https://mcp.supabase.com/mcp?project_ref=zozzhptqoclvbfysmopg"
     }
   }
 }

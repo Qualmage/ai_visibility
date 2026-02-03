@@ -1,0 +1,219 @@
+"""Fetch prompts for all HE + Monitor/Display US URLs overnight.
+
+Includes: TV, televisions, memory, home-audio, projectors, micro-led, micro-rgb, monitor, displays
+Excludes: business, mobile, smartphones, /phones/
+
+Respects 600 req/hour rate limit. Resumes automatically on restart.
+
+Usage:
+    uv run clients/samsung/fetch_he_url_prompts.py
+"""
+
+import os
+import json
+import time
+import hashlib
+import requests
+from dotenv import load_dotenv
+
+load_dotenv()
+
+SEMRUSH_API_KEY = os.getenv("SEMRUSH_API_KEY")
+SUPABASE_URL = "https://zozzhptqoclvbfysmopg.supabase.co"
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+WORKSPACE_ID = "a22caad0-2a96-4174-9e2f-59f1542f156b"
+ELEMENT_ID = "777346b4-6777-40fe-9356-4a5d63a70ef8"
+
+OUTPUT_DIR = "data/url_prompts"
+RATE_LIMIT = 6.0
+BATCH_SIZE = 500
+
+INCLUDES = ["tv", "televisions", "memory", "home-audio", "projectors", "micro-led", "micro-rgb", "monitor", "displays"]
+EXCLUDES = ["business", "mobile", "smartphones", "/phones/"]
+
+
+def is_he_url(url):
+    url_lower = url.lower()
+    has_include = any(p in url_lower for p in INCLUDES)
+    has_exclude = any(p in url_lower for p in EXCLUDES)
+    return has_include and not has_exclude and "samsung.com/us/" in url_lower
+
+
+def get_he_urls():
+    """Fetch all matching US URLs from Supabase."""
+    all_urls = []
+    offset = 0
+
+    while True:
+        resp = requests.get(
+            f"{SUPABASE_URL}/rest/v1/semrush_cited_pages",
+            headers={"apikey": SUPABASE_KEY, "Authorization": f"Bearer {SUPABASE_KEY}"},
+            params={
+                "select": "url,prompts_count",
+                "url": "like.*samsung.com/us/*",
+                "order": "prompts_count.desc",
+                "limit": 1000,
+                "offset": offset
+            }
+        )
+        rows = resp.json()
+        if not rows:
+            break
+        all_urls.extend(rows)
+        offset += 1000
+
+    return [r for r in all_urls if is_he_url(r["url"])]
+
+
+def url_to_filename(url):
+    return hashlib.md5(url.encode()).hexdigest()[:12] + ".json"
+
+
+def fetch_prompts(url):
+    api_url = f"https://api.semrush.com/apis/v4-raw/external-api/v1/workspaces/{WORKSPACE_ID}/products/ai/elements/{ELEMENT_ID}"
+    headers = {
+        "accept": "application/json",
+        "Authorization": f"Apikey {SEMRUSH_API_KEY}",
+        "Content-Type": "application/json",
+    }
+
+    all_prompts = []
+    offset = 0
+
+    while True:
+        payload = {
+            "render_data": {
+                "statistics": {"rowCount": {"col": "*", "func": "count"}},
+                "pagination": {"limit": 1000, "offset": offset},
+                "filters": {
+                    "simple": {"competitor_domains": ["samsung.com"], "url": url},
+                    "advanced": {
+                        "op": "and",
+                        "filters": [
+                            {"op": "eq", "val": "us", "col": "CBF_country"},
+                            {"op": "eq", "val": " ", "col": "CBF_model"},
+                            {"op": "eq", "val": "MENTIONS_TARGET", "col": "CBF_category"}
+                        ]
+                    }
+                }
+            }
+        }
+
+        resp = requests.post(api_url, headers=headers, json=payload)
+        resp.raise_for_status()
+        data = resp.json()
+
+        rows = data.get("blocks", {}).get("data", [])
+        stats = data.get("blocks", {}).get("data_statistics", [{}])[0]
+        total = stats.get("rowCount", 0)
+
+        all_prompts.extend(rows)
+        if len(all_prompts) >= total or not rows:
+            break
+        offset += 1000
+        time.sleep(RATE_LIMIT)
+
+    return all_prompts
+
+
+def upload_batch(records):
+    resp = requests.post(
+        f"{SUPABASE_URL}/rest/v1/semrush_url_prompts?on_conflict=url,prompt_hash,country",
+        headers={
+            "apikey": SUPABASE_KEY,
+            "Authorization": f"Bearer {SUPABASE_KEY}",
+            "Content-Type": "application/json",
+            "Prefer": "return=minimal,resolution=merge-duplicates"
+        },
+        json=records
+    )
+    resp.raise_for_status()
+
+
+def main():
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+
+    print("Fetching HE + Monitor/Display US URLs from Supabase...")
+    urls = get_he_urls()
+    print(f"Total matching URLs: {len(urls)}")
+
+    existing = set(os.listdir(OUTPUT_DIR))
+    remaining = [(u["url"], u["prompts_count"]) for u in urls if url_to_filename(u["url"]) not in existing]
+    already = len(urls) - len(remaining)
+    print(f"Already fetched: {already}")
+    print(f"Remaining: {len(remaining)}")
+    print(f"Estimated hours: {len(remaining) * RATE_LIMIT / 3600:.1f}")
+    print()
+
+    upload_buffer = []
+    errors = 0
+
+    for i, (url, expected) in enumerate(remaining):
+        filename = url_to_filename(url)
+        filepath = os.path.join(OUTPUT_DIR, filename)
+
+        try:
+            prompts = fetch_prompts(url)
+
+            with open(filepath, "w") as f:
+                json.dump({
+                    "url": url,
+                    "total_prompts": len(prompts),
+                    "prompts": prompts,
+                    "fetched_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+                }, f)
+
+            for p in prompts:
+                upload_buffer.append({
+                    "url": url,
+                    "prompt": p["prompt"],
+                    "prompt_hash": p["prompt_hash"],
+                    "topic": p.get("topic"),
+                    "llm": p.get("llm"),
+                    "volume": p.get("volume"),
+                    "mentioned_brands_count": p.get("mentioned_brands_count"),
+                    "used_sources_count": p.get("used_sources_count"),
+                    "serp_id": p.get("serp_id"),
+                    "country": "us"
+                })
+
+            done = already + i + 1
+            print(f"[{done}/{len(urls)}] {len(prompts):>4} prompts | {url[30:80]}")
+
+            # Upload in batches
+            if len(upload_buffer) >= BATCH_SIZE:
+                seen = {}
+                for r in upload_buffer:
+                    seen[(r["url"], r["prompt_hash"], r["country"])] = r
+                deduped = list(seen.values())
+
+                for j in range(0, len(deduped), BATCH_SIZE):
+                    try:
+                        upload_batch(deduped[j:j + BATCH_SIZE])
+                    except Exception as e:
+                        print(f"  Upload error: {e}")
+                upload_buffer = []
+
+        except Exception as e:
+            errors += 1
+            print(f"[{already + i + 1}/{len(urls)}] ERROR: {url[:60]} - {e}")
+
+        time.sleep(RATE_LIMIT)
+
+    # Final upload
+    if upload_buffer:
+        seen = {}
+        for r in upload_buffer:
+            seen[(r["url"], r["prompt_hash"], r["country"])] = r
+        deduped = list(seen.values())
+        for j in range(0, len(deduped), BATCH_SIZE):
+            try:
+                upload_batch(deduped[j:j + BATCH_SIZE])
+            except Exception as e:
+                print(f"  Upload error: {e}")
+
+    print(f"\nDone! Processed {len(urls)} URLs ({errors} errors)")
+
+
+if __name__ == "__main__":
+    main()

@@ -101,17 +101,10 @@
     line-height: var(--line-height-tight);
 }
 
-.kpi-change {
-    font-size: 13px;
-    font-weight: 600;
+/* Change badges - uses global .change-badge from components.html */
+.kpi-card .change-badge {
     margin-top: var(--spacing-xs);
-    color: var(--color-text-secondary);
 }
-
-.kpi-change.na { color: var(--color-text-secondary); }
-.kpi-change.no-change { color: var(--color-accent-yellow); }
-.kpi-change.increase { color: var(--color-accent-green); }
-.kpi-change.decrease { color: var(--color-accent-red); }
 <!-- END CSS -->
 
 <!-- HTML -->
@@ -122,40 +115,40 @@
                 <span>?</span>
                 <div class="kpi-tooltip-text">Estimated share of audience likely to notice your brand in AI search results, based on prompt popularity and ranking position.</div>
             </div>
-            <img class="kpi-icon" src="../assets/sov.jpg" alt="Share of Voice">
+            <img class="kpi-icon" src="./images/sov.jpg" alt="Share of Voice">
             <div class="kpi-label">Share of Voice</div>
             <div class="kpi-value">65%</div>
-            <div class="kpi-change increase">↑ +5%</div>
+            <span class="change-badge increase-good"><span class="arrow">&#8599;</span> +5%</span>
         </div>
         <div class="kpi-card">
             <div class="kpi-tooltip">
                 <span>?</span>
                 <div class="kpi-tooltip-text">Percentage of AI responses that cite your website as a source.</div>
             </div>
-            <img class="kpi-icon" src="../assets/source_visi.jpg" alt="Source Visibility">
+            <img class="kpi-icon" src="./images/source_visi.jpg" alt="Source Visibility">
             <div class="kpi-label">Source Visibility</div>
             <div class="kpi-value">42%</div>
-            <div class="kpi-change increase">↑ +8%</div>
+            <span class="change-badge increase-good"><span class="arrow">&#8599;</span> +8%</span>
         </div>
         <div class="kpi-card">
             <div class="kpi-tooltip">
                 <span>?</span>
                 <div class="kpi-tooltip-text">Total visits to your website from AI platforms.</div>
             </div>
-            <img class="kpi-icon" src="../assets/referral.jpg" alt="Referral Traffic">
+            <img class="kpi-icon" src="./images/referral.jpg" alt="Referral Traffic">
             <div class="kpi-label">Referral Traffic</div>
             <div class="kpi-value">106,445</div>
-            <div class="kpi-change increase">↑ +10,989 (+10.3%)</div>
+            <span class="change-badge increase-good"><span class="arrow">&#8599;</span> +10,989 (+10.3%)</span>
         </div>
         <div class="kpi-card">
             <div class="kpi-tooltip">
                 <span>?</span>
                 <div class="kpi-tooltip-text">Overall visibility score measuring your brand's presence across AI platforms.</div>
             </div>
-            <img class="kpi-icon" src="../assets/ai visi.jpg" alt="AI Visibility">
+            <img class="kpi-icon" src="./images/ai-visi.jpg" alt="AI Visibility">
             <div class="kpi-label">AI Visibility</div>
             <div class="kpi-value">91</div>
-            <div class="kpi-change increase">↑ +12</div>
+            <span class="change-badge increase-good"><span class="arrow">&#8599;</span> +12</span>
         </div>
     </div>
 </div>

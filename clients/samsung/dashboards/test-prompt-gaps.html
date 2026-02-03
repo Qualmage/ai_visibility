@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test: Prompt Gaps KPI Card</title>
+    <style>
+        /* Samsung Fonts */
+        @font-face {
+            font-family: 'Samsung Sharp Sans';
+            src: url('../assets/fonts/SamsungSharpSansBd.woff2') format('woff2'),
+                 url('../assets/fonts/SamsungSharpSans-Bold.ttf') format('truetype');
+            font-weight: 700;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: 'Samsung One';
+            src: url('../assets/fonts/SamsungOneLatinWeb-400.woff2') format('woff2'),
+                 url('../assets/fonts/SamsungOneLatinCompact-400.ttf') format('truetype');
+            font-weight: 400;
+            font-style: normal;
+        }
+
+        /* ===== BASE: TOKENS ===== */
+        :root {
+            --color-primary: #1428A0;
+            --color-accent-purple: #8091df;
+            --color-accent-green: #96d551;
+            --color-accent-red: #ff4438;
+            --color-bg-page: #f8f9fa;
+            --color-bg-card: #ffffff;
+            --color-border: #e0e0e0;
+            --color-text-primary: #000000;
+            --color-text-secondary: #666666;
+            --font-display: 'Samsung Sharp Sans', sans-serif;
+            --font-body: 'Samsung One', -apple-system, sans-serif;
+            --font-size-metric: 42px;
+            --font-weight-bold: 700;
+            --spacing-sm: 8px;
+            --spacing-md: 12px;
+            --spacing-lg: 16px;
+            --spacing-xl: 20px;
+            --spacing-2xl: 24px;
+            --radius-md: 6px;
+            --radius-xl: 12px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--color-bg-page);
+            color: var(--color-text-primary);
+            padding: 40px;
+        }
+
+        .container {
+            max-width: 320px;
+        }
+
+        /* ===== BASE: COMPONENTS (Global) ===== */
+
+        /* Tooltip Icon (18x18px - matches all templates) */
+        .tooltip-icon {
+            width: 18px;
+            height: 18px;
+            background: var(--color-accent-purple);
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: help;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .tooltip-icon span {
+            color: white;
+            font-size: 12px;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .tooltip-text {
+            visibility: hidden;
+            opacity: 0;
+            position: absolute;
+            top: 24px;
+            right: 0;
+            width: 200px;
+            background: #333;
+            color: white;
+            font-family: var(--font-body);
+            font-size: 12px;
+            font-weight: 400;
+            padding: 10px 12px;
+            border-radius: var(--radius-md);
+            line-height: 1.4;
+            text-align: left;
+            z-index: 100;
+            transition: opacity 0.2s, visibility 0.2s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .tooltip-text::before {
+            content: '';
+            position: absolute;
+            top: -6px;
+            right: 8px;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-bottom: 6px solid #333;
+        }
+
+        .tooltip-icon:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .tooltip-icon.tooltip-center .tooltip-text {
+            right: auto;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .tooltip-icon.tooltip-center .tooltip-text::before {
+            right: auto;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        /* Change Badge */
+        .change-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-family: var(--font-body);
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .change-badge.increase {
+            background: rgba(255, 68, 56, 0.1);
+            color: var(--color-accent-red);
+        }
+
+        .change-badge.decrease {
+            background: rgba(150, 213, 81, 0.2);
+            color: #2e7d32;
+        }
+
+        .change-badge.increase-good {
+            background: rgba(150, 213, 81, 0.2);
+            color: #2e7d32;
+        }
+
+        .change-badge.decrease-bad {
+            background: rgba(255, 68, 56, 0.1);
+            color: var(--color-accent-red);
+        }
+
+        .change-badge .arrow {
+            font-size: 12px;
+        }
+
+        /* ===== COMPONENT: Stacked KPI Card ===== */
+        .kpi-card-stacked {
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+        }
+
+        .kpi-stacked-section {
+            padding: var(--spacing-xl);
+        }
+
+        .kpi-stacked-section:not(:last-child) {
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .kpi-stacked-header {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .kpi-stacked-label {
+            font-family: var(--font-body);
+            font-size: 14px;
+            font-weight: 400;
+            color: var(--color-text-secondary);
+        }
+
+        .kpi-stacked-metrics {
+            display: flex;
+            align-items: baseline;
+            gap: var(--spacing-md);
+        }
+
+        .kpi-stacked-value {
+            font-family: var(--font-display);
+            font-size: var(--font-size-metric);
+            font-weight: var(--font-weight-bold);
+            color: var(--color-text-primary);
+            line-height: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="kpi-card-stacked">
+            <!-- # of Prompt Gaps Section -->
+            <div class="kpi-stacked-section">
+                <div class="kpi-stacked-header">
+                    <span class="kpi-stacked-label"># of Prompt Gaps</span>
+                    <div class="tooltip-icon tooltip-center">
+                        <span>?</span>
+                        <div class="tooltip-text">Number of prompts where Samsung is not mentioned in AI responses.</div>
+                    </div>
+                </div>
+                <div class="kpi-stacked-metrics">
+                    <span class="kpi-stacked-value">56</span>
+                    <span class="change-badge increase">
+                        <span class="arrow">&#8599;</span>
+                        +54
+                    </span>
+                </div>
+            </div>
+
+            <!-- Gap % Section -->
+            <div class="kpi-stacked-section">
+                <div class="kpi-stacked-header">
+                    <span class="kpi-stacked-label">Gap %</span>
+                    <div class="tooltip-icon tooltip-center">
+                        <span>?</span>
+                        <div class="tooltip-text">Percentage of tracked prompts where Samsung is not mentioned.</div>
+                    </div>
+                </div>
+                <div class="kpi-stacked-metrics">
+                    <span class="kpi-stacked-value">37%</span>
+                    <span class="change-badge increase">
+                        +25.57%
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

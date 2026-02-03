@@ -3,11 +3,13 @@
   "output": "dashboards/scom-overview.html",
   "base": [
     "base/fonts.html",
-    "base/tokens.html"
+    "base/tokens.html",
+    "base/components.html"
   ],
   "components": [
     "header.html",
     "kpi-cards.html",
+    "data-context.html",
     "line-charts.html",
     "platform-tables.html",
     "sunburst-prompts.html",

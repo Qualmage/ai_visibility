@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QLED - Trends | Samsung AI Visibility</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link rel="stylesheet" href="../css/slides.css">
+</head>
+<body>
+    <div class="slide-container">
+        <header class="slide-header">
+            <div>
+                <h1>QLED<span class="subtitle">Concept Trends Over Time</span></h1>
+            </div>
+            <span class="slide-badge">Slide 4 of 5</span>
+        </header>
+
+        <div class="slide-content">
+            <div class="section">
+                <h2>Top Concept Mentions: Dec 18, 2025 - Jan 29, 2026</h2>
+                <div id="trend-chart" class="chart-container large"></div>
+            </div>
+
+            <div class="insights horizontal mt-24">
+                <div class="insight-card">
+                    <strong>Jan 15 Data Expansion</strong>
+                    Mentions jumped <span class="highlight">10x</span> on Jan 15 when additional prompts were added to tracking.
+                </div>
+                <div class="insight-card">
+                    <strong>Brightness Leads Consistently</strong>
+                    "Brightness" is the top concept across the entire period, averaging <span class="highlight">400+ daily mentions</span> post-expansion.
+                </div>
+                <div class="insight-card">
+                    <strong>Gaming Features Rising</strong>
+                    Gaming mentions grew from <span class="highlight">4/day to 130+/day</span>, reflecting holiday gaming interest.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/slide-charts.js"></script>
+    <script>
+        // Real trend data from Supabase - Dec 18, 2025 to Jan 29, 2026
+        const trendData = [
+            {"date":"2025-12-18","concept":"brightness","mentions":30},
+            {"date":"2025-12-18","concept":"contrast","mentions":6},
+            {"date":"2025-12-18","concept":"4k resolution","mentions":21},
+            {"date":"2025-12-18","concept":"gaming features","mentions":4},
+            {"date":"2025-12-19","concept":"brightness","mentions":38},
+            {"date":"2025-12-19","concept":"contrast","mentions":5},
+            {"date":"2025-12-19","concept":"4k resolution","mentions":19},
+            {"date":"2025-12-19","concept":"gaming features","mentions":4},
+            {"date":"2025-12-20","concept":"brightness","mentions":31},
+            {"date":"2025-12-20","concept":"contrast","mentions":8},
+            {"date":"2025-12-20","concept":"4k resolution","mentions":22},
+            {"date":"2025-12-21","concept":"brightness","mentions":37},
+            {"date":"2025-12-21","concept":"contrast","mentions":8},
+            {"date":"2025-12-21","concept":"4k resolution","mentions":8},
+            {"date":"2025-12-21","concept":"gaming features","mentions":4},
+            {"date":"2025-12-22","concept":"brightness","mentions":25},
+            {"date":"2025-12-22","concept":"contrast","mentions":5},
+            {"date":"2025-12-22","concept":"4k resolution","mentions":13},
+            {"date":"2025-12-22","concept":"gaming features","mentions":2},
+            {"date":"2025-12-23","concept":"brightness","mentions":23},
+            {"date":"2025-12-23","concept":"contrast","mentions":9},
+            {"date":"2025-12-23","concept":"4k resolution","mentions":13},
+            {"date":"2025-12-23","concept":"gaming features","mentions":4},
+            {"date":"2025-12-24","concept":"brightness","mentions":35},
+            {"date":"2025-12-24","concept":"contrast","mentions":5},
+            {"date":"2025-12-24","concept":"4k resolution","mentions":14},
+            {"date":"2025-12-24","concept":"gaming features","mentions":2},
+            {"date":"2025-12-25","concept":"brightness","mentions":34},
+            {"date":"2025-12-25","concept":"contrast","mentions":5},
+            {"date":"2025-12-25","concept":"4k resolution","mentions":12},
+            {"date":"2025-12-25","concept":"gaming features","mentions":8},
+            {"date":"2025-12-26","concept":"brightness","mentions":30},
+            {"date":"2025-12-26","concept":"contrast","mentions":15},
+            {"date":"2025-12-26","concept":"4k resolution","mentions":16},
+            {"date":"2025-12-26","concept":"gaming features","mentions":3},
+            {"date":"2025-12-27","concept":"brightness","mentions":30},
+            {"date":"2025-12-27","concept":"contrast","mentions":13},
+            {"date":"2025-12-27","concept":"4k resolution","mentions":11},
+            {"date":"2025-12-27","concept":"gaming features","mentions":1},
+            {"date":"2025-12-28","concept":"brightness","mentions":39},
+            {"date":"2025-12-28","concept":"contrast","mentions":7},
+            {"date":"2025-12-28","concept":"4k resolution","mentions":23},
+            {"date":"2025-12-28","concept":"gaming features","mentions":2},
+            {"date":"2025-12-29","concept":"brightness","mentions":44},
+            {"date":"2025-12-29","concept":"contrast","mentions":9},
+            {"date":"2025-12-29","concept":"4k resolution","mentions":19},
+            {"date":"2025-12-29","concept":"gaming features","mentions":2},
+            {"date":"2025-12-30","concept":"brightness","mentions":49},
+            {"date":"2025-12-30","concept":"contrast","mentions":9},
+            {"date":"2025-12-30","concept":"4k resolution","mentions":13},
+            {"date":"2025-12-30","concept":"gaming features","mentions":8},
+            {"date":"2025-12-31","concept":"brightness","mentions":52},
+            {"date":"2025-12-31","concept":"contrast","mentions":16},
+            {"date":"2025-12-31","concept":"4k resolution","mentions":27},
+            {"date":"2025-12-31","concept":"gaming features","mentions":9},
+            {"date":"2026-01-01","concept":"brightness","mentions":57},
+            {"date":"2026-01-01","concept":"contrast","mentions":19},
+            {"date":"2026-01-01","concept":"4k resolution","mentions":33},
+            {"date":"2026-01-01","concept":"gaming features","mentions":14},
+            {"date":"2026-01-02","concept":"brightness","mentions":44},
+            {"date":"2026-01-02","concept":"contrast","mentions":21},
+            {"date":"2026-01-02","concept":"4k resolution","mentions":29},
+            {"date":"2026-01-02","concept":"gaming features","mentions":9},
+            {"date":"2026-01-03","concept":"brightness","mentions":52},
+            {"date":"2026-01-03","concept":"contrast","mentions":14},
+            {"date":"2026-01-03","concept":"4k resolution","mentions":26},
+            {"date":"2026-01-03","concept":"gaming features","mentions":4},
+            {"date":"2026-01-04","concept":"brightness","mentions":54},
+            {"date":"2026-01-04","concept":"contrast","mentions":16},
+            {"date":"2026-01-04","concept":"4k resolution","mentions":33},
+            {"date":"2026-01-04","concept":"gaming features","mentions":14},
+            {"date":"2026-01-05","concept":"brightness","mentions":48},
+            {"date":"2026-01-05","concept":"contrast","mentions":19},
+            {"date":"2026-01-05","concept":"4k resolution","mentions":34},
+            {"date":"2026-01-05","concept":"gaming features","mentions":6},
+            {"date":"2026-01-06","concept":"brightness","mentions":47},
+            {"date":"2026-01-06","concept":"contrast","mentions":11},
+            {"date":"2026-01-06","concept":"4k resolution","mentions":11},
+            {"date":"2026-01-06","concept":"gaming features","mentions":9},
+            {"date":"2026-01-07","concept":"brightness","mentions":56},
+            {"date":"2026-01-07","concept":"contrast","mentions":19},
+            {"date":"2026-01-07","concept":"4k resolution","mentions":21},
+            {"date":"2026-01-07","concept":"gaming features","mentions":7},
+            {"date":"2026-01-08","concept":"brightness","mentions":54},
+            {"date":"2026-01-08","concept":"contrast","mentions":19},
+            {"date":"2026-01-08","concept":"4k resolution","mentions":29},
+            {"date":"2026-01-08","concept":"gaming features","mentions":15},
+            {"date":"2026-01-09","concept":"brightness","mentions":52},
+            {"date":"2026-01-09","concept":"contrast","mentions":21},
+            {"date":"2026-01-09","concept":"4k resolution","mentions":27},
+            {"date":"2026-01-09","concept":"gaming features","mentions":14},
+            {"date":"2026-01-10","concept":"brightness","mentions":51},
+            {"date":"2026-01-10","concept":"contrast","mentions":19},
+            {"date":"2026-01-10","concept":"4k resolution","mentions":35},
+            {"date":"2026-01-10","concept":"gaming features","mentions":12},
+            {"date":"2026-01-11","concept":"brightness","mentions":45},
+            {"date":"2026-01-11","concept":"contrast","mentions":18},
+            {"date":"2026-01-11","concept":"4k resolution","mentions":18},
+            {"date":"2026-01-11","concept":"gaming features","mentions":10},
+            {"date":"2026-01-12","concept":"brightness","mentions":56},
+            {"date":"2026-01-12","concept":"contrast","mentions":16},
+            {"date":"2026-01-12","concept":"4k resolution","mentions":32},
+            {"date":"2026-01-12","concept":"gaming features","mentions":10},
+            {"date":"2026-01-13","concept":"brightness","mentions":49},
+            {"date":"2026-01-13","concept":"contrast","mentions":20},
+            {"date":"2026-01-13","concept":"4k resolution","mentions":23},
+            {"date":"2026-01-13","concept":"gaming features","mentions":8},
+            {"date":"2026-01-14","concept":"brightness","mentions":45},
+            {"date":"2026-01-14","concept":"contrast","mentions":13},
+            {"date":"2026-01-14","concept":"4k resolution","mentions":38},
+            {"date":"2026-01-14","concept":"gaming features","mentions":6},
+            {"date":"2026-01-15","concept":"brightness","mentions":409},
+            {"date":"2026-01-15","concept":"contrast","mentions":202},
+            {"date":"2026-01-15","concept":"4k resolution","mentions":318},
+            {"date":"2026-01-15","concept":"gaming features","mentions":114},
+            {"date":"2026-01-16","concept":"brightness","mentions":398},
+            {"date":"2026-01-16","concept":"contrast","mentions":176},
+            {"date":"2026-01-16","concept":"4k resolution","mentions":294},
+            {"date":"2026-01-16","concept":"gaming features","mentions":131},
+            {"date":"2026-01-17","concept":"brightness","mentions":450},
+            {"date":"2026-01-17","concept":"contrast","mentions":206},
+            {"date":"2026-01-17","concept":"4k resolution","mentions":246},
+            {"date":"2026-01-17","concept":"gaming features","mentions":117},
+            {"date":"2026-01-18","concept":"brightness","mentions":415},
+            {"date":"2026-01-18","concept":"contrast","mentions":183},
+            {"date":"2026-01-18","concept":"4k resolution","mentions":305},
+            {"date":"2026-01-18","concept":"gaming features","mentions":118},
+            {"date":"2026-01-19","concept":"brightness","mentions":375},
+            {"date":"2026-01-19","concept":"contrast","mentions":168},
+            {"date":"2026-01-19","concept":"4k resolution","mentions":120},
+            {"date":"2026-01-19","concept":"gaming features","mentions":124},
+            {"date":"2026-01-20","concept":"brightness","mentions":373},
+            {"date":"2026-01-20","concept":"contrast","mentions":176},
+            {"date":"2026-01-20","concept":"4k resolution","mentions":114},
+            {"date":"2026-01-20","concept":"gaming features","mentions":118},
+            {"date":"2026-01-21","concept":"brightness","mentions":402},
+            {"date":"2026-01-21","concept":"contrast","mentions":215},
+            {"date":"2026-01-21","concept":"4k resolution","mentions":240},
+            {"date":"2026-01-21","concept":"gaming features","mentions":112},
+            {"date":"2026-01-22","concept":"brightness","mentions":349},
+            {"date":"2026-01-22","concept":"contrast","mentions":162},
+            {"date":"2026-01-22","concept":"4k resolution","mentions":120},
+            {"date":"2026-01-22","concept":"gaming features","mentions":120},
+            {"date":"2026-01-23","concept":"brightness","mentions":401},
+            {"date":"2026-01-23","concept":"contrast","mentions":176},
+            {"date":"2026-01-23","concept":"4k resolution","mentions":132},
+            {"date":"2026-01-23","concept":"gaming features","mentions":143},
+            {"date":"2026-01-24","concept":"brightness","mentions":436},
+            {"date":"2026-01-24","concept":"contrast","mentions":231},
+            {"date":"2026-01-24","concept":"4k resolution","mentions":356},
+            {"date":"2026-01-24","concept":"gaming features","mentions":147},
+            {"date":"2026-01-25","concept":"brightness","mentions":426},
+            {"date":"2026-01-25","concept":"contrast","mentions":212},
+            {"date":"2026-01-25","concept":"4k resolution","mentions":316},
+            {"date":"2026-01-25","concept":"gaming features","mentions":129},
+            {"date":"2026-01-26","concept":"brightness","mentions":404},
+            {"date":"2026-01-26","concept":"contrast","mentions":197},
+            {"date":"2026-01-26","concept":"4k resolution","mentions":183},
+            {"date":"2026-01-26","concept":"gaming features","mentions":136},
+            {"date":"2026-01-27","concept":"brightness","mentions":434},
+            {"date":"2026-01-27","concept":"contrast","mentions":217},
+            {"date":"2026-01-27","concept":"4k resolution","mentions":308},
+            {"date":"2026-01-27","concept":"gaming features","mentions":135},
+            {"date":"2026-01-28","concept":"brightness","mentions":352},
+            {"date":"2026-01-28","concept":"contrast","mentions":186},
+            {"date":"2026-01-28","concept":"4k resolution","mentions":267},
+            {"date":"2026-01-28","concept":"gaming features","mentions":101},
+            {"date":"2026-01-29","concept":"brightness","mentions":383},
+            {"date":"2026-01-29","concept":"contrast","mentions":170},
+            {"date":"2026-01-29","concept":"4k resolution","mentions":123},
+            {"date":"2026-01-29","concept":"gaming features","mentions":133}
+        ];
+
+        const displayConcepts = ['brightness', 'contrast', '4k resolution', 'gaming features'];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                renderTrendLines('trend-chart', trendData, displayConcepts);
+            }, 100);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test: Source Analysis Components</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        /* ===================================================================
+           SAMSUNG FONTS
+           =================================================================== */
+        @font-face {
+            font-family: 'Samsung Sharp Sans';
+            src: url('../assets/fonts/SamsungSharpSansBd.woff2') format('woff2'),
+                 url('../assets/fonts/SamsungSharpSans-Bold.ttf') format('truetype');
+            font-weight: 700;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: 'Samsung One';
+            src: url('../assets/fonts/SamsungOneLatinWeb-400.woff2') format('woff2'),
+                 url('../assets/fonts/SamsungOneLatinCompact-400.ttf') format('truetype');
+            font-weight: 400;
+            font-style: normal;
+        }
+
+        /* ===================================================================
+           BASE: TOKENS
+           =================================================================== */
+        :root {
+            /* Brand */
+            --color-primary: #1428A0;
+            --color-primary-light: #8091df;
+
+            /* Accent Palette */
+            --color-accent-blue: #0277c6;
+            --color-accent-cyan: #02b2e4;
+            --color-accent-teal: #01c3b0;
+            --color-accent-purple: #8091df;
+            --color-accent-green: #96d551;
+            --color-accent-yellow: #feb447;
+            --color-accent-red: #ff4438;
+
+            /* Backgrounds */
+            --color-bg-page: #f8f9fa;
+            --color-bg-card: #ffffff;
+
+            /* Text */
+            --color-text-primary: #000000;
+            --color-text-secondary: #666666;
+
+            /* Borders */
+            --color-border: #e0e0e0;
+
+            /* Typography */
+            --font-display: 'Samsung Sharp Sans', sans-serif;
+            --font-body: 'Samsung One', -apple-system, sans-serif;
+            --font-size-xs: 11px;
+            --font-size-sm: 12px;
+            --font-size-base: 14px;
+            --font-size-md: 16px;
+            --font-size-lg: 18px;
+            --font-size-xl: 24px;
+            --font-size-2xl: 28px;
+            --font-size-metric: 42px;
+            --font-weight-bold: 700;
+            --line-height-tight: 1.1;
+
+            /* Spacing */
+            --spacing-xs: 4px;
+            --spacing-sm: 8px;
+            --spacing-md: 12px;
+            --spacing-lg: 16px;
+            --spacing-xl: 20px;
+            --spacing-2xl: 24px;
+
+            /* Radius */
+            --radius-sm: 4px;
+            --radius-md: 6px;
+            --radius-lg: 8px;
+            --radius-xl: 12px;
+
+            /* Source Type Colors */
+            --color-source-owned: #1428A0;
+            --color-source-earned: #10a37f;
+            --color-source-social: #8e44ad;
+            --color-source-competitor: #f9ab00;
+            --color-source-other: #9e9e9e;
+
+            /* Competitor Brand Colors */
+            --color-lg: #A50034;
+            --color-sony: #000000;
+            --color-tcl: #E31937;
+            --color-hisense: #00A0DF;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--color-bg-page);
+            color: var(--color-text-primary);
+            line-height: 1.5;
+        }
+
+        /* ===================================================================
+           LAYOUT
+           =================================================================== */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: var(--spacing-2xl);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .section-title {
+            font-family: var(--font-display);
+            font-size: var(--font-size-xl);
+            font-weight: var(--font-weight-bold);
+            color: var(--color-text-primary);
+        }
+
+        .section-subtitle {
+            font-size: var(--font-size-base);
+            color: var(--color-text-secondary);
+            margin-top: var(--spacing-xs);
+        }
+
+        .section-divider {
+            height: 1px;
+            background: var(--color-border);
+            margin: var(--spacing-2xl) 0;
+        }
+
+        /* ===================================================================
+           BASE: COMPONENTS (Global)
+           =================================================================== */
+
+        /* Tooltip Icon */
+        .tooltip-icon {
+            width: 18px;
+            height: 18px;
+            background: var(--color-accent-purple);
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: help;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .tooltip-icon span {
+            color: white;
+            font-size: 12px;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .tooltip-text {
+            visibility: hidden;
+            opacity: 0;
+            position: absolute;
+            top: 24px;
+            right: 0;
+            width: 220px;
+            background: #333;
+            color: white;
+            font-family: var(--font-body);
+            font-size: 12px;
+            font-weight: 400;
+            padding: 10px 12px;
+            border-radius: var(--radius-md);
+            line-height: 1.4;
+            text-align: left;
+            z-index: 100;
+            transition: opacity 0.2s, visibility 0.2s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .tooltip-text::before {
+            content: '';
+            position: absolute;
+            top: -6px;
+            right: 8px;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-bottom: 6px solid #333;
+        }
+
+        .tooltip-icon:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .tooltip-icon.tooltip-center .tooltip-text {
+            right: auto;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .tooltip-icon.tooltip-center .tooltip-text::before {
+            right: auto;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        /* Change Badge */
+        .change-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-family: var(--font-body);
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .change-badge.increase {
+            background: rgba(255, 68, 56, 0.1);
+            color: var(--color-accent-red);
+        }
+
+        .change-badge.decrease {
+            background: rgba(150, 213, 81, 0.2);
+            color: #2e7d32;
+        }
+
+        .change-badge.increase-good {
+            background: rgba(150, 213, 81, 0.2);
+            color: #2e7d32;
+        }
+
+        .change-badge.decrease-bad {
+            background: rgba(255, 68, 56, 0.1);
+            color: var(--color-accent-red);
+        }
+
+        .change-badge.neutral {
+            background: rgba(0, 0, 0, 0.05);
+            color: var(--color-text-secondary);
+        }
+
+        .change-badge .arrow {
+            font-size: 12px;
+        }
+
+        /* Download Button */
+        .download-btn {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            color: var(--color-text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .download-btn:hover {
+            border-color: var(--color-primary);
+            color: var(--color-primary);
+        }
+
+        /* ===================================================================
+           COMPONENT 1: SOURCE KPI CARDS (4-column grid, single-row style)
+           =================================================================== */
+        .kpi-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-2xl);
+        }
+
+        .kpi-card-single {
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-lg);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .kpi-card-single .kpi-left {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        .kpi-card-single .kpi-label {
+            font-family: var(--font-body);
+            font-size: 14px;
+            font-weight: 400;
+            color: var(--color-text-secondary);
+        }
+
+        .kpi-card-single .kpi-right {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+        }
+
+        .kpi-card-single .kpi-value {
+            font-family: var(--font-display);
+            font-size: 28px;
+            font-weight: var(--font-weight-bold);
+            color: var(--color-text-primary);
+            line-height: 1;
+        }
+
+        /* ===================================================================
+           COMPONENT 2: SOURCE TYPE PIE CHART
+           =================================================================== */
+        .chart-card {
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-xl);
+            margin-bottom: var(--spacing-2xl);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .chart-title {
+            font-family: var(--font-display);
+            font-size: var(--font-size-md);
+            font-weight: 700;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .source-chart-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 60px;
+        }
+
+        .source-donut-wrapper {
+            position: relative;
+            width: 200px;
+            height: 200px;
+        }
+
+        .source-donut-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            pointer-events: none;
+        }
+
+        .source-donut-total {
+            font-family: var(--font-display);
+            font-size: 28px;
+            font-weight: var(--font-weight-bold);
+            color: var(--color-primary);
+            line-height: 1;
+        }
+
+        .source-donut-label {
+            font-size: 11px;
+            color: var(--color-text-secondary);
+            text-transform: uppercase;
+        }
+
+        .source-legend {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-md);
+        }
+
+        .source-legend-item {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            font-size: 14px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .source-legend-item:hover {
+            opacity: 0.7;
+        }
+
+        .source-legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+        }
+
+        .source-legend-color.owned { background: var(--color-source-owned); }
+        .source-legend-color.earned { background: var(--color-source-earned); }
+        .source-legend-color.social { background: var(--color-source-social); }
+        .source-legend-color.competitor { background: var(--color-source-competitor); }
+        .source-legend-color.other { background: var(--color-source-other); }
+
+        .source-legend-label {
+            flex: 1;
+            color: var(--color-text-secondary);
+        }
+
+        .source-legend-value {
+            font-family: var(--font-display);
+            font-weight: 700;
+            min-width: 50px;
+            text-align: right;
+        }
+
+        .source-legend-percent {
+            font-size: 12px;
+            color: var(--color-text-secondary);
+            min-width: 40px;
+            text-align: right;
+        }
+
+        /* D3 Donut Styles */
+        .source-arc {
+            cursor: pointer;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+
+        .source-arc:hover {
+            opacity: 0.8;
+        }
+
+        /* ===================================================================
+           COMPONENT 3: SOURCE DOMAIN & URL TABLES
+           =================================================================== */
+        .tables-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--spacing-xl);
+            margin-bottom: var(--spacing-2xl);
+        }
+
+        .table-card {
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-xl);
+        }
+
+        .table-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .table-card-title {
+            font-family: var(--font-display);
+            font-size: 14px;
+            font-weight: 700;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .data-table th {
+            text-align: left;
+            font-weight: 600;
+            color: var(--color-text-secondary);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 8px 12px;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .data-table th:not(:first-child) {
+            text-align: right;
+        }
+
+        .data-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #f0f0f0;
+            vertical-align: middle;
+        }
+
+        .data-table td:not(:first-child) {
+            text-align: right;
+        }
+
+        .data-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .data-table tbody tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .data-table tbody tr:hover {
+            background: #f0f1f3;
+        }
+
+        /* Source Type Badge */
+        .source-type-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .source-type-badge.owned {
+            background: rgba(20, 40, 160, 0.1);
+            color: var(--color-source-owned);
+        }
+
+        .source-type-badge.earned {
+            background: rgba(16, 163, 127, 0.1);
+            color: var(--color-source-earned);
+        }
+
+        .source-type-badge.social {
+            background: rgba(142, 68, 173, 0.1);
+            color: var(--color-source-social);
+        }
+
+        .source-type-badge.competitor {
+            background: rgba(249, 171, 0, 0.1);
+            color: #c98a00;
+        }
+
+        .source-type-badge.other {
+            background: rgba(158, 158, 158, 0.1);
+            color: var(--color-source-other);
+        }
+
+        /* Domain name cell */
+        .domain-name {
+            font-weight: 500;
+            color: var(--color-text-primary);
+        }
+
+        .url-name {
+            font-size: 12px;
+            color: var(--color-text-secondary);
+            max-width: 250px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* Bar visualization */
+        .bar-cell {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        .bar-container {
+            width: 60px;
+            height: 8px;
+            background: #f0f0f0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            background: var(--color-primary);
+            border-radius: 4px;
+        }
+
+        .bar-value {
+            font-weight: 600;
+            min-width: 45px;
+            text-align: right;
+        }
+
+        /* Position change */
+        .position-change {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .position-change.up {
+            color: #10b981;
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .position-change.down {
+            color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .position-change.neutral {
+            color: var(--color-text-secondary);
+            background: #f3f4f6;
+        }
+
+        /* Pagination */
+        .table-pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: var(--spacing-lg);
+            padding-top: var(--spacing-lg);
+            border-top: 1px solid var(--color-border);
+            font-size: 13px;
+            color: var(--color-text-secondary);
+        }
+
+        .pagination-info {
+            font-size: 12px;
+        }
+
+        /* ===================================================================
+           COMPONENT 4: COMPETITOR ANALYSIS SECTION
+           =================================================================== */
+        .competitor-section {
+            margin-bottom: var(--spacing-2xl);
+        }
+
+        .competitor-card {
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-xl);
+        }
+
+        .competitor-table .brand-cell {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+        }
+
+        .brand-indicator {
+            width: 4px;
+            height: 28px;
+            border-radius: 2px;
+        }
+
+        .brand-indicator.samsung { background: var(--color-primary); }
+        .brand-indicator.lg { background: var(--color-lg); }
+        .brand-indicator.sony { background: var(--color-sony); }
+        .brand-indicator.tcl { background: var(--color-tcl); }
+        .brand-indicator.hisense { background: var(--color-hisense); }
+
+        .brand-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .brand-name {
+            font-weight: 600;
+            color: var(--color-text-primary);
+        }
+
+        .brand-domain {
+            font-size: 12px;
+            color: var(--color-text-secondary);
+        }
+
+        /* VS Samsung column */
+        .vs-delta {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: 600;
+        }
+
+        .vs-delta.ahead {
+            color: var(--color-accent-red);
+        }
+
+        .vs-delta.behind {
+            color: var(--color-accent-green);
+        }
+
+        .vs-delta.same {
+            color: var(--color-text-secondary);
+        }
+
+        /* Samsung row highlight */
+        .data-table tbody tr.brand-row {
+            background: rgba(20, 40, 160, 0.03);
+        }
+
+        .data-table tbody tr.brand-row:hover {
+            background: rgba(20, 40, 160, 0.06);
+        }
+
+        /* ===================================================================
+           RESPONSIVE
+           =================================================================== */
+        @media (max-width: 1024px) {
+            .kpi-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .tables-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .source-chart-container {
+                flex-direction: column;
+                gap: var(--spacing-xl);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Page Header -->
+        <div class="section-header">
+            <div>
+                <h1 class="section-title">Source Analysis</h1>
+                <p class="section-subtitle">Track citations, domains, and competitive source visibility</p>
+            </div>
+        </div>
+
+        <!-- ===============================================================
+             COMPONENT 1: SOURCE KPI CARDS (Single-row style)
+             =============================================================== -->
+        <div class="kpi-row">
+            <!-- Citations KPI -->
+            <div class="kpi-card-single">
+                <div class="kpi-left">
+                    <span class="kpi-label">Citations</span>
+                    <div class="tooltip-icon">
+                        <span>?</span>
+                        <div class="tooltip-text">Total number of times your domain or content is cited as a source in AI-generated responses across all tracked prompts.</div>
+                    </div>
+                </div>
+                <div class="kpi-right">
+                    <div class="kpi-value">1,247</div>
+                    <span class="change-badge increase-good"><span class="arrow">&#8599;</span> +156</span>
+                </div>
+            </div>
+
+            <!-- Citation Gaps KPI -->
+            <div class="kpi-card-single">
+                <div class="kpi-left">
+                    <span class="kpi-label">Citation Gaps</span>
+                    <div class="tooltip-icon">
+                        <span>?</span>
+                        <div class="tooltip-text">Number of prompts where competitors are cited but your brand is not. These represent opportunities to improve source coverage.</div>
+                    </div>
+                </div>
+                <div class="kpi-right">
+                    <div class="kpi-value">83</div>
+                    <span class="change-badge decrease"><span class="arrow">&#8600;</span> -12</span>
+                </div>
+            </div>
+
+            <!-- Mentions KPI -->
+            <div class="kpi-card-single">
+                <div class="kpi-left">
+                    <span class="kpi-label">Mentions</span>
+                    <div class="tooltip-icon">
+                        <span>?</span>
+                        <div class="tooltip-text">Total brand mentions across AI responses, including inline references and citations from any source mentioning your brand.</div>
+                    </div>
+                </div>
+                <div class="kpi-right">
+                    <div class="kpi-value">3,892</div>
+                    <span class="change-badge increase-good"><span class="arrow">&#8599;</span> +284</span>
+                </div>
+            </div>
+
+            <!-- Source Visibility KPI -->
+            <div class="kpi-card-single">
+                <div class="kpi-left">
+                    <span class="kpi-label">Source Visibility</span>
+                    <div class="tooltip-icon">
+                        <span>?</span>
+                        <div class="tooltip-text">Percentage of AI responses that cite your website as a source across all tracked prompts.</div>
+                    </div>
+                </div>
+                <div class="kpi-right">
+                    <div class="kpi-value">42%</div>
+                    <span class="change-badge increase-good"><span class="arrow">&#8599;</span> +8%</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===============================================================
+             COMPONENT 2: SOURCE TYPE PIE CHART
+             =============================================================== -->
+        <div class="chart-card">
+            <div class="chart-header">
+                <div class="chart-title">
+                    AI Sources by Type
+                    <div class="tooltip-icon tooltip-center">
+                        <span>?</span>
+                        <div class="tooltip-text">Distribution of citation sources across owned properties, earned media, social platforms, competitors, and other sources.</div>
+                    </div>
+                </div>
+                <button class="download-btn" title="Download chart">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="source-chart-container">
+                <div class="source-donut-wrapper">
+                    <svg id="source-donut" width="200" height="200"></svg>
+                    <div class="source-donut-center">
+                        <div class="source-donut-total">1,247</div>
+                        <div class="source-donut-label">Citations</div>
+                    </div>
+                </div>
+                <div class="source-legend">
+                    <div class="source-legend-item" data-type="owned">
+                        <div class="source-legend-color owned"></div>
+                        <span class="source-legend-label">Owned</span>
+                        <span class="source-legend-value">423</span>
+                        <span class="source-legend-percent">33.9%</span>
+                    </div>
+                    <div class="source-legend-item" data-type="earned">
+                        <div class="source-legend-color earned"></div>
+                        <span class="source-legend-label">Earned</span>
+                        <span class="source-legend-value">512</span>
+                        <span class="source-legend-percent">41.1%</span>
+                    </div>
+                    <div class="source-legend-item" data-type="social">
+                        <div class="source-legend-color social"></div>
+                        <span class="source-legend-label">Social</span>
+                        <span class="source-legend-value">156</span>
+                        <span class="source-legend-percent">12.5%</span>
+                    </div>
+                    <div class="source-legend-item" data-type="competitor">
+                        <div class="source-legend-color competitor"></div>
+                        <span class="source-legend-label">Benchmark Competitors</span>
+                        <span class="source-legend-value">98</span>
+                        <span class="source-legend-percent">7.9%</span>
+                    </div>
+                    <div class="source-legend-item" data-type="other">
+                        <div class="source-legend-color other"></div>
+                        <span class="source-legend-label">Other</span>
+                        <span class="source-legend-value">58</span>
+                        <span class="source-legend-percent">4.6%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===============================================================
+             COMPONENT 3: SOURCE DOMAIN & URL TABLES
+             =============================================================== -->
+        <div class="tables-grid">
+            <!-- Domain Table -->
+            <div class="table-card">
+                <div class="table-card-header">
+                    <div class="table-card-title">
+                        Source Domains
+                        <div class="tooltip-icon tooltip-center">
+                            <span>?</span>
+                            <div class="tooltip-text">Top domains cited as sources in AI responses for your tracked prompts.</div>
+                        </div>
+                    </div>
+                    <button class="download-btn" title="Download data">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                    </button>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Source Domain</th>
+                            <th>Type</th>
+                            <th>Citations</th>
+                            <th>Change</th>
+                            <th>Avg. Position</th>
+                            <th>Source Visibility</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="domain-name">samsung.com</span></td>
+                            <td><span class="source-type-badge owned">Owned</span></td>
+                            <td>423</td>
+                            <td><span class="position-change up">&#9650; 54</span></td>
+                            <td>1.8</td>
+                            <td>
+                                <div class="bar-cell">
+                                    <div class="bar-container"><div class="bar-fill" style="width: 72%"></div></div>
+                                    <span class="bar-value">72%</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="domain-name">rtings.com</span></td>
+                            <td><span class="source-type-badge earned">Earned</span></td>
+                            <td>287</td>
+                            <td><span class="position-change up">&#9650; 23</span></td>
+                            <td>2.1</td>
+                            <td>
+                                <div class="bar-cell">
+                                    <div class="bar-container"><div class="bar-fill" style="width: 48%"></div></div>
+                                    <span class="bar-value">48%</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="domain-name">cnet.com</span></td>
+                            <td><span class="source-type-badge earned">Earned</span></td>
+                            <td>156</td>
+                            <td><span class="position-change down">&#9660; 8</span></td>
+                            <td>2.4</td>
+                            <td>
+                                <div class="bar-cell">
+                                    <div class="bar-container"><div class="bar-fill" style="width: 35%"></div></div>
+                                    <span class="bar-value">35%</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="domain-name">reddit.com</span></td>
+                            <td><span class="source-type-badge social">Social</span></td>
+                            <td>134</td>
+                            <td><span class="position-change up">&#9650; 41</span></td>
+                            <td>3.2</td>
+                            <td>
+                                <div class="bar-cell">
+                                    <div class="bar-container"><div class="bar-fill" style="width: 28%"></div></div>
+                                    <span class="bar-value">28%</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="domain-name">lg.com</span></td>
+                            <td><span class="source-type-badge competitor">Competitor</span></td>
+                            <td>98</td>
+                            <td><span class="position-change neutral">&#8212; 0</span></td>
+                            <td>2.6</td>
+                            <td>
+                                <div class="bar-cell">
+                                    <div class="bar-container"><div class="bar-fill" style="width: 22%"></div></div>
+                                    <span class="bar-value">22%</span>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="table-pagination">
+                    <span class="pagination-info">Showing 1-5 of 127 domains</span>
+                </div>
+            </div>
+
+            <!-- URL Table -->
+            <div class="table-card">
+                <div class="table-card-header">
+                    <div class="table-card-title">
+                        Cited URLs
+                        <div class="tooltip-icon tooltip-center">
+                            <span>?</span>
+                            <div class="tooltip-text">Specific URLs most frequently cited in AI-generated responses.</div>
+                        </div>
+                    </div>
+                    <button class="download-btn" title="Download data">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                    </button>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>URL</th>
+                            <th>Citations</th>
+                            <th>Change</th>
+                            <th>Position</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="url-name" title="samsung.com/tv/qled-tv/">samsung.com/tv/qled-tv/</span></td>
+                            <td>87</td>
+                            <td><span class="position-change up">&#9650; 12</span></td>
+                            <td>1.4</td>
+                        </tr>
+                        <tr>
+                            <td><span class="url-name" title="rtings.com/tv/reviews/samsung/s95d-oled">rtings.com/tv/reviews/samsung/s95d-oled</span></td>
+                            <td>64</td>
+                            <td><span class="position-change up">&#9650; 8</span></td>
+                            <td>1.8</td>
+                        </tr>
+                        <tr>
+                            <td><span class="url-name" title="samsung.com/tv/neo-qled/">samsung.com/tv/neo-qled/</span></td>
+                            <td>52</td>
+                            <td><span class="position-change down">&#9660; 3</span></td>
+                            <td>2.1</td>
+                        </tr>
+                        <tr>
+                            <td><span class="url-name" title="cnet.com/reviews/samsung-frame-tv-2024/">cnet.com/reviews/samsung-frame-tv-2024/</span></td>
+                            <td>41</td>
+                            <td><span class="position-change up">&#9650; 15</span></td>
+                            <td>2.3</td>
+                        </tr>
+                        <tr>
+                            <td><span class="url-name" title="reddit.com/r/4kTV/samsung_vs_lg_2024">reddit.com/r/4kTV/samsung_vs_lg_2024</span></td>
+                            <td>38</td>
+                            <td><span class="position-change up">&#9650; 22</span></td>
+                            <td>3.1</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="table-pagination">
+                    <span class="pagination-info">Showing 1-5 of 342 URLs</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===============================================================
+             COMPONENT 4: COMPETITOR ANALYSIS SECTION
+             =============================================================== -->
+        <div class="competitor-section">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title" style="font-size: 18px;">Competitor Citation Analysis</h2>
+                    <p class="section-subtitle">Compare source citation performance against tracked competitors</p>
+                </div>
+            </div>
+            <div class="competitor-card">
+                <table class="data-table competitor-table">
+                    <thead>
+                        <tr>
+                            <th>Competitor</th>
+                            <th>Citations</th>
+                            <th>Change</th>
+                            <th>Avg. Position</th>
+                            <th>vs Samsung</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="brand-row">
+                            <td>
+                                <div class="brand-cell">
+                                    <div class="brand-indicator samsung"></div>
+                                    <div class="brand-info">
+                                        <span class="brand-name">Samsung</span>
+                                        <span class="brand-domain">samsung.com</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>423</td>
+                            <td><span class="position-change up">&#9650; 54</span></td>
+                            <td>1.8</td>
+                            <td><span class="vs-delta same">&#8212;</span></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="brand-cell">
+                                    <div class="brand-indicator lg"></div>
+                                    <div class="brand-info">
+                                        <span class="brand-name">LG</span>
+                                        <span class="brand-domain">lg.com</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>387</td>
+                            <td><span class="position-change up">&#9650; 28</span></td>
+                            <td>2.1</td>
+                            <td><span class="vs-delta behind">-36 behind</span></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="brand-cell">
+                                    <div class="brand-indicator sony"></div>
+                                    <div class="brand-info">
+                                        <span class="brand-name">Sony</span>
+                                        <span class="brand-domain">sony.com</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>312</td>
+                            <td><span class="position-change down">&#9660; 15</span></td>
+                            <td>2.4</td>
+                            <td><span class="vs-delta behind">-111 behind</span></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="brand-cell">
+                                    <div class="brand-indicator tcl"></div>
+                                    <div class="brand-info">
+                                        <span class="brand-name">TCL</span>
+                                        <span class="brand-domain">tcl.com</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>198</td>
+                            <td><span class="position-change up">&#9650; 42</span></td>
+                            <td>3.2</td>
+                            <td><span class="vs-delta behind">-225 behind</span></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="brand-cell">
+                                    <div class="brand-indicator hisense"></div>
+                                    <div class="brand-info">
+                                        <span class="brand-name">Hisense</span>
+                                        <span class="brand-domain">hisense.com</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>156</td>
+                            <td><span class="position-change up">&#9650; 67</span></td>
+                            <td>3.5</td>
+                            <td><span class="vs-delta behind">-267 behind</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ===================================================================
+         D3.js Donut Chart Script
+         =================================================================== -->
+    <script>
+        // Source Type Data
+        const sourceData = [
+            { type: 'owned', label: 'Owned', value: 423, color: '#1428A0' },
+            { type: 'earned', label: 'Earned', value: 512, color: '#10a37f' },
+            { type: 'social', label: 'Social', value: 156, color: '#8e44ad' },
+            { type: 'competitor', label: 'Competitors', value: 98, color: '#f9ab00' },
+            { type: 'other', label: 'Other', value: 58, color: '#9e9e9e' }
+        ];
+
+        // Chart dimensions
+        const width = 200;
+        const height = 200;
+        const radius = Math.min(width, height) / 2;
+        const innerRadius = 60; // Donut hole
+
+        // Create SVG
+        const svg = d3.select('#source-donut')
+            .attr('width', width)
+            .attr('height', height)
+            .append('g')
+            .attr('transform', `translate(${width / 2}, ${height / 2})`);
+
+        // Create pie generator
+        const pie = d3.pie()
+            .value(d => d.value)
+            .sort(null);
+
+        // Create arc generator
+        const arc = d3.arc()
+            .innerRadius(innerRadius)
+            .outerRadius(radius - 2);
+
+        // Hover arc (slightly larger)
+        const arcHover = d3.arc()
+            .innerRadius(innerRadius)
+            .outerRadius(radius + 4);
+
+        // Create arcs
+        const arcs = svg.selectAll('.source-arc')
+            .data(pie(sourceData))
+            .enter()
+            .append('path')
+            .attr('class', 'source-arc')
+            .attr('d', arc)
+            .attr('fill', d => d.data.color)
+            .attr('stroke', 'white')
+            .attr('stroke-width', 2)
+            .style('cursor', 'pointer');
+
+        // Hover interactions
+        arcs.on('mouseover', function(event, d) {
+            d3.select(this)
+                .transition()
+                .duration(200)
+                .attr('d', arcHover);
+
+            // Highlight corresponding legend item
+            d3.selectAll('.source-legend-item')
+                .style('opacity', item => item.dataset.type === d.data.type ? 1 : 0.5);
+
+            // Update center text
+            d3.select('.source-donut-total').text(d.data.value);
+            d3.select('.source-donut-label').text(d.data.label);
+        })
+        .on('mouseout', function(event, d) {
+            d3.select(this)
+                .transition()
+                .duration(200)
+                .attr('d', arc);
+
+            // Reset legend
+            d3.selectAll('.source-legend-item').style('opacity', 1);
+
+            // Reset center text
+            const total = sourceData.reduce((sum, item) => sum + item.value, 0);
+            d3.select('.source-donut-total').text(total.toLocaleString());
+            d3.select('.source-donut-label').text('Citations');
+        });
+
+        // Legend interactions
+        d3.selectAll('.source-legend-item').on('mouseover', function() {
+            const type = this.dataset.type;
+            arcs.style('opacity', d => d.data.type === type ? 1 : 0.3);
+            d3.selectAll('.source-legend-item').style('opacity', function() {
+                return this.dataset.type === type ? 1 : 0.5;
+            });
+        }).on('mouseout', function() {
+            arcs.style('opacity', 1);
+            d3.selectAll('.source-legend-item').style('opacity', 1);
+        });
+    </script>
+</body>
+</html>

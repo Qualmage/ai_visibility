@@ -1,0 +1,391 @@
+<!-- === Sentiment Treemap ===
+D3.js treemap of concepts sized by mentions
+Color by sentiment (green=positive, gray=neutral, red=negative)
+-->
+
+<!-- Treemap Section HTML -->
+<div class="container">
+    <div class="chart-card full-width">
+        <div class="chart-header">
+            <div class="chart-title">
+                Concept Sentiment Map
+                <div class="tooltip-icon">
+                    <span>?</span>
+                    <div class="tooltip-text">Concepts sized by mention volume, colored by sentiment. Green = positive, Gray = neutral, Red = negative sentiment.</div>
+                </div>
+            </div>
+            <div class="chart-controls">
+                <select class="filter-select treemap-brand-filter" id="treemap-brand">
+                    <option value="Samsung" selected>Samsung</option>
+                    <option value="LG">LG</option>
+                    <option value="Sony">Sony</option>
+                    <option value="TCL">TCL</option>
+                    <option value="Hisense">Hisense</option>
+                </select>
+                <button class="download-btn" title="Download">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7 10 12 15 17 10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <div class="treemap-container" id="sentiment-treemap"></div>
+        <div class="treemap-legend">
+            <div class="treemap-legend-item">
+                <span class="legend-dot positive"></span>
+                <span>Positive Sentiment</span>
+            </div>
+            <div class="treemap-legend-item">
+                <span class="legend-dot neutral"></span>
+                <span>Neutral Sentiment</span>
+            </div>
+            <div class="treemap-legend-item">
+                <span class="legend-dot negative"></span>
+                <span>Negative Sentiment</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Treemap CSS -->
+<style>
+.treemap-container {
+    width: 100%;
+    min-height: 500px;
+    padding: var(--spacing-md) 0;
+}
+
+.treemap-container svg {
+    display: block;
+    width: 100%;
+    height: 500px;
+}
+
+.treemap-tile {
+    stroke: #fff;
+    stroke-width: 2px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.treemap-tile:hover {
+    stroke-width: 3px;
+    filter: brightness(1.1);
+}
+
+.treemap-tile-label {
+    font-family: var(--font-body);
+    font-size: 11px;
+    fill: #fff;
+    pointer-events: none;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+.treemap-tile-value {
+    font-family: var(--font-display);
+    font-size: 10px;
+    fill: rgba(255,255,255,0.8);
+    pointer-events: none;
+}
+
+.treemap-legend {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-xl);
+    padding: var(--spacing-md) 0;
+    margin-top: var(--spacing-md);
+    border-top: 1px solid var(--color-border);
+}
+
+.treemap-legend-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    font-family: var(--font-body);
+    font-size: 12px;
+    color: var(--color-text-secondary);
+}
+
+.treemap-legend-item .legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.treemap-legend-item .legend-dot.positive {
+    background: var(--color-accent-green);
+}
+
+.treemap-legend-item .legend-dot.neutral {
+    background: var(--color-neutral);
+}
+
+.treemap-legend-item .legend-dot.negative {
+    background: var(--color-accent-red);
+}
+
+.chart-controls {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.treemap-brand-filter {
+    min-width: 120px;
+}
+
+/* Treemap tooltip */
+.treemap-tooltip {
+    position: fixed;
+    background: #333;
+    color: white;
+    padding: 10px 14px;
+    border-radius: var(--radius-md);
+    font-size: 12px;
+    font-family: var(--font-body);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s;
+    z-index: 1000;
+    max-width: 250px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.treemap-tooltip.visible {
+    opacity: 1;
+}
+
+.treemap-tooltip .tooltip-name {
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 6px;
+}
+
+.treemap-tooltip .tooltip-metrics {
+    display: grid;
+    grid-template-columns: auto auto;
+    gap: 4px 12px;
+}
+
+.treemap-tooltip .tooltip-label {
+    color: rgba(255,255,255,0.7);
+}
+
+.treemap-tooltip .tooltip-value {
+    font-weight: 600;
+    text-align: right;
+}
+
+.treemap-tooltip .tooltip-value.positive {
+    color: var(--color-accent-green);
+}
+
+.treemap-tooltip .tooltip-value.negative {
+    color: var(--color-accent-red);
+}
+</style>
+
+<!-- Treemap Tooltip Element -->
+<div class="treemap-tooltip" id="treemap-tooltip"></div>
+
+<!-- Treemap JavaScript -->
+<script>
+(function() {
+    // Configuration
+    const config = {
+        width: 1000,
+        height: 500,
+        padding: 3
+    };
+
+    // Sentiment color scale: -1 (red) to 0 (gray) to +1 (green)
+    const sentimentColorScale = d3.scaleLinear()
+        .domain([-1, 0, 1])
+        .range(['#ff4438', '#9e9e9e', '#96d551'])
+        .clamp(true);
+
+    const tooltip = d3.select('#treemap-tooltip');
+
+    // Sample data structure
+    const sampleData = {
+        name: 'Samsung',
+        children: [
+            { name: 'QLED Display', value: 450, sentiment: 0.8, stats: { positive: 360, neutral: 70, negative: 20 } },
+            { name: 'Smart Features', value: 380, sentiment: 0.6, stats: { positive: 230, neutral: 120, negative: 30 } },
+            { name: 'Gaming Performance', value: 320, sentiment: 0.7, stats: { positive: 224, neutral: 80, negative: 16 } },
+            { name: 'Picture Quality', value: 290, sentiment: 0.5, stats: { positive: 145, neutral: 130, negative: 15 } },
+            { name: 'Sound System', value: 210, sentiment: 0.2, stats: { positive: 42, neutral: 147, negative: 21 } },
+            { name: 'Price Value', value: 185, sentiment: -0.2, stats: { positive: 37, neutral: 92, negative: 56 } },
+            { name: 'HDR Support', value: 170, sentiment: 0.65, stats: { positive: 110, neutral: 51, negative: 9 } },
+            { name: 'Motion Handling', value: 150, sentiment: 0.55, stats: { positive: 82, neutral: 60, negative: 8 } },
+            { name: 'Input Lag', value: 130, sentiment: 0.4, stats: { positive: 52, neutral: 65, negative: 13 } },
+            { name: 'Connectivity', value: 120, sentiment: 0.3, stats: { positive: 36, neutral: 72, negative: 12 } },
+            { name: 'Design', value: 110, sentiment: 0.75, stats: { positive: 82, neutral: 22, negative: 6 } },
+            { name: 'Energy Efficiency', value: 95, sentiment: 0.1, stats: { positive: 10, neutral: 76, negative: 9 } },
+            { name: 'Remote Control', value: 80, sentiment: -0.15, stats: { positive: 12, neutral: 52, negative: 16 } },
+            { name: 'Software Updates', value: 70, sentiment: -0.3, stats: { positive: 7, neutral: 42, negative: 21 } },
+            { name: 'Customer Support', value: 60, sentiment: -0.4, stats: { positive: 6, neutral: 30, negative: 24 } }
+        ]
+    };
+
+    function renderTreemap(data) {
+        const container = d3.select('#sentiment-treemap');
+        container.selectAll('*').remove();
+
+        const svg = container.append('svg')
+            .attr('viewBox', `0 0 ${config.width} ${config.height}`)
+            .attr('preserveAspectRatio', 'xMidYMid meet');
+
+        // Create hierarchy and compute treemap layout
+        const root = d3.hierarchy(data)
+            .sum(d => d.value)
+            .sort((a, b) => b.value - a.value);
+
+        d3.treemap()
+            .size([config.width, config.height])
+            .padding(config.padding)
+            .round(true)(root);
+
+        // Create tile groups
+        const tiles = svg.selectAll('.treemap-tile-group')
+            .data(root.leaves())
+            .join('g')
+            .attr('class', 'treemap-tile-group')
+            .attr('transform', d => `translate(${d.x0},${d.y0})`);
+
+        // Draw rectangles
+        tiles.append('rect')
+            .attr('class', 'treemap-tile')
+            .attr('width', d => Math.max(0, d.x1 - d.x0))
+            .attr('height', d => Math.max(0, d.y1 - d.y0))
+            .attr('rx', 4)
+            .attr('fill', d => sentimentColorScale(d.data.sentiment || 0))
+            .on('mouseenter', function(event, d) {
+                const sentimentPct = ((d.data.sentiment || 0) * 100).toFixed(0);
+                const sentimentClass = d.data.sentiment > 0 ? 'positive' : (d.data.sentiment < 0 ? 'negative' : '');
+                const stats = d.data.stats || { positive: 0, neutral: 0, negative: 0 };
+
+                tooltip
+                    .html(`
+                        <div class="tooltip-name">${d.data.name}</div>
+                        <div class="tooltip-metrics">
+                            <span class="tooltip-label">Mentions</span>
+                            <span class="tooltip-value">${d.data.value.toLocaleString()}</span>
+                            <span class="tooltip-label">Sentiment</span>
+                            <span class="tooltip-value ${sentimentClass}">${sentimentPct > 0 ? '+' : ''}${sentimentPct}%</span>
+                            <span class="tooltip-label">Positive</span>
+                            <span class="tooltip-value positive">${stats.positive.toLocaleString()}</span>
+                            <span class="tooltip-label">Neutral</span>
+                            <span class="tooltip-value">${stats.neutral.toLocaleString()}</span>
+                            <span class="tooltip-label">Negative</span>
+                            <span class="tooltip-value negative">${stats.negative.toLocaleString()}</span>
+                        </div>
+                    `)
+                    .classed('visible', true)
+                    .style('left', (event.pageX + 10) + 'px')
+                    .style('top', (event.pageY - 10) + 'px');
+
+                // Dim other tiles
+                tiles.selectAll('.treemap-tile')
+                    .style('opacity', tile => tile === d ? 1 : 0.4);
+            })
+            .on('mousemove', function(event) {
+                tooltip
+                    .style('left', (event.pageX + 10) + 'px')
+                    .style('top', (event.pageY - 10) + 'px');
+            })
+            .on('mouseleave', function() {
+                tooltip.classed('visible', false);
+                tiles.selectAll('.treemap-tile').style('opacity', 1);
+            })
+            .on('click', function(event, d) {
+                document.dispatchEvent(new CustomEvent('treemapTileClick', {
+                    detail: { concept: d.data.name, brand: data.name }
+                }));
+            });
+
+        // Add labels (only if tile is large enough)
+        tiles.each(function(d) {
+            const width = d.x1 - d.x0;
+            const height = d.y1 - d.y0;
+
+            if (width > 50 && height > 30) {
+                const g = d3.select(this);
+
+                // Concept name
+                g.append('text')
+                    .attr('class', 'treemap-tile-label')
+                    .attr('x', 6)
+                    .attr('y', 16)
+                    .text(d => {
+                        const name = d.data.name;
+                        const maxChars = Math.floor(width / 7);
+                        return name.length > maxChars ? name.substring(0, maxChars - 2) + '...' : name;
+                    });
+
+                // Value (if enough height)
+                if (height > 45) {
+                    g.append('text')
+                        .attr('class', 'treemap-tile-value')
+                        .attr('x', 6)
+                        .attr('y', 30)
+                        .text(d => d.data.value.toLocaleString());
+                }
+            }
+        });
+    }
+
+    // Load data from Supabase
+    async function loadTreemapData(brand = 'Samsung') {
+        try {
+            if (typeof SupabaseData === 'undefined') {
+                console.warn('SupabaseData not available, using sample data');
+                sampleData.name = brand;
+                renderTreemap(sampleData);
+                return;
+            }
+
+            const mentionsData = await SupabaseData.fetchConceptMentions({
+                brand: brand,
+                limit: 500
+            });
+
+            if (mentionsData.length > 0) {
+                const treemapData = SupabaseData.transform.treemap(mentionsData, brand);
+                renderTreemap(treemapData);
+            } else {
+                sampleData.name = brand;
+                renderTreemap(sampleData);
+            }
+        } catch (error) {
+            console.error('Error loading treemap data:', error);
+            sampleData.name = brand;
+            renderTreemap(sampleData);
+        }
+    }
+
+    // Brand filter change handler
+    const brandFilter = document.getElementById('treemap-brand');
+    if (brandFilter) {
+        brandFilter.addEventListener('change', () => {
+            loadTreemapData(brandFilter.value);
+        });
+    }
+
+    // Listen for global filter changes
+    document.addEventListener('filtersChanged', () => {
+        const brand = brandFilter ? brandFilter.value : 'Samsung';
+        loadTreemapData(brand);
+    });
+
+    // Initial render
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => loadTreemapData('Samsung'));
+    } else {
+        loadTreemapData('Samsung');
+    }
+})();
+</script>

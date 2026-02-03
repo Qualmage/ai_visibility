@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OLED - Samsung AI Visibility</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        @font-face {
+            font-family: 'Samsung Sharp Sans';
+            src: url('../assets/fonts/SamsungSharpSansBd.woff2') format('woff2'),
+                 url('../assets/fonts/SamsungSharpSans-Bold.ttf') format('truetype');
+            font-weight: 700;
+        }
+        @font-face {
+            font-family: 'Samsung One';
+            src: url('../assets/fonts/SamsungOneLatinWeb-400.woff2') format('woff2'),
+                 url('../assets/fonts/SamsungOneLatinCompact-400.ttf') format('truetype');
+            font-weight: 400;
+        }
+
+        :root {
+            --color-primary: #1428A0;
+            --color-bg-page: #f8f9fa;
+            --color-bg-card: #ffffff;
+            --color-text-primary: #000000;
+            --color-text-secondary: #666666;
+            --color-border: #e0e0e0;
+            --font-display: 'Samsung Sharp Sans', sans-serif;
+            --font-body: 'Samsung One', -apple-system, sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--color-bg-page);
+            color: var(--color-text-primary);
+            min-height: 100vh;
+            padding: 24px;
+        }
+
+        .slide-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: var(--color-bg-card);
+            border-radius: 12px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+
+        .slide-header {
+            background: var(--color-primary);
+            color: white;
+            padding: 24px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .slide-header h1 {
+            font-family: var(--font-display);
+            font-size: 32px;
+            font-weight: 700;
+        }
+
+        .prompt-count {
+            font-size: 16px;
+            opacity: 0.9;
+            background: rgba(255,255,255,0.15);
+            padding: 8px 16px;
+            border-radius: 20px;
+        }
+
+        .slide-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr 1fr;
+            gap: 24px;
+            padding: 24px;
+        }
+
+        .section {
+            background: #fafafa;
+            border-radius: 8px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .section h2 {
+            font-family: var(--font-display);
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--color-text-primary);
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--color-primary);
+        }
+
+        .chart-container {
+            flex: 1;
+            position: relative;
+            min-height: 280px;
+        }
+
+        .insights {
+            margin-top: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .insight {
+            background: white;
+            padding: 12px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            line-height: 1.4;
+            border-left: 3px solid var(--color-primary);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .insight strong {
+            color: var(--color-primary);
+        }
+
+        .insight .highlight {
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <header class="slide-header">
+            <h1>OLED</h1>
+            <span class="prompt-count">26 prompts analyzed</span>
+        </header>
+
+        <div class="slide-grid">
+            <div class="section platform">
+                <h2>AI Platform Distribution</h2>
+                <div id="platform-donut" class="chart-container"></div>
+                <div class="insights">
+                    <div class="insight">
+                        <strong>LG Leads OLED:</strong> <span class="highlight">12,898</span> mentions vs Samsung's 8,918
+                    </div>
+                    <div class="insight">
+                        <strong>QD-OLED Advantage:</strong> Samsung's QD-OLED tech has <span class="highlight">487</span> positive mentions
+                    </div>
+                    <div class="insight">
+                        <strong>Brightness Edge:</strong> Samsung leads with <span class="highlight">548</span> brightness mentions
+                    </div>
+                </div>
+            </div>
+
+            <div class="section concepts">
+                <h2>Samsung Concepts & Sentiment</h2>
+                <div id="concept-treemap" class="chart-container"></div>
+            </div>
+
+            <div class="section competitors">
+                <h2>Competitive Analysis</h2>
+                <div id="competitor-radar" class="chart-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/slide-charts.js"></script>
+    <script>
+        // Platform data
+        const platformData = [
+            {"model":"search-gpt","prompts":26,"citations":8285},
+            {"model":"google-ai-mode","prompts":26,"citations":6048},
+            {"model":"google-ai-overview","prompts":26,"citations":3757}
+        ];
+
+        // Concept data for Samsung
+        const conceptData = [
+            {"concept":"brightness","sentiment":"positive","mentions":548},
+            {"concept":"4k resolution","sentiment":"positive","mentions":233},
+            {"concept":"qd-oled panel","sentiment":"positive","mentions":200},
+            {"concept":"qd-oled technology","sentiment":"positive","mentions":172},
+            {"concept":"contrast","sentiment":"positive","mentions":154},
+            {"concept":"peak brightness","sentiment":"positive","mentions":127},
+            {"concept":"oled technology","sentiment":"positive","mentions":127},
+            {"concept":"qd-oled","sentiment":"positive","mentions":115},
+            {"concept":"gaming features","sentiment":"positive","mentions":113},
+            {"concept":"brightness","sentiment":"neutral","mentions":104},
+            {"concept":"price","sentiment":"positive","mentions":97},
+            {"concept":"color volume","sentiment":"positive","mentions":93},
+            {"concept":"4k resolution","sentiment":"neutral","mentions":89},
+            {"concept":"vibrant colors","sentiment":"positive","mentions":80},
+            {"concept":"hdr10+","sentiment":"neutral","mentions":76},
+            {"concept":"low input lag","sentiment":"positive","mentions":75},
+            {"concept":"picture quality","sentiment":"positive","mentions":72},
+            {"concept":"gaming performance","sentiment":"positive","mentions":68},
+            {"concept":"color","sentiment":"positive","mentions":67},
+            {"concept":"color vibrancy","sentiment":"positive","mentions":65}
+        ];
+
+        // Competitor data
+        const competitorData = [
+            {"brand_name":"LG","mentions":12898,"unique_concepts":1464,"positive_pct":"77.3","negative_pct":"1.0","neutral_pct":"21.7"},
+            {"brand_name":"Samsung","mentions":8918,"unique_concepts":1255,"positive_pct":"70.0","negative_pct":"1.6","neutral_pct":"28.3"},
+            {"brand_name":"Sony","mentions":3256,"unique_concepts":687,"positive_pct":"72.0","negative_pct":"0.5","neutral_pct":"27.5"},
+            {"brand_name":"TCL","mentions":495,"unique_concepts":152,"positive_pct":"64.8","negative_pct":"1.2","neutral_pct":"33.9"},
+            {"brand_name":"Hisense","mentions":391,"unique_concepts":115,"positive_pct":"72.1","negative_pct":"0.8","neutral_pct":"27.1"}
+        ];
+
+        // Render charts on load
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                renderDonut('platform-donut', platformData);
+                renderTreemap('concept-treemap', conceptData);
+                renderCompetitorBars('competitor-radar', competitorData);
+            }, 100);
+        });
+    </script>
+</body>
+</html>

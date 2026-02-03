@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QLED - Citation Insights | Samsung AI Visibility</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link rel="stylesheet" href="../css/slides.css">
+    <style>
+        .citation-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 15px;
+        }
+        .citation-table th {
+            background: var(--color-primary);
+            color: white;
+            padding: 14px 16px;
+            text-align: left;
+            font-family: var(--font-display);
+            font-weight: 700;
+        }
+        .citation-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid #e0e0e0;
+            vertical-align: top;
+        }
+        .citation-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        .citation-table .rank {
+            width: 50px;
+            text-align: center;
+            font-weight: 700;
+            color: var(--color-primary);
+            font-size: 18px;
+        }
+        .citation-table .url-cell {
+            max-width: 400px;
+        }
+        .citation-table .url-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        .citation-table .url-path {
+            font-size: 12px;
+            color: #888;
+        }
+        .citation-table .count {
+            text-align: right;
+            font-weight: 700;
+            font-size: 18px;
+            color: var(--color-primary);
+        }
+        .citation-table .example-prompt {
+            font-size: 13px;
+            color: #555;
+            font-style: italic;
+            max-width: 300px;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <header class="slide-header">
+            <div>
+                <h1>QLED<span class="subtitle">Top Cited Samsung Pages</span></h1>
+            </div>
+            <span class="slide-badge">Slide 3 of 5</span>
+        </header>
+
+        <div class="slide-content">
+            <table class="citation-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Samsung Page</th>
+                        <th>Top Triggering Prompt</th>
+                        <th style="text-align:right">Citations</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="rank">1</td>
+                        <td class="url-cell">
+                            <div class="url-title">Screen Mirroring & Smart View Guide</div>
+                            <div class="url-path">/us/support/answer/ANS10001896/</div>
+                        </td>
+                        <td class="example-prompt">"how can i share my screen to my tv"</td>
+                        <td class="count">1,155</td>
+                    </tr>
+                    <tr>
+                        <td class="rank">2</td>
+                        <td class="url-cell">
+                            <div class="url-title">QLED Picture Settings Guide</div>
+                            <div class="url-path">/us/support/answer/ANS10002500/</div>
+                        </td>
+                        <td class="example-prompt">"best picture settings for samsung qled"</td>
+                        <td class="count">934</td>
+                    </tr>
+                    <tr>
+                        <td class="rank">3</td>
+                        <td class="url-cell">
+                            <div class="url-title">Gaming Mode & Input Lag Settings</div>
+                            <div class="url-path">/us/support/answer/ANS10002030/</div>
+                        </td>
+                        <td class="example-prompt">"reduce input lag on samsung tv"</td>
+                        <td class="count">867</td>
+                    </tr>
+                    <tr>
+                        <td class="rank">4</td>
+                        <td class="url-cell">
+                            <div class="url-title">Picture Quality Troubleshooting</div>
+                            <div class="url-path">/us/support/troubleshoot/TSG10001924/</div>
+                        </td>
+                        <td class="example-prompt">"samsung tv picture flickering"</td>
+                        <td class="count">813</td>
+                    </tr>
+                    <tr>
+                        <td class="rank">5</td>
+                        <td class="url-cell">
+                            <div class="url-title">TV Dimensions & Size Guide</div>
+                            <div class="url-path">/my/tvs/tv-buying-guide/tv-dimensions/</div>
+                        </td>
+                        <td class="example-prompt">"what size tv should i buy"</td>
+                        <td class="count">551</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="insights horizontal mt-24">
+                <div class="insight-card">
+                    <strong>Support Pages Dominate</strong>
+                    Samsung support articles capture <span class="highlight">78%</span> of top citations — optimizing these pages is high-impact.
+                </div>
+                <div class="insight-card">
+                    <strong>How-To Queries Win</strong>
+                    Prompts starting with "how to" drive <span class="highlight">3x more</span> citations than product comparison queries.
+                </div>
+                <div class="insight-card">
+                    <strong>Cross-Platform Authority</strong>
+                    Same URLs cited across ChatGPT, AI Overview, and AI Mode — consistent source trust.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/slide-charts.js"></script>
+</body>
+</html>

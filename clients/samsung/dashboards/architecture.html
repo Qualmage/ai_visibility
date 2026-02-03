@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Samsung AI Visibility - System Architecture</title>
+    <style>
+/* === Fonts === */
+@font-face {
+    font-family: 'Samsung Sharp Sans';
+    src: url('./fonts/SamsungSharpSansBd.woff2') format('woff2'),
+         url('./fonts/SamsungSharpSans-Bold.ttf') format('truetype');
+    font-weight: 700;
+}
+@font-face {
+    font-family: 'Samsung One';
+    src: url('./fonts/SamsungOneLatinWeb-400.woff2') format('woff2'),
+         url('./fonts/SamsungOneLatinCompact-400.ttf') format('truetype');
+    font-weight: 400;
+}
+
+/* === Design Tokens === */
+:root {
+    /* Brand */
+    --color-primary: #1428A0;
+    --color-primary-light: #8091df;
+
+    /* Accent Palette */
+    --color-accent-blue: #0277c6;
+    --color-accent-cyan: #02b2e4;
+    --color-accent-teal: #01c3b0;
+    --color-accent-purple: #8091df;
+    --color-accent-green: #96d551;
+    --color-accent-yellow: #feb447;
+    --color-accent-red: #ff4438;
+
+    /* Semantic */
+    --color-success: #4caf50;
+    --color-error: #f44336;
+    --color-neutral: #9e9e9e;
+
+    /* Backgrounds */
+    --color-bg-page: #f8f9fa;
+    --color-bg-header: #f7f7f7;
+    --color-bg-card: #ffffff;
+
+    /* Text */
+    --color-text-primary: #000000;
+    --color-text-secondary: #666666;
+
+    /* Borders */
+    --color-border: #e0e0e0;
+    --color-border-accent: #1428A0;
+
+    /* Typography */
+    --font-display: 'Samsung Sharp Sans', sans-serif;
+    --font-body: 'Samsung One', -apple-system, sans-serif;
+    --font-size-xs: 11px;
+    --font-size-sm: 12px;
+    --font-size-base: 14px;
+    --font-size-md: 16px;
+    --font-size-lg: 18px;
+    --font-size-xl: 24px;
+    --font-size-2xl: 28px;
+
+    /* Spacing */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 12px;
+    --spacing-lg: 16px;
+    --spacing-xl: 20px;
+    --spacing-2xl: 24px;
+
+    /* Layout */
+    --max-width: 1400px;
+    --radius-sm: 4px;
+    --radius-md: 6px;
+    --radius-lg: 8px;
+    --radius-xl: 12px;
+    --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: var(--font-body);
+    background: var(--color-bg-page);
+    color: var(--color-text-primary);
+    line-height: 1.6;
+}
+
+.container {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: var(--spacing-2xl);
+}
+
+/* === Header === */
+header {
+    background: var(--color-bg-header);
+    border-bottom: 3px solid var(--color-border-accent);
+    box-shadow: var(--shadow-sm);
+}
+
+.header-content {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: var(--spacing-lg) var(--spacing-2xl);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-title {
+    font-family: var(--font-display);
+    font-size: var(--font-size-2xl);
+    font-weight: 700;
+    color: var(--color-primary);
+}
+
+.header-logo {
+    height: 36px;
+}
+
+.header-nav {
+    display: flex;
+    gap: var(--spacing-lg);
+    align-items: center;
+}
+
+.header-nav a {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.header-nav a:hover {
+    color: var(--color-primary);
+}
+
+/* === Chart Cards === */
+.chart-card {
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-xl);
+    margin-bottom: var(--spacing-2xl);
+}
+
+.chart-card h2 {
+    font-family: var(--font-display);
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    color: var(--color-primary);
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-md);
+    border-bottom: 2px solid var(--color-border-accent);
+}
+
+.chart-card h3 {
+    font-family: var(--font-display);
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin: var(--spacing-xl) 0 var(--spacing-md);
+}
+
+.chart-card h4 {
+    font-family: var(--font-display);
+    font-size: var(--font-size-md);
+    font-weight: 700;
+    color: var(--color-text-secondary);
+    margin: var(--spacing-lg) 0 var(--spacing-sm);
+}
+
+.chart-card p {
+    color: var(--color-text-secondary);
+    margin-bottom: var(--spacing-md);
+}
+
+/* === Tables === */
+.schema-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--font-size-base);
+    margin-bottom: var(--spacing-xl);
+}
+
+.schema-table th,
+.schema-table td {
+    padding: var(--spacing-md) var(--spacing-lg);
+    text-align: left;
+    border-bottom: 1px solid var(--color-border);
+    vertical-align: top;
+}
+
+.schema-table th {
+    font-family: var(--font-display);
+    font-size: var(--font-size-xs);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--color-text-secondary);
+    background: var(--color-bg-page);
+}
+
+.schema-table tbody tr:hover {
+    background: var(--color-bg-page);
+}
+
+.schema-table code {
+    background: rgba(20, 40, 160, 0.08);
+    color: var(--color-primary);
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+    font-family: 'Monaco', 'Consolas', monospace;
+    font-size: var(--font-size-sm);
+}
+
+.schema-table .numeric {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+/* === Badges === */
+.badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.badge.primary {
+    background: rgba(20, 40, 160, 0.1);
+    color: var(--color-primary);
+}
+
+.badge.success {
+    background: rgba(150, 213, 81, 0.2);
+    color: #2e7d32;
+}
+
+.badge.warning {
+    background: rgba(254, 180, 71, 0.2);
+    color: #b45309;
+}
+
+.badge.info {
+    background: rgba(2, 178, 228, 0.15);
+    color: #0277c6;
+}
+
+/* === Diagram === */
+.diagram-container {
+    background: var(--color-bg-page);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-xl);
+    margin: var(--spacing-lg) 0;
+    overflow-x: auto;
+}
+
+.diagram-ascii {
+    font-family: 'Monaco', 'Consolas', monospace;
+    font-size: 13px;
+    line-height: 1.4;
+    white-space: pre;
+    color: var(--color-text-primary);
+}
+
+/* === Grid Layouts === */
+.two-column {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-xl);
+}
+
+.three-column {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-lg);
+}
+
+@media (max-width: 1024px) {
+    .two-column, .three-column {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* === Component Cards === */
+.component-card {
+    background: linear-gradient(135deg, rgba(20, 40, 160, 0.03) 0%, rgba(128, 145, 223, 0.05) 100%);
+    border: 1px solid rgba(20, 40, 160, 0.1);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    margin-bottom: var(--spacing-md);
+}
+
+.component-card h5 {
+    font-family: var(--font-display);
+    font-size: var(--font-size-base);
+    font-weight: 700;
+    color: var(--color-primary);
+    margin-bottom: var(--spacing-sm);
+}
+
+.component-card p {
+    font-size: var(--font-size-sm);
+    margin: 0;
+}
+
+.component-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.component-list li {
+    padding: var(--spacing-sm) 0;
+    border-bottom: 1px solid var(--color-border);
+    font-size: var(--font-size-sm);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.component-list li:last-child {
+    border-bottom: none;
+}
+
+/* === Flow Steps === */
+.flow-steps {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+    margin: var(--spacing-lg) 0;
+}
+
+.flow-step {
+    flex: 1;
+    min-width: 150px;
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-md);
+    text-align: center;
+    position: relative;
+}
+
+.flow-step::after {
+    content: '\2192';
+    position: absolute;
+    right: -18px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--color-primary);
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.flow-step:last-child::after {
+    display: none;
+}
+
+.flow-step-number {
+    display: inline-flex;
+    width: 28px;
+    height: 28px;
+    background: var(--color-primary);
+    color: white;
+    border-radius: 50%;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+    font-size: var(--font-size-sm);
+    font-weight: 700;
+    margin-bottom: var(--spacing-sm);
+}
+
+.flow-step-text {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+}
+
+/* === Filter Tags === */
+.filter-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    margin: var(--spacing-md) 0;
+}
+
+.filter-tag {
+    background: var(--color-bg-page);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-xs) var(--spacing-md);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+}
+
+.filter-tag strong {
+    color: var(--color-text-primary);
+}
+
+/* === Back Link === */
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    font-size: var(--font-size-sm);
+    margin-bottom: var(--spacing-lg);
+}
+
+.back-link:hover {
+    color: var(--color-primary);
+}
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div>
+                <span class="header-title">System Architecture</span>
+            </div>
+            <nav class="header-nav">
+                <a href="./geo-dashboard.html">GEO Dashboard</a>
+                <a href="./data-definitions.html">Data Definitions</a>
+                <img class="header-logo" src="./images/logo.jpg" alt="Samsung">
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <a href="./geo-dashboard.html" class="back-link">&larr; Back to Dashboard</a>
+
+        <!-- Section 1: System Overview -->
+        <div class="chart-card">
+            <h2>System Overview</h2>
+            <p>The Samsung AI Visibility Dashboard fetches data from SEMrush APIs, stores it in Supabase, and visualizes it through interactive charts and tables.</p>
+
+            <div class="diagram-container">
+                <div class="diagram-ascii">
++------------------+      +-------------------+      +------------------+      +--------------------+
+|    SEMrush API   |      |  Python Scripts   |      |     Supabase     |      |     Dashboard      |
+|                  |      |                   |      |                  |      |                    |
+|  Cited Pages     | ---> |  fetch_*.py       | ---> |  Tables:         | ---> |  geo-dashboard.html|
+|  Concept Mentions|      |  load_*.py        |      |  - concept_      |      |                    |
+|  Concept Prompts |      |                   |      |    mentions      |      |  Components:       |
+|  URL Prompts     |      |  Transforms &     |      |  - cited_pages   |      |  - KPI Cards       |
+|                  |      |  Loads JSON       |      |  - prompt_urls   |      |  - Charts (11)     |
+|                  |      |                   |      |  - domains       |      |  - Tables (5)      |
++------------------+      +-------------------+      |                  |      |                    |
+                                                     |  RPC Functions:  |      |  supabase-data.js  |
+                                                     |  - get_daily_    | <--- |  callRPC()         |
+                                                     |    mentions      |      |  supabaseQuery()   |
+                                                     |  - get_top_      |      |                    |
+                                                     |    categories    |      +--------------------+
+                                                     +------------------+
+</div>
+            </div>
+
+            <div class="three-column">
+                <div class="component-card">
+                    <h5>Data Sources</h5>
+                    <p>SEMrush AI Visibility API provides brand mentions, citations, prompts, and sentiment data across AI models (ChatGPT, Google AI Overview, Google AI Mode).</p>
+                </div>
+                <div class="component-card">
+                    <h5>Data Pipeline</h5>
+                    <p>Python scripts fetch paginated API responses, parse JSON, and load into Supabase tables with upsert logic for daily updates.</p>
+                </div>
+                <div class="component-card">
+                    <h5>Frontend</h5>
+                    <p>Static HTML/JS dashboard using Chart.js and D3.js for visualizations. Fetches data via Supabase REST API and RPC functions.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: Database Schema -->
+        <div class="chart-card">
+            <h2>Database Schema</h2>
+            <p>All data is stored in Supabase PostgreSQL. Tables are organized by data type with appropriate indexes for query performance.</p>
+
+            <h3>Tables by Data Volume</h3>
+            <table class="schema-table">
+                <thead>
+                    <tr>
+                        <th>Table</th>
+                        <th class="numeric">Rows</th>
+                        <th>Purpose</th>
+                        <th>Key Columns</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>semrush_prompt_urls</code></td>
+                        <td class="numeric">249,307</td>
+                        <td>URL citations per prompt with position and date</td>
+                        <td>prompt_hash, url, position, date</td>
+                    </tr>
+                    <tr>
+                        <td><code>semrush_concept_mentions</code></td>
+                        <td class="numeric">151,787</td>
+                        <td>Brand/concept mentions with sentiment breakdown</td>
+                        <td>date, concept, model, brand, mentions</td>
+                    </tr>
+                    <tr>
+                        <td><code>semrush_concept_prompts</code></td>
+                        <td class="numeric">145,337</td>
+                        <td>Prompts with quotes and sentiment per brand</td>
+                        <td>prompt, brand, sentiment, quote</td>
+                    </tr>
+                    <tr>
+                        <td><code>semrush_cited_pages</code></td>
+                        <td class="numeric">84,856</td>
+                        <td>Cited Samsung URLs with citation counts</td>
+                        <td>url, domain, prompts_count</td>
+                    </tr>
+                    <tr>
+                        <td><code>semrush_domains</code></td>
+                        <td class="numeric">69,974</td>
+                        <td>Domain classifications (owned/earned/competitor)</td>
+                        <td>domain, domain_type, citations</td>
+                    </tr>
+                    <tr>
+                        <td><code>semrush_url_prompts</code></td>
+                        <td class="numeric">43,842</td>
+                        <td>URL-prompt relationships with volume and topic</td>
+                        <td>url, prompt, topic, llm, volume</td>
+                    </tr>
+                    <tr>
+                        <td><code>tv_topics</code></td>
+                        <td class="numeric">41</td>
+                        <td>Topic taxonomy (categories and tags)</td>
+                        <td>category, tag, description</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Primary Table Schemas</h3>
+
+            <h4>semrush_concept_mentions</h4>
+            <table class="schema-table">
+                <thead>
+                    <tr>
+                        <th>Column</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>id</code></td><td>UUID</td><td>Primary key (auto-generated)</td></tr>
+                    <tr><td><code>date</code></td><td>DATE</td><td>Snapshot date</td></tr>
+                    <tr><td><code>concept</code></td><td>TEXT</td><td>Concept name (e.g., "picture quality")</td></tr>
+                    <tr><td><code>concept_category</code></td><td>TEXT</td><td>Category (e.g., "display")</td></tr>
+                    <tr><td><code>concept_subcategory</code></td><td>TEXT</td><td>Subcategory (e.g., "visual performance")</td></tr>
+                    <tr><td><code>mentions</code></td><td>INTEGER</td><td>Number of mentions for this date</td></tr>
+                    <tr><td><code>sentiment_positive</code></td><td>INTEGER</td><td>Positive sentiment count</td></tr>
+                    <tr><td><code>sentiment_negative</code></td><td>INTEGER</td><td>Negative sentiment count</td></tr>
+                    <tr><td><code>sentiment_neutral</code></td><td>INTEGER</td><td>Neutral sentiment count</td></tr>
+                    <tr><td><code>model</code></td><td>TEXT</td><td>AI model (search-gpt, google-ai-overview, google-ai-mode)</td></tr>
+                    <tr><td><code>brand</code></td><td>TEXT</td><td>Brand name (Samsung, LG, Sony, TCL, Hisense)</td></tr>
+                </tbody>
+            </table>
+
+            <h4>semrush_cited_pages</h4>
+            <table class="schema-table">
+                <thead>
+                    <tr>
+                        <th>Column</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>id</code></td><td>UUID</td><td>Primary key (auto-generated)</td></tr>
+                    <tr><td><code>url</code></td><td>TEXT</td><td>The cited URL</td></tr>
+                    <tr><td><code>prompts_count</code></td><td>INTEGER</td><td>Number of AI prompts citing this URL</td></tr>
+                    <tr><td><code>domain</code></td><td>TEXT</td><td>Domain (e.g., samsung.com)</td></tr>
+                    <tr><td><code>country</code></td><td>TEXT</td><td>Country filter (us, uk, etc.)</td></tr>
+                    <tr><td><code>category</code></td><td>TEXT</td><td>Category (OWNED_BY_TARGET, COMPETITOR, OTHER)</td></tr>
+                </tbody>
+            </table>
+
+            <h4>semrush_prompt_urls</h4>
+            <table class="schema-table">
+                <thead>
+                    <tr>
+                        <th>Column</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>id</code></td><td>UUID</td><td>Primary key (auto-generated)</td></tr>
+                    <tr><td><code>date</code></td><td>DATE</td><td>Date of the prompt response</td></tr>
+                    <tr><td><code>prompt_hash</code></td><td>TEXT</td><td>Unique prompt identifier</td></tr>
+                    <tr><td><code>url</code></td><td>TEXT</td><td>Cited source URL</td></tr>
+                    <tr><td><code>domain</code></td><td>TEXT</td><td>Domain of the cited URL</td></tr>
+                    <tr><td><code>position</code></td><td>INTEGER</td><td>Position in AI response (1 = first cited)</td></tr>
+                    <tr><td><code>model</code></td><td>TEXT</td><td>AI model that generated the response</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Section 3: RPC Functions -->
+        <div class="chart-card">
+            <h2>API Functions (RPC)</h2>
+            <p>Supabase RPC functions provide optimized server-side aggregations for dashboard queries.</p>
+
+            <table class="schema-table">
+                <thead>
+                    <tr>
+                        <th>Function</th>
+                        <th>Parameters</th>
+                        <th>Returns</th>
+                        <th>Used By</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>get_daily_mentions</code></td>
+                        <td>date_from, model_filter</td>
+                        <td>date, model, brand, total_mentions, sentiment_*</td>
+                        <td>KPI Cards, Trend Charts, Share of Voice</td>
+                    </tr>
+                    <tr>
+                        <td><code>get_top_categories</code></td>
+                        <td>date_from, model_filter, limit_count</td>
+                        <td>concept_category, total_mentions, sentiment breakdown</td>
+                        <td>Topics Bar Chart</td>
+                    </tr>
+                    <tr>
+                        <td><code>get_samsung_country_citations</code></td>
+                        <td>(none)</td>
+                        <td>country_site, citations, percentage</td>
+                        <td>Samsung Country Sites Chart</td>
+                    </tr>
+                    <tr>
+                        <td><code>get_sources_by_topic</code></td>
+                        <td>p_date, p_tag</td>
+                        <td>domain, domain_type, citations, mentions, sentiment_%</td>
+                        <td>Sources by Topic Table</td>
+                    </tr>
+                    <tr>
+                        <td><code>get_cited_urls</code></td>
+                        <td>p_offset, p_limit, p_domain_filter</td>
+                        <td>url, domain, prompts_count, prompts</td>
+                        <td>Cited URLs Table (paginated)</td>
+                    </tr>
+                    <tr>
+                        <td><code>get_cited_urls_count</code></td>
+                        <td>p_domain_filter</td>
+                        <td>total count</td>
+                        <td>Cited URLs pagination</td>
+                    </tr>
+                    <tr>
+                        <td><code>get_negative_quotes</code></td>
+                        <td>p_offset, p_limit, p_domain, p_concept</td>
+                        <td>prompt, quote, domain, concept, sentiment</td>
+                        <td>PR Action Center (paginated)</td>
+                    </tr>
+                    <tr>
+                        <td><code>get_concept_sentiment_summary</code></td>
+                        <td>date_from, model_filter</td>
+                        <td>concept, positive, negative, neutral counts</td>
+                        <td>Concept Mix Charts</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Example RPC Call</h3>
+            <div class="diagram-container">
+                <div class="diagram-ascii">
+// JavaScript (supabase-data.js)
+async function fetchDailyMentions(dateFrom = null, model = 'all') {
+    const params = {
+        date_from: dateFrom,
+        model_filter: model === 'all' ? null : model
+    };
+    return callRPC('get_daily_mentions', params);
+}
+
+// Supabase REST API Call
+POST https://[project].supabase.co/rest/v1/rpc/get_daily_mentions
+Headers: { apikey: '...', Authorization: 'Bearer ...' }
+Body: { "date_from": "2026-01-01", "model_filter": "search-gpt" }
+</div>
+            </div>
+        </div>
+
+        <!-- Section 4: Dashboard Components -->
+        <div class="chart-card">
+            <h2>Dashboard Components</h2>
+            <p>The GEO Dashboard consists of 4 KPI cards, 11 charts, and 5 data tables.</p>
+
+            <div class="two-column">
+                <div>
+                    <h3>Charts (11)</h3>
+                    <ul class="component-list">
+                        <li>
+                            <span>Share of Voice</span>
+                            <span class="badge primary">Doughnut/Bar Toggle</span>
+                        </li>
+                        <li>
+                            <span>Sentiment Distribution</span>
+                            <span class="badge success">Doughnut</span>
+                        </li>
+                        <li>
+                            <span>Visibility by AI Model</span>
+                            <span class="badge info">Horizontal Bar</span>
+                        </li>
+                        <li>
+                            <span>Brand Visibility Trend</span>
+                            <span class="badge info">Line Chart</span>
+                        </li>
+                        <li>
+                            <span>Domain Sentiment</span>
+                            <span class="badge warning">Stacked Horizontal Bar</span>
+                        </li>
+                        <li>
+                            <span>Domain Type Distribution</span>
+                            <span class="badge success">Pie Chart</span>
+                        </li>
+                        <li>
+                            <span>Negative Concepts</span>
+                            <span class="badge info">Horizontal Bar</span>
+                        </li>
+                        <li>
+                            <span>Negative by Domain</span>
+                            <span class="badge info">Horizontal Bar</span>
+                        </li>
+                        <li>
+                            <span>Positive Concepts</span>
+                            <span class="badge info">Horizontal Bar</span>
+                        </li>
+                        <li>
+                            <span>Concept Mix</span>
+                            <span class="badge primary">Doughnut</span>
+                        </li>
+                        <li>
+                            <span>Samsung Country Sites</span>
+                            <span class="badge info">Horizontal Bar</span>
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <h3>Tables (5)</h3>
+                    <ul class="component-list">
+                        <li>
+                            <span>Citation Sources</span>
+                            <span class="badge primary">Sortable</span>
+                        </li>
+                        <li>
+                            <span>Topics Tree</span>
+                            <span class="badge warning">Hierarchical</span>
+                        </li>
+                        <li>
+                            <span>Cited URLs</span>
+                            <span class="badge info">Paginated</span>
+                        </li>
+                        <li>
+                            <span>Domain Performance Summary</span>
+                            <span class="badge primary">Sortable</span>
+                        </li>
+                        <li>
+                            <span>Negative Quotes Browser</span>
+                            <span class="badge info">Paginated + Filters</span>
+                        </li>
+                    </ul>
+
+                    <h3>KPI Cards (4)</h3>
+                    <ul class="component-list">
+                        <li>
+                            <span>Share of Voice</span>
+                            <span class="badge success">Live</span>
+                        </li>
+                        <li>
+                            <span>Source Visibility</span>
+                            <span class="badge success">Live</span>
+                        </li>
+                        <li>
+                            <span>Referral Traffic</span>
+                            <span class="badge warning">Placeholder</span>
+                        </li>
+                        <li>
+                            <span>AI Visibility Score</span>
+                            <span class="badge success">Live</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 5: Data Flow -->
+        <div class="chart-card">
+            <h2>Data Flow</h2>
+            <p>The <code>loadDashboard()</code> function orchestrates data fetching and rendering on page load and filter changes.</p>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-text">Read Filters<br><small>Date, Model, Topic</small></div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-text">Fetch APIs<br><small>10 parallel calls</small></div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-text">Transform Data<br><small>Aggregations</small></div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">4</div>
+                    <div class="flow-step-text">Update KPIs<br><small>4 metric cards</small></div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">5</div>
+                    <div class="flow-step-text">Render Charts<br><small>11 visualizations</small></div>
+                </div>
+            </div>
+
+            <h3>Parallel API Fetches</h3>
+            <div class="diagram-container">
+                <div class="diagram-ascii">
+async function loadDashboard() {
+    const dateFrom = getDateFilter(dateRange.value);
+    const model = modelFilter.value;
+
+    // Parallel fetches for performance
+    const [
+        dailyMentions,      // KPIs, trends, share of voice
+        topCategories,      // Topics chart
+        citedPagesData,     // Source visibility
+        conceptSentiment,   // Sentiment charts
+        countryCitations,   // Samsung country sites
+        // ... more
+    ] = await Promise.all([
+        fetchDailyMentions(dateFrom, model),
+        fetchTopCategories(dateFrom, model, 15),
+        fetchCitedPages({ limit: 500 }),
+        callRPC('get_concept_sentiment_summary', { date_from: dateFrom }),
+        callRPC('get_samsung_country_citations', {}),
+        // ... more
+    ]);
+
+    // Calculate derived metrics
+    const kpis = calculateKPIs(dailyMentions);
+    const sourceMetrics = calculateSourceVisibility(citedPagesData);
+
+    // Update UI
+    updateKPICards(kpis, sourceMetrics);
+    renderAllCharts(dailyMentions, topCategories, ...);
+}
+</div>
+            </div>
+        </div>
+
+        <!-- Section 6: Filter System -->
+        <div class="chart-card">
+            <h2>Filter System</h2>
+            <p>Filters cascade through the dashboard, affecting different sections based on their data dependencies.</p>
+
+            <h3>Main Filters</h3>
+            <div class="filter-tags">
+                <div class="filter-tag"><strong>Date Range:</strong> 7d / 14d / 30d / All time</div>
+                <div class="filter-tag"><strong>Model:</strong> All / ChatGPT / AI Overview / AI Mode</div>
+                <div class="filter-tag"><strong>Topic:</strong> All / Category / Specific Tag</div>
+                <div class="filter-tag"><strong>Domain Type:</strong> All / Owned / Earned / Competitor</div>
+                <div class="filter-tag"><strong>Sentiment:</strong> All / Positive / Negative / Neutral</div>
+            </div>
+
+            <h3>Secondary Filters (Section-Specific)</h3>
+            <div class="filter-tags">
+                <div class="filter-tag"><strong>Cited URLs Domain:</strong> Filter URLs table by domain substring</div>
+                <div class="filter-tag"><strong>PR Domain:</strong> Filter negative quotes by source domain</div>
+                <div class="filter-tag"><strong>PR Concept:</strong> Filter negative quotes by concept</div>
+            </div>
+
+            <h3>Filter Impact Matrix</h3>
+            <table class="schema-table">
+                <thead>
+                    <tr>
+                        <th>Component</th>
+                        <th>Date</th>
+                        <th>Model</th>
+                        <th>Topic</th>
+                        <th>Domain Type</th>
+                        <th>Sentiment</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>KPI Cards</td>
+                        <td class="badge success">Yes</td>
+                        <td class="badge success">Yes</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>Share of Voice</td>
+                        <td class="badge success">Yes</td>
+                        <td class="badge success">Yes</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>Trend Line</td>
+                        <td class="badge success">Yes</td>
+                        <td class="badge success">Yes</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>Topics Tree</td>
+                        <td class="badge success">Yes</td>
+                        <td class="badge success">Yes</td>
+                        <td class="badge success">Yes</td>
+                        <td>-</td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>Citation Sources</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td class="badge success">Yes</td>
+                        <td class="badge success">Yes</td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>Cited URLs</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td class="badge success">Yes</td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>PR Action Center</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td class="badge success">Yes</td>
+                        <td class="badge success">Yes</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Section 7: Data Pipeline Scripts -->
+        <div class="chart-card">
+            <h2>Data Pipeline Scripts</h2>
+            <p>Python scripts in <code>clients/samsung/</code> handle data extraction and loading.</p>
+
+            <table class="schema-table">
+                <thead>
+                    <tr>
+                        <th>Script</th>
+                        <th>Purpose</th>
+                        <th>Output</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>fetch_cited_pages.py</code></td>
+                        <td>Fetch all cited Samsung URLs from SEMrush API</td>
+                        <td>data/cited_pages.json</td>
+                    </tr>
+                    <tr>
+                        <td><code>load_cited_pages.py</code></td>
+                        <td>Load cited pages JSON into Supabase</td>
+                        <td>semrush_cited_pages table</td>
+                    </tr>
+                    <tr>
+                        <td><code>fetch_concept_mentions.py</code></td>
+                        <td>Fetch daily concept mention snapshots</td>
+                        <td>data/concept_mentions.json</td>
+                    </tr>
+                    <tr>
+                        <td><code>load_concept_mentions.py</code></td>
+                        <td>Load concept mentions with sentiment parsing</td>
+                        <td>semrush_concept_mentions table</td>
+                    </tr>
+                    <tr>
+                        <td><code>fetch_concept_prompts.py</code></td>
+                        <td>Fetch prompts with quotes per brand</td>
+                        <td>data/concept_prompts.json</td>
+                    </tr>
+                    <tr>
+                        <td><code>load_concept_prompts.py</code></td>
+                        <td>Load concept prompts into Supabase</td>
+                        <td>semrush_concept_prompts table</td>
+                    </tr>
+                    <tr>
+                        <td><code>fetch_url_prompts.py</code></td>
+                        <td>Fetch prompts that cite each URL</td>
+                        <td>data/url_prompts.json</td>
+                    </tr>
+                    <tr>
+                        <td><code>load_url_prompts.py</code></td>
+                        <td>Load URL-prompt relationships</td>
+                        <td>semrush_url_prompts table</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Typical Data Refresh Workflow</h3>
+            <div class="diagram-container">
+                <div class="diagram-ascii">
+# 1. Fetch fresh data from SEMrush
+uv run fetch_concept_mentions.py
+uv run fetch_cited_pages.py
+
+# 2. Load into Supabase (upserts to avoid duplicates)
+uv run load_concept_mentions.py
+uv run load_cited_pages.py
+
+# 3. Refresh summary tables (optional, for performance)
+SELECT refresh_daily_mentions_summary();
+SELECT refresh_domain_summary();
+</div>
+            </div>
+        </div>
+
+        <!-- Section 8: Technologies -->
+        <div class="chart-card">
+            <h2>Technology Stack</h2>
+
+            <div class="three-column">
+                <div class="component-card">
+                    <h5>Frontend</h5>
+                    <ul style="margin: 0; padding-left: 20px; font-size: 14px; color: var(--color-text-secondary);">
+                        <li>HTML5 / CSS3 (Design Tokens)</li>
+                        <li>Chart.js (charts)</li>
+                        <li>D3.js (advanced viz)</li>
+                        <li>Vanilla JavaScript (ES6+)</li>
+                    </ul>
+                </div>
+                <div class="component-card">
+                    <h5>Backend</h5>
+                    <ul style="margin: 0; padding-left: 20px; font-size: 14px; color: var(--color-text-secondary);">
+                        <li>Supabase (PostgreSQL)</li>
+                        <li>Supabase Edge Functions</li>
+                        <li>REST API + RPC</li>
+                        <li>Row Level Security</li>
+                    </ul>
+                </div>
+                <div class="component-card">
+                    <h5>Data Pipeline</h5>
+                    <ul style="margin: 0; padding-left: 20px; font-size: 14px; color: var(--color-text-secondary);">
+                        <li>Python 3.12+ (uv)</li>
+                        <li>httpx (async HTTP)</li>
+                        <li>supabase-py (client)</li>
+                        <li>SEMrush AI Visibility API</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

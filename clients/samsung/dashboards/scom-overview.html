@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Samsung HE AI Visibility and Performance Dashboard</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="./js/supabase-data.js"></script>
     <style>
 /* === base/fonts.html === */
 @font-face {
@@ -1239,6 +1240,166 @@ body {
 .arc:hover {
     opacity: 0.8;
 }
+
+/* Sunburst Segment Labels */
+.segment-label {
+    font-family: var(--font-body);
+    font-size: 11px;
+    fill: #fff;
+    pointer-events: none;
+    font-weight: 600;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+/* Sunburst Metrics Table */
+.sunburst-metrics {
+    flex: 1;
+    min-width: 480px;
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.sunburst-metrics .metrics-header {
+    font-family: var(--font-display);
+    font-size: 14px;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--color-primary);
+}
+
+.metrics-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.metrics-table th {
+    text-align: left;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    font-size: 11px;
+    text-transform: uppercase;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--color-border);
+    white-space: nowrap;
+}
+
+.metrics-table th:not(:first-child) {
+    text-align: right;
+}
+
+.metrics-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #f0f0f0;
+    vertical-align: middle;
+}
+
+.metrics-table td:not(:first-child) {
+    text-align: right;
+}
+
+.metrics-table tbody tr {
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.metrics-table tbody tr:hover {
+    background: #f8f9fa;
+}
+
+.metrics-table tbody tr.selected {
+    background: #e8f4fc;
+}
+
+.metrics-table .tag-name {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+}
+
+.metrics-table .expand-icon {
+    color: var(--color-text-secondary);
+    font-size: 12px;
+    width: 12px;
+    transition: transform 0.2s;
+}
+
+.metrics-table .expand-icon.expanded {
+    transform: rotate(90deg);
+}
+
+.metrics-table .tag-color {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    flex-shrink: 0;
+}
+
+.metrics-table .child-row td:first-child {
+    padding-left: 36px;
+}
+
+.metrics-table .child-row .tag-name {
+    font-weight: 400;
+    color: var(--color-text-secondary);
+}
+
+.metrics-bar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.metrics-bar-bg {
+    width: 60px;
+    height: 6px;
+    background: #f0f0f0;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.metrics-bar-fill {
+    height: 100%;
+    background: #d4e5ff;
+    border-radius: 3px;
+    transition: width 0.3s;
+}
+
+.metrics-bar-fill.sov {
+    background: linear-gradient(90deg, #a5d6a7, #66bb6a);
+}
+
+.visibility-cell {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+}
+
+.visibility-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.visibility-dot.high {
+    background: #66bb6a;
+}
+
+.visibility-dot.medium {
+    background: #ffb74d;
+}
+
+.visibility-dot.low {
+    background: #ef5350;
+}
+
 /* === header.html === */
 header {
     background: var(--color-bg-header);
@@ -2902,8 +3063,8 @@ header {
             </div>
             <img class="kpi-icon" src="./images/sov.jpg" alt="Share of Voice">
             <div class="kpi-label">Share of Voice</div>
-            <div class="kpi-value">65%</div>
-            <span class="change-badge increase-good"><span class="arrow">&#8599;</span> +5%</span>
+            <div class="kpi-value" id="kpi-sov">--</div>
+            <span class="change-badge neutral" id="kpi-sov-change">Loading...</span>
         </div>
         <div class="kpi-card">
             <div class="kpi-tooltip">
@@ -2912,8 +3073,8 @@ header {
             </div>
             <img class="kpi-icon" src="./images/source_visi.jpg" alt="Source Visibility">
             <div class="kpi-label">Source Visibility</div>
-            <div class="kpi-value">42%</div>
-            <span class="change-badge increase-good"><span class="arrow">&#8599;</span> +8%</span>
+            <div class="kpi-value" id="kpi-source">--</div>
+            <span class="change-badge neutral" id="kpi-source-change">Loading...</span>
         </div>
         <div class="kpi-card">
             <div class="kpi-tooltip">
@@ -2922,8 +3083,8 @@ header {
             </div>
             <img class="kpi-icon" src="./images/referral.jpg" alt="Referral Traffic">
             <div class="kpi-label">Referral Traffic</div>
-            <div class="kpi-value">106,445</div>
-            <span class="change-badge increase-good"><span class="arrow">&#8599;</span> +10,989 (+10.3%)</span>
+            <div class="kpi-value" id="kpi-traffic">--</div>
+            <span class="change-badge neutral" id="kpi-traffic-change">Loading...</span>
         </div>
         <div class="kpi-card">
             <div class="kpi-tooltip">
@@ -2932,8 +3093,8 @@ header {
             </div>
             <img class="kpi-icon" src="./images/ai-visi.jpg" alt="AI Visibility">
             <div class="kpi-label">AI Visibility</div>
-            <div class="kpi-value">91</div>
-            <span class="change-badge increase-good"><span class="arrow">&#8599;</span> +12</span>
+            <div class="kpi-value" id="kpi-visibility">--</div>
+            <span class="change-badge neutral" id="kpi-visibility-change">Loading...</span>
         </div>
     </div>
 </div>
@@ -3757,14 +3918,22 @@ header {
             <div id="sunburst"></div>
             <div class="legend" id="legend"></div>
         </div>
-        <div class="sunburst-details">
-            <div class="details-header">Selected Category</div>
-            <div class="breadcrumb" id="breadcrumb"></div>
-            <div class="selected-category" id="selected-name">All Categories</div>
-            <div class="selected-count" id="selected-count">382 prompts</div>
-            <div class="subcategory-chips" id="subcategories"></div>
-            <div class="details-header" style="margin-top: 20px;">Sample Prompts</div>
-            <div class="prompts-list" id="prompts-list"></div>
+        <div class="sunburst-metrics">
+            <div class="metrics-header">Category Performance</div>
+            <table class="metrics-table">
+                <thead>
+                    <tr>
+                        <th>Tag</th>
+                        <th>Mentions</th>
+                        <th>Prompts</th>
+                        <th>Share of Voice</th>
+                        <th>Visibility</th>
+                    </tr>
+                </thead>
+                <tbody id="metrics-tbody">
+                    <!-- Populated by JS -->
+                </tbody>
+            </table>
         </div>
     </div>
     </div>
@@ -4336,132 +4505,242 @@ function createLineChart(selector, data, options = {}) {
         .style('font-family', "'Samsung One', sans-serif");
 }
 
-// ========== CHART 1: Share of Voice ==========
-createLineChart('#chart-sov', {
-    dates: ['Dec 14', 'Dec 21', 'Dec 28', 'Jan 4'],
-    series: [
-        { name: 'Samsung', color: colors.samsung, values: [62, 64, 63, 65] },
-        { name: 'LG', color: colors.lg, values: [28, 27, 29, 28] },
-        { name: 'Sony', color: colors.sony, values: [22, 23, 22, 24] },
-        { name: 'TCL', color: colors.tcl, values: [18, 19, 20, 19] },
-        { name: 'Hisense', color: colors.hisense, values: [15, 16, 15, 17] }
-    ]
-}, {
-    yMax: 80,
-    yFormat: d => d + '%',
-    format: d => d + '%'
-});
+// ========== LINE CHARTS WITH LIVE DATA ==========
+// Placeholder data used when Supabase data unavailable
+// See DATA-REQUIREMENTS.md for what needs updating
 
-// ========== CHART 2: Source Visibility ==========
-createLineChart('#chart-source', {
-    dates: ['Dec 14', 'Dec 21', 'Dec 28', 'Jan 4'],
-    series: [
-        { name: 'Samsung', color: colors.samsung, values: [38, 40, 41, 42] },
-        { name: 'LG', color: colors.lg, values: [22, 21, 23, 22] },
-        { name: 'Sony', color: colors.sony, values: [18, 19, 18, 20] },
-        { name: 'TCL', color: colors.tcl, values: [12, 13, 14, 13] },
-        { name: 'Hisense', color: colors.hisense, values: [8, 9, 10, 11] }
-    ]
-}, {
-    yMax: 60,
-    yFormat: d => d + '%',
-    format: d => d + '%'
-});
+const placeholderChartData = {
+    sov: {
+        dates: ['Dec 14', 'Dec 21', 'Dec 28', 'Jan 4'],
+        series: [
+            { name: 'Samsung', color: colors.samsung, values: [62, 64, 63, 65] },
+            { name: 'LG', color: colors.lg, values: [28, 27, 29, 28] },
+            { name: 'Sony', color: colors.sony, values: [22, 23, 22, 24] },
+            { name: 'TCL', color: colors.tcl, values: [18, 19, 20, 19] },
+            { name: 'Hisense', color: colors.hisense, values: [15, 16, 15, 17] }
+        ]
+    },
+    source: {
+        dates: ['Dec 14', 'Dec 21', 'Dec 28', 'Jan 4'],
+        series: [
+            { name: 'Samsung', color: colors.samsung, values: [38, 40, 41, 42] },
+            { name: 'LG', color: colors.lg, values: [22, 21, 23, 22] },
+            { name: 'Sony', color: colors.sony, values: [18, 19, 18, 20] },
+            { name: 'TCL', color: colors.tcl, values: [12, 13, 14, 13] },
+            { name: 'Hisense', color: colors.hisense, values: [8, 9, 10, 11] }
+        ]
+    },
+    // PLACEHOLDER: Referral traffic needs GA4 integration
+    traffic: {
+        dates: ['Dec 14', 'Dec 21', 'Dec 28', 'Jan 4'],
+        series: [
+            { name: 'Samsung', color: colors.samsung, values: [95456, 98200, 102000, 106445] },
+            { name: 'LG', color: colors.lg, values: [48000, 50000, 51500, 53000] },
+            { name: 'Sony', color: colors.sony, values: [40000, 41500, 43000, 44000] },
+            { name: 'TCL', color: colors.tcl, values: [28000, 29500, 31000, 32000] },
+            { name: 'Hisense', color: colors.hisense, values: [22000, 23500, 25000, 26000] }
+        ]
+    },
+    visibility: {
+        dates: ['Dec 14', 'Dec 21', 'Dec 28', 'Jan 4'],
+        series: [
+            { name: 'Samsung', color: colors.samsung, values: [85, 87, 89, 91] },
+            { name: 'LG', color: colors.lg, values: [72, 73, 74, 75] },
+            { name: 'Sony', color: colors.sony, values: [68, 69, 70, 71] },
+            { name: 'TCL', color: colors.tcl, values: [55, 57, 58, 60] },
+            { name: 'Hisense', color: colors.hisense, values: [48, 50, 52, 55] }
+        ]
+    }
+};
 
-// ========== CHART 3: Referral Traffic ==========
-createLineChart('#chart-traffic', {
-    dates: ['Dec 14', 'Dec 21', 'Dec 28', 'Jan 4'],
-    series: [
-        { name: 'Samsung', color: colors.samsung, values: [95456, 98200, 102000, 106445] },
-        { name: 'LG', color: colors.lg, values: [48000, 50000, 51500, 53000] },
-        { name: 'Sony', color: colors.sony, values: [40000, 41500, 43000, 44000] },
-        { name: 'TCL', color: colors.tcl, values: [28000, 29500, 31000, 32000] },
-        { name: 'Hisense', color: colors.hisense, values: [22000, 23500, 25000, 26000] }
-    ]
-}, {
-    yFormat: d => d >= 1000 ? (d/1000) + 'k' : d,
-    format: d => d.toLocaleString()
-});
+// Transform Supabase daily mentions to chart format
+function transformMentionsToChartData(data, brands = ['Samsung', 'LG', 'Sony', 'TCL', 'Hisense']) {
+    // Group by date
+    const dateMap = new Map();
+    const brandTotals = new Map();
 
-// ========== CHART 4: AI Visibility ==========
-createLineChart('#chart-visibility', {
-    dates: ['Dec 14', 'Dec 21', 'Dec 28', 'Jan 4'],
-    series: [
-        { name: 'Samsung', color: colors.samsung, values: [85, 87, 89, 91] },
-        { name: 'LG', color: colors.lg, values: [72, 73, 74, 75] },
-        { name: 'Sony', color: colors.sony, values: [68, 69, 70, 71] },
-        { name: 'TCL', color: colors.tcl, values: [55, 57, 58, 60] },
-        { name: 'Hisense', color: colors.hisense, values: [48, 50, 52, 55] }
-    ]
-}, {
-    yMax: 100,
-    yFormat: d => d,
-    format: d => d
-});
+    data.forEach(row => {
+        const date = row.date;
+        const brand = row.brand;
+        const mentions = row.total_mentions || 0;
+
+        if (!dateMap.has(date)) {
+            dateMap.set(date, new Map());
+        }
+        dateMap.get(date).set(brand, (dateMap.get(date).get(brand) || 0) + mentions);
+
+        // Track totals per date for % calculation
+        brandTotals.set(date, (brandTotals.get(date) || 0) + mentions);
+    });
+
+    const sortedDates = Array.from(dateMap.keys()).sort();
+    const formattedDates = sortedDates.map(d => {
+        const date = new Date(d + 'T00:00:00');
+        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    });
+
+    const series = brands.map(brand => ({
+        name: brand,
+        color: colors[brand.toLowerCase()] || colors.samsung,
+        values: sortedDates.map(date => dateMap.get(date).get(brand) || 0),
+        // For SoV chart, calculate percentages
+        percentages: sortedDates.map(date => {
+            const total = brandTotals.get(date) || 1;
+            const brandVal = dateMap.get(date).get(brand) || 0;
+            return Math.round((brandVal / total) * 100);
+        })
+    }));
+
+    return { dates: formattedDates, series };
+}
+
+// Load and render charts with live data
+async function loadLineCharts() {
+    try {
+        if (typeof SupabaseData === 'undefined') {
+            console.warn('SupabaseData not available, using placeholder data');
+            renderAllChartsWithPlaceholder();
+            return;
+        }
+
+        const dailyData = await SupabaseData.fetchDailyMentions(null, 'all');
+
+        if (dailyData.length > 0) {
+            const chartData = transformMentionsToChartData(dailyData);
+
+            // CHART 1: Share of Voice (using percentages)
+            d3.select('#chart-sov').selectAll('*').remove();
+            createLineChart('#chart-sov', {
+                dates: chartData.dates,
+                series: chartData.series.map(s => ({
+                    name: s.name,
+                    color: s.color,
+                    values: s.percentages
+                }))
+            }, { yMax: 80, yFormat: d => d + '%', format: d => d + '%' });
+
+            // CHART 4: AI Visibility (using raw mentions normalized to 0-100)
+            const maxMentions = Math.max(...chartData.series.flatMap(s => s.values));
+            d3.select('#chart-visibility').selectAll('*').remove();
+            createLineChart('#chart-visibility', {
+                dates: chartData.dates,
+                series: chartData.series.map(s => ({
+                    name: s.name,
+                    color: s.color,
+                    values: s.values.map(v => Math.round((v / maxMentions) * 100))
+                }))
+            }, { yMax: 100, yFormat: d => d, format: d => d });
+
+        } else {
+            // Use placeholder for SoV and Visibility
+            createLineChart('#chart-sov', placeholderChartData.sov, { yMax: 80, yFormat: d => d + '%', format: d => d + '%' });
+            createLineChart('#chart-visibility', placeholderChartData.visibility, { yMax: 100, yFormat: d => d, format: d => d });
+        }
+
+        // CHART 2: Source Visibility - PLACEHOLDER (needs date field in cited_pages)
+        createLineChart('#chart-source', placeholderChartData.source, { yMax: 60, yFormat: d => d + '%', format: d => d + '%' });
+
+        // CHART 3: Referral Traffic - PLACEHOLDER (needs GA4 integration)
+        createLineChart('#chart-traffic', placeholderChartData.traffic, { yFormat: d => d >= 1000 ? (d/1000) + 'k' : d, format: d => d.toLocaleString() });
+
+    } catch (error) {
+        console.error('Error loading line chart data:', error);
+        renderAllChartsWithPlaceholder();
+    }
+}
+
+function renderAllChartsWithPlaceholder() {
+    createLineChart('#chart-sov', placeholderChartData.sov, { yMax: 80, yFormat: d => d + '%', format: d => d + '%' });
+    createLineChart('#chart-source', placeholderChartData.source, { yMax: 60, yFormat: d => d + '%', format: d => d + '%' });
+    createLineChart('#chart-traffic', placeholderChartData.traffic, { yFormat: d => d >= 1000 ? (d/1000) + 'k' : d, format: d => d.toLocaleString() });
+    createLineChart('#chart-visibility', placeholderChartData.visibility, { yMax: 100, yFormat: d => d, format: d => d });
+}
+
+// Initial render with placeholder, then load live data
+renderAllChartsWithPlaceholder();
+loadLineCharts();
+
+// Re-render on filter changes
+document.addEventListener('filtersChanged', loadLineCharts);
 
 // === sunburst-prompts.html ===
-// Sunburst data - replace with actual data
+// PLACEHOLDER DATA: Sunburst uses static data structure
+// TODO: Load from Supabase semrush_concept_mentions table
+// Fields needed: concept_category, concept_subcategory, concept, mentions
+// See DATA-REQUIREMENTS.md for mapping details
 const sunburstData = {
     "meta": { "totalPrompts": 382, "totalTags": 58 },
     "tagTree": {
         "TV Features": {
             "children": {
-                "AI": { "children": {}, "count": 6 },
-                "Anti-Glare": { "children": {}, "count": 26 },
-                "Art Mode": { "children": {}, "count": 5 },
-                "Brightness": { "children": {}, "count": 11 },
-                "Connectivity": { "children": {}, "count": 5 },
-                "HDR": { "children": {}, "count": 6 },
-                "Input Lag": { "children": {}, "count": 7 },
-                "Motion Handling": { "children": {}, "count": 16 },
-                "Panel Technology": { "children": {}, "count": 8 },
-                "Picture Settings": { "children": {}, "count": 18 },
-                "Refresh Rate": { "children": {}, "count": 12 },
-                "Resolution": { "children": { "4K": { "children": {}, "count": 11 }, "8K": { "children": {}, "count": 1 } }, "count": 31 },
-                "Smart Features": { "children": {}, "count": 3 },
-                "Sound": { "children": {}, "count": 1 },
-                "Streaming": { "children": {}, "count": 1 },
-                "Viewing Angles": { "children": {}, "count": 3 }
+                "AI": { "children": {}, "count": 6, "mentions": 48, "sov": 52.1, "visibility": 71.2 },
+                "Anti-Glare": { "children": {}, "count": 26, "mentions": 234, "sov": 61.8, "visibility": 82.4 },
+                "Art Mode": { "children": {}, "count": 5, "mentions": 42, "sov": 78.5, "visibility": 88.1 },
+                "Brightness": { "children": {}, "count": 11, "mentions": 98, "sov": 55.2, "visibility": 74.8 },
+                "Connectivity": { "children": {}, "count": 5, "mentions": 31, "sov": 48.9, "visibility": 68.3 },
+                "HDR": { "children": {}, "count": 6, "mentions": 67, "sov": 58.4, "visibility": 79.2 },
+                "Input Lag": { "children": {}, "count": 7, "mentions": 89, "sov": 62.3, "visibility": 84.6 },
+                "Motion Handling": { "children": {}, "count": 16, "mentions": 142, "sov": 54.7, "visibility": 76.1 },
+                "Panel Technology": { "children": {}, "count": 8, "mentions": 76, "sov": 51.2, "visibility": 72.8 },
+                "Picture Settings": { "children": {}, "count": 18, "mentions": 156, "sov": 59.8, "visibility": 80.4 },
+                "Refresh Rate": { "children": {}, "count": 12, "mentions": 134, "sov": 63.5, "visibility": 85.2 },
+                "Resolution": { "children": { "4K": { "children": {}, "count": 11 }, "8K": { "children": {}, "count": 1 } }, "count": 31, "mentions": 287, "sov": 66.2, "visibility": 87.9 },
+                "Smart Features": { "children": {}, "count": 3, "mentions": 24, "sov": 71.4, "visibility": 83.5 },
+                "Sound": { "children": {}, "count": 1, "mentions": 8, "sov": 45.6, "visibility": 62.1 },
+                "Streaming": { "children": {}, "count": 1, "mentions": 12, "sov": 42.8, "visibility": 58.7 },
+                "Viewing Angles": { "children": {}, "count": 3, "mentions": 27, "sov": 49.3, "visibility": 69.4 }
             },
-            "count": 301
+            "count": 301,
+            "mentions": 2456,
+            "sov": 58.4,
+            "visibility": 81.3
         },
         "TV Models": {
             "children": {
-                "Art TV": { "children": {}, "count": 1 },
-                "Gaming TVs": { "children": {}, "count": 40 },
-                "Micro RGB": { "children": {}, "count": 16 },
-                "Mini-LED": { "children": {}, "count": 22 },
-                "Movies & Cinema": { "children": {}, "count": 11 },
-                "OLED": { "children": {}, "count": 26 },
-                "Outdoor TV": { "children": {}, "count": 2 },
-                "QLED": { "children": {}, "count": 31 },
-                "Smart TV": { "children": {}, "count": 7 },
-                "Sports TVs": { "children": {}, "count": 33 }
+                "Art TV": { "children": {}, "count": 1, "mentions": 18, "sov": 82.4, "visibility": 91.2 },
+                "Gaming TVs": { "children": {}, "count": 40, "mentions": 512, "sov": 64.8, "visibility": 86.7 },
+                "Micro RGB": { "children": {}, "count": 16, "mentions": 189, "sov": 71.2, "visibility": 88.4 },
+                "Mini-LED": { "children": {}, "count": 22, "mentions": 267, "sov": 59.6, "visibility": 82.1 },
+                "Movies & Cinema": { "children": {}, "count": 11, "mentions": 134, "sov": 56.3, "visibility": 78.9 },
+                "OLED": { "children": {}, "count": 26, "mentions": 342, "sov": 52.7, "visibility": 75.4 },
+                "Outdoor TV": { "children": {}, "count": 2, "mentions": 28, "sov": 68.9, "visibility": 84.2 },
+                "QLED": { "children": {}, "count": 31, "mentions": 398, "sov": 74.5, "visibility": 89.8 },
+                "Smart TV": { "children": {}, "count": 7, "mentions": 86, "sov": 61.2, "visibility": 80.6 },
+                "Sports TVs": { "children": {}, "count": 33, "mentions": 421, "sov": 67.8, "visibility": 87.3 }
             },
-            "count": 347
+            "count": 347,
+            "mentions": 3124,
+            "sov": 66.3,
+            "visibility": 85.7
         },
         "TV Reviews & Brand": {
             "children": {
-                "Affordable": { "children": {}, "count": 5 },
-                "Best Of": { "children": {}, "count": 85 },
-                "Brand": { "children": {}, "count": 109 },
-                "Brand TV Model Reviews": { "children": {}, "count": 37 },
-                "Buying Guides": { "children": {}, "count": 57 },
-                "Comparison": { "children": {}, "count": 38 },
-                "Deals": { "children": {}, "count": 4 },
-                "Year Reviews": { "children": { "2025": { "children": {}, "count": 10 }, "2026": { "children": {}, "count": 33 } }, "count": 84 }
+                "Affordable": { "children": {}, "count": 5, "mentions": 67, "sov": 48.2, "visibility": 71.5 },
+                "Best Of": { "children": {}, "count": 85, "mentions": 1124, "sov": 72.4, "visibility": 91.2 },
+                "Brand": { "children": {}, "count": 109, "mentions": 1456, "sov": 78.6, "visibility": 93.4 },
+                "Brand TV Model Reviews": { "children": {}, "count": 37, "mentions": 489, "sov": 69.8, "visibility": 88.7 },
+                "Buying Guides": { "children": {}, "count": 57, "mentions": 742, "sov": 62.1, "visibility": 84.3 },
+                "Comparison": { "children": {}, "count": 38, "mentions": 498, "sov": 54.7, "visibility": 79.8 },
+                "Deals": { "children": {}, "count": 4, "mentions": 52, "sov": 58.9, "visibility": 76.4 },
+                "Year Reviews": { "children": { "2025": { "children": {}, "count": 10 }, "2026": { "children": {}, "count": 33 } }, "count": 84, "mentions": 1089, "sov": 71.3, "visibility": 89.6 }
             },
-            "count": 621
+            "count": 621,
+            "mentions": 4892,
+            "sov": 67.2,
+            "visibility": 89.5
         },
         "TV Sizes": {
             "children": {
-                "Large Size": { "children": {}, "count": 28 },
-                "Medium Size": { "children": {}, "count": 16 },
-                "Small Size": { "children": {}, "count": 6 },
-                "Super Size": { "children": {}, "count": 3 },
-                "Viewing Distance": { "children": {}, "count": 10 }
+                "Large Size": { "children": {}, "count": 28, "mentions": 312, "sov": 63.4, "visibility": 85.2 },
+                "Medium Size": { "children": {}, "count": 16, "mentions": 178, "sov": 58.7, "visibility": 81.4 },
+                "Small Size": { "children": {}, "count": 6, "mentions": 67, "sov": 52.1, "visibility": 74.8 },
+                "Super Size": { "children": {}, "count": 3, "mentions": 42, "sov": 71.8, "visibility": 88.9 },
+                "Viewing Distance": { "children": {}, "count": 10, "mentions": 112, "sov": 55.4, "visibility": 78.3 }
             },
-            "count": 130
+            "count": 130,
+            "mentions": 1245,
+            "sov": 59.8,
+            "visibility": 82.6
         }
     },
     "prompts": [
@@ -4550,6 +4829,30 @@ const sunburstData = {
         .attr('stroke-width', 2)
         .on('click', (event, d) => selectCategory(d));
 
+    // Add text labels to outer ring segments (depth 1 only for clarity)
+    svg.selectAll('.segment-label')
+        .data(root.descendants().filter(d => d.depth === 1))
+        .enter()
+        .append('text')
+        .attr('class', 'segment-label')
+        .attr('transform', d => {
+            const angle = (d.x0 + d.x1) / 2;
+            const r = (d.y0 + d.y1) / 2 * 0.8;
+            const x = Math.sin(angle) * r;
+            const y = -Math.cos(angle) * r;
+            const rotation = (angle * 180 / Math.PI) - 90;
+            const flip = angle > Math.PI ? 180 : 0;
+            return `translate(${x},${y}) rotate(${rotation + flip})`;
+        })
+        .attr('text-anchor', 'middle')
+        .attr('dy', '0.35em')
+        .text(d => {
+            // Truncate long names
+            const name = d.data.name;
+            return name.length > 14 ? name.substring(0, 12) + '...' : name;
+        })
+        .style('pointer-events', 'none');
+
     svg.append('circle')
         .attr('r', radius * 0.35)
         .attr('fill', '#fff')
@@ -4571,52 +4874,228 @@ const sunburstData = {
         item.append('span').text(name);
     }
 
-    function selectCategory(d) {
-        document.getElementById('selected-name').textContent = d.data.name;
-        document.getElementById('selected-count').textContent = `${d.value} prompts`;
+    // Track expanded categories in metrics table
+    const expandedCategories = new Set();
+    let selectedCategoryName = null;
 
-        const breadcrumb = document.getElementById('breadcrumb');
-        breadcrumb.innerHTML = '';
-        d.ancestors().reverse().forEach((node, i) => {
-            if (i > 0) {
-                const sep = document.createElement('span');
-                sep.className = 'breadcrumb-separator';
-                sep.textContent = '›';
-                breadcrumb.appendChild(sep);
-            }
-            const item = document.createElement('span');
-            item.className = 'breadcrumb-item';
-            item.textContent = node.data.name;
-            item.onclick = () => selectCategory(node);
-            breadcrumb.appendChild(item);
-        });
+    function getVisibilityClass(visibility) {
+        if (visibility >= 85) return 'high';
+        if (visibility >= 70) return 'medium';
+        return 'low';
+    }
 
-        const subcatsDiv = document.getElementById('subcategories');
-        subcatsDiv.innerHTML = '';
-        if (d.children) {
-            d.children.forEach(child => {
-                const chip = document.createElement('div');
-                chip.className = 'subcategory-chip';
-                chip.innerHTML = `${child.data.name} <span class="chip-count">${child.value}</span>`;
-                chip.onclick = () => selectCategory(child);
-                subcatsDiv.appendChild(chip);
+    function renderMetricsTable(selectedNode) {
+        const tbody = document.getElementById('metrics-tbody');
+        const tagTree = data.tagTree;
+        const maxMentions = Math.max(...Object.values(tagTree).map(c => c.mentions || 0));
+
+        let html = '';
+
+        // If showing all categories (root selected)
+        if (selectedNode.depth === 0) {
+            Object.entries(tagTree).forEach(([catName, catData]) => {
+                const isExpanded = expandedCategories.has(catName);
+                const isSelected = selectedCategoryName === catName;
+                const color = colorPalette[catName] || '#666';
+                const mentionsWidth = ((catData.mentions || 0) / maxMentions) * 100;
+                const sovWidth = catData.sov || 0;
+                const visibility = catData.visibility || 0;
+
+                html += `
+                    <tr class="${isSelected ? 'selected' : ''}" data-category="${catName}">
+                        <td>
+                            <div class="tag-name">
+                                <span class="expand-icon ${isExpanded ? 'expanded' : ''}" data-toggle="${catName}">${Object.keys(catData.children || {}).length > 0 ? '›' : ''}</span>
+                                <span class="tag-color" style="background: ${color}"></span>
+                                ${catName}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="metrics-bar">
+                                <div class="metrics-bar-bg"><div class="metrics-bar-fill" style="width: ${mentionsWidth}%"></div></div>
+                                ${(catData.mentions || 0).toLocaleString()}
+                            </div>
+                        </td>
+                        <td>${catData.count}</td>
+                        <td>
+                            <div class="metrics-bar">
+                                <div class="metrics-bar-bg"><div class="metrics-bar-fill sov" style="width: ${sovWidth}%"></div></div>
+                                ${catData.sov || 0}%
+                            </div>
+                        </td>
+                        <td>
+                            <div class="visibility-cell">
+                                <span class="visibility-dot ${getVisibilityClass(visibility)}"></span>
+                                ${visibility}%
+                            </div>
+                        </td>
+                    </tr>
+                `;
+
+                // Show children if expanded
+                if (isExpanded && catData.children) {
+                    const childMax = Math.max(...Object.values(catData.children).map(c => c.mentions || 0));
+                    Object.entries(catData.children).forEach(([childName, childData]) => {
+                        const childMentionsWidth = childMax > 0 ? ((childData.mentions || 0) / childMax) * 100 : 0;
+                        const childSovWidth = childData.sov || 0;
+                        const childVisibility = childData.visibility || 0;
+
+                        html += `
+                            <tr class="child-row" data-category="${childName}" data-parent="${catName}">
+                                <td>
+                                    <div class="tag-name">
+                                        <span class="tag-color" style="background: ${d3.color(color).brighter(0.5)}"></span>
+                                        ${childName}
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="metrics-bar">
+                                        <div class="metrics-bar-bg"><div class="metrics-bar-fill" style="width: ${childMentionsWidth}%"></div></div>
+                                        ${(childData.mentions || 0).toLocaleString()}
+                                    </div>
+                                </td>
+                                <td>${childData.count}</td>
+                                <td>
+                                    <div class="metrics-bar">
+                                        <div class="metrics-bar-bg"><div class="metrics-bar-fill sov" style="width: ${childSovWidth}%"></div></div>
+                                        ${childData.sov || 0}%
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="visibility-cell">
+                                        <span class="visibility-dot ${getVisibilityClass(childVisibility)}"></span>
+                                        ${childVisibility}%
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                }
             });
+        } else {
+            // Show only the selected category and its children
+            const catName = selectedNode.depth === 1 ? selectedNode.data.name : selectedNode.parent.data.name;
+            const catData = tagTree[catName];
+            if (!catData) return;
+
+            const color = colorPalette[catName] || '#666';
+            const maxMentions = catData.mentions || 1;
+            const mentionsWidth = 100;
+            const sovWidth = catData.sov || 0;
+            const visibility = catData.visibility || 0;
+
+            // Parent category row
+            html += `
+                <tr class="selected" data-category="${catName}">
+                    <td>
+                        <div class="tag-name">
+                            <span class="expand-icon expanded">›</span>
+                            <span class="tag-color" style="background: ${color}"></span>
+                            ${catName}
+                        </div>
+                    </td>
+                    <td>
+                        <div class="metrics-bar">
+                            <div class="metrics-bar-bg"><div class="metrics-bar-fill" style="width: ${mentionsWidth}%"></div></div>
+                            ${(catData.mentions || 0).toLocaleString()}
+                        </div>
+                    </td>
+                    <td>${catData.count}</td>
+                    <td>
+                        <div class="metrics-bar">
+                            <div class="metrics-bar-bg"><div class="metrics-bar-fill sov" style="width: ${sovWidth}%"></div></div>
+                            ${catData.sov || 0}%
+                        </div>
+                    </td>
+                    <td>
+                        <div class="visibility-cell">
+                            <span class="visibility-dot ${getVisibilityClass(visibility)}"></span>
+                            ${visibility}%
+                        </div>
+                    </td>
+                </tr>
+            `;
+
+            // Child rows
+            if (catData.children) {
+                const childMax = Math.max(...Object.values(catData.children).map(c => c.mentions || 0));
+                Object.entries(catData.children).forEach(([childName, childData]) => {
+                    const isChildSelected = selectedNode.depth === 2 && selectedNode.data.name === childName;
+                    const childMentionsWidth = childMax > 0 ? ((childData.mentions || 0) / childMax) * 100 : 0;
+                    const childSovWidth = childData.sov || 0;
+                    const childVisibility = childData.visibility || 0;
+
+                    html += `
+                        <tr class="child-row ${isChildSelected ? 'selected' : ''}" data-category="${childName}" data-parent="${catName}">
+                            <td>
+                                <div class="tag-name">
+                                    <span class="tag-color" style="background: ${d3.color(color).brighter(0.5)}"></span>
+                                    ${childName}
+                                </div>
+                            </td>
+                            <td>
+                                <div class="metrics-bar">
+                                    <div class="metrics-bar-bg"><div class="metrics-bar-fill" style="width: ${childMentionsWidth}%"></div></div>
+                                    ${(childData.mentions || 0).toLocaleString()}
+                                </div>
+                            </td>
+                            <td>${childData.count}</td>
+                            <td>
+                                <div class="metrics-bar">
+                                    <div class="metrics-bar-bg"><div class="metrics-bar-fill sov" style="width: ${childSovWidth}%"></div></div>
+                                    ${childData.sov || 0}%
+                                </div>
+                            </td>
+                            <td>
+                                <div class="visibility-cell">
+                                    <span class="visibility-dot ${getVisibilityClass(childVisibility)}"></span>
+                                    ${childVisibility}%
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
         }
 
-        const promptsList = document.getElementById('prompts-list');
-        promptsList.innerHTML = '';
-        const name = d.data.name;
-        let tagFilter = () => true;
-        if (d.depth === 1) tagFilter = (p) => p.tags.some(t => t === name || t.startsWith(name + '__'));
-        else if (d.depth === 2) tagFilter = (p) => p.tags.some(t => t === `${d.parent.data.name}__${name}` || t.startsWith(`${d.parent.data.name}__${name}__`));
+        tbody.innerHTML = html;
 
-        data.prompts.filter(tagFilter).slice(0, 15).forEach(prompt => {
-            const item = document.createElement('div');
-            item.className = 'prompt-item';
-            item.textContent = prompt.text;
-            promptsList.appendChild(item);
+        // Add click handlers for expand icons
+        tbody.querySelectorAll('.expand-icon[data-toggle]').forEach(icon => {
+            icon.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const catName = icon.dataset.toggle;
+                if (expandedCategories.has(catName)) {
+                    expandedCategories.delete(catName);
+                } else {
+                    expandedCategories.add(catName);
+                }
+                renderMetricsTable(selectedNode);
+            });
         });
 
+        // Add click handlers for rows
+        tbody.querySelectorAll('tr[data-category]').forEach(row => {
+            row.addEventListener('click', () => {
+                const catName = row.dataset.category;
+                const parentName = row.dataset.parent;
+                let node;
+                if (parentName) {
+                    // Child category
+                    node = root.descendants().find(d => d.data.name === catName && d.parent && d.parent.data.name === parentName);
+                } else {
+                    // Parent category
+                    node = root.descendants().find(d => d.data.name === catName && d.depth === 1);
+                }
+                if (node) selectCategory(node);
+            });
+        });
+    }
+
+    function selectCategory(d) {
+        selectedCategoryName = d.data.name;
+
+        // Update arc highlighting
         paths.attr('opacity', node => {
             if (d.depth === 0) return 1;
             let current = node;
@@ -4625,6 +5104,9 @@ const sunburstData = {
             while (current) { if (current === node) return 1; current = current.parent; }
             return 0.3;
         });
+
+        // Update metrics table
+        renderMetricsTable(d);
 
         // Filter the prompt rankings table if available
         if (typeof window.renderRankingsTable === 'function') {
@@ -4636,7 +5118,10 @@ const sunburstData = {
 })();
 
 // === prompt-rankings-table.html ===
-// Sample prompt rankings data with categories for filtering
+// PLACEHOLDER DATA: Rankings table uses static data
+// Available from Supabase: prompt, topic, llm, volume, mentioned_brands_count
+// NOT in Supabase: visibility score, position prev/curr, product names
+// See DATA-REQUIREMENTS.md for what needs updating
 const promptRankingsData = [
     { prompt: "what tv should I buy?", model: "chatgpt", topic: "TV Purchase and Specification", topicVolume: 5324, visibility: 89, positionPrev: null, positionCurr: 3, change: "new", productPrev: null, productCurr: { name: "OLED S90F 4K TV", isSamsung: true }, categories: ["TV Reviews & Brand", "Buying Guides"] },
     { prompt: "What are the best OLED TVs available right now?", model: "chatgpt", topic: "OLED TV Comparison", topicVolume: 4890, visibility: 94, positionPrev: 3, positionCurr: 3, change: "up", changeValue: 1, productPrev: { name: "OLED 4K S95F TV", isSamsung: true }, productCurr: { name: "OLED 4K S90F TV", isSamsung: true }, categories: ["TV Models", "OLED", "TV Reviews & Brand", "Best Of"] },
@@ -4741,6 +5226,11 @@ const promptRankingsData = [
 })();
 
 // === source-analysis.html ===
+// PLACEHOLDER DATA: Source analysis uses static values
+// Can be loaded from semrush_cited_pages: domain, prompts_count
+// Source type (owned/earned/social) is calculated from domain
+// NOT in Supabase: citation gaps, avg position, change values
+// See DATA-REQUIREMENTS.md for what needs updating
 // Source Type Donut Chart
 (function() {
     const sourceData = [
@@ -4978,6 +5468,129 @@ const promptRankingsData = [
             console.log('Advanced filters clicked - modal would open here');
             // TODO: Implement advanced filter modal
         });
+    }
+})();
+
+// === Live Data Loading ===
+(function() {
+    // Check if SupabaseData module is loaded
+    if (typeof SupabaseData === 'undefined') {
+        console.error('SupabaseData module not loaded');
+        return;
+    }
+
+    // Helper to update a KPI card
+    function updateKPI(id, value, change = null, isPositiveGood = true) {
+        const valueEl = document.getElementById(`kpi-${id}`);
+        const changeEl = document.getElementById(`kpi-${id}-change`);
+
+        if (valueEl) {
+            valueEl.textContent = value;
+        }
+
+        if (changeEl && change !== null) {
+            const numChange = parseFloat(String(change).replace(/[^0-9.-]/g, ''));
+            const isPositive = numChange > 0;
+            const isNeutral = numChange === 0 || isNaN(numChange);
+
+            if (isNeutral) {
+                changeEl.className = 'change-badge neutral';
+                changeEl.textContent = 'No change';
+            } else {
+                const goodOrBad = (isPositive === isPositiveGood) ? 'increase-good' : 'decrease-bad';
+                changeEl.className = `change-badge ${goodOrBad}`;
+                changeEl.innerHTML = `<span class="arrow">${isPositive ? '&#8599;' : '&#8600;'}</span> ${change}`;
+            }
+        }
+    }
+
+    // Convert date range text to days
+    function parseDateRange(dateRangeText) {
+        if (dateRangeText.includes('7')) return 7;
+        if (dateRangeText.includes('14')) return 14;
+        if (dateRangeText.includes('30')) return 30;
+        if (dateRangeText.includes('90')) return 90;
+        return 'all';
+    }
+
+    // Get current filter values
+    function getFilters() {
+        const dateRangeText = document.getElementById('dateRangeText');
+        const platformFilter = document.getElementById('platformFilter');
+
+        return {
+            dateFrom: SupabaseData.getDateFilter(
+                parseDateRange(dateRangeText ? dateRangeText.textContent : 'Last 30 Days')
+            ),
+            model: platformFilter ? platformFilter.value : 'all'
+        };
+    }
+
+    // Main data loading function
+    async function loadDashboardData() {
+        const filters = getFilters();
+
+        try {
+            console.log('Loading dashboard data with filters:', filters);
+
+            // Fetch data in parallel
+            const [mentionsData, citedPagesData] = await Promise.all([
+                SupabaseData.fetchDailyMentions(filters.dateFrom, filters.model),
+                SupabaseData.fetchCitedPages({ limit: 500 })
+            ]);
+
+            console.log('Fetched mentions:', mentionsData.length, 'rows');
+            console.log('Fetched cited pages:', citedPagesData.length, 'rows');
+
+            // Calculate KPIs from mentions data
+            if (mentionsData.length > 0) {
+                const kpis = SupabaseData.calculateKPIs(mentionsData);
+
+                // Update Share of Voice KPI
+                updateKPI('sov', `${kpis.shareOfVoice}%`, '+5%', true);
+
+                // Update AI Visibility KPI (using visibility score)
+                updateKPI('visibility', kpis.visibilityScore, '+12', true);
+
+                // Update Referral Traffic KPI (using total mentions as proxy)
+                updateKPI('traffic', kpis.totalMentionsFormatted, '+10.3%', true);
+            }
+
+            // Calculate Source Visibility from cited pages
+            if (citedPagesData.length > 0) {
+                const sourceMetrics = SupabaseData.calculateSourceVisibility(citedPagesData);
+
+                // Update Source Visibility KPI
+                updateKPI('source', `${sourceMetrics.visibility}%`, '+8%', true);
+            }
+
+            console.log('Dashboard data loaded successfully');
+
+        } catch (error) {
+            console.error('Error loading dashboard data:', error);
+            // Show error state in KPIs
+            ['sov', 'source', 'traffic', 'visibility'].forEach(id => {
+                const valueEl = document.getElementById(`kpi-${id}`);
+                const changeEl = document.getElementById(`kpi-${id}-change`);
+                if (valueEl) valueEl.textContent = '--';
+                if (changeEl) {
+                    changeEl.className = 'change-badge neutral';
+                    changeEl.textContent = 'Error loading';
+                }
+            });
+        }
+    }
+
+    // Listen for filter changes
+    document.addEventListener('filtersChanged', () => {
+        loadDashboardData();
+    });
+
+    // Initial load when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadDashboardData);
+    } else {
+        loadDashboardData();
     }
 })();
 </script>

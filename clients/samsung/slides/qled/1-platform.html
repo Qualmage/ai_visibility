@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QLED - AI Platform Distribution | Samsung AI Visibility</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link rel="stylesheet" href="../css/slides.css">
+    <style>
+        .dual-donut-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            padding: 0 20px;
+        }
+        .donut-panel {
+            text-align: center;
+        }
+        .donut-panel h3 {
+            font-family: var(--font-display);
+            font-size: 16px;
+            margin-bottom: 12px;
+            color: var(--color-text-primary);
+        }
+        .donut-panel .chart-container {
+            min-height: 300px;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <header class="slide-header">
+            <div>
+                <h1>QLED<span class="subtitle">AI Platform Distribution</span></h1>
+            </div>
+            <span class="slide-badge">Slide 1 of 5</span>
+        </header>
+
+        <div class="slide-content">
+            <div class="dual-donut-container">
+                <div class="donut-panel">
+                    <h3>Brand Mentions</h3>
+                    <div id="mentions-donut" class="chart-container"></div>
+                </div>
+                <div class="donut-panel">
+                    <h3>URL Citations</h3>
+                    <div id="citations-donut" class="chart-container"></div>
+                </div>
+            </div>
+
+            <div class="insights horizontal" style="margin-top: 20px;">
+                <div class="insight-card">
+                    <strong>ChatGPT Mentions More</strong>
+                    ChatGPT leads mentions (<span class="highlight">46%</span>) but cites Samsung URLs less (<span class="highlight">10%</span>).
+                </div>
+                <div class="insight-card">
+                    <strong>AI Overview Cites More</strong>
+                    Google AI Overview drives <span class="highlight">72%</span> of URL citations — key for SEO visibility.
+                </div>
+                <div class="insight-card">
+                    <strong>Different Strategies Needed</strong>
+                    Optimize content for ChatGPT mentions; optimize URLs for AI Overview citations.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/slide-charts.js"></script>
+    <script>
+        // Brand mentions data (from concept_mentions)
+        const mentionsData = [
+            {"model":"chatgpt","prompts":43,"citations":7879},
+            {"model":"google-ai-mode","prompts":43,"citations":5203},
+            {"model":"google-ai-overview","prompts":43,"citations":4098}
+        ];
+
+        // URL citations data (from url_prompts)
+        const citationsData = [
+            {"model":"google-ai-overview","prompts":0,"citations":32817},
+            {"model":"google-ai-mode","prompts":0,"citations":6036},
+            {"model":"chatgpt","prompts":0,"citations":4643}
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                renderDonut('mentions-donut', mentionsData, 'answers tracked');
+                renderDonut('citations-donut', citationsData, 'citations tracked');
+            }, 100);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini-LED - Samsung AI Visibility</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        @font-face {
+            font-family: 'Samsung Sharp Sans';
+            src: url('../assets/fonts/SamsungSharpSansBd.woff2') format('woff2'),
+                 url('../assets/fonts/SamsungSharpSans-Bold.ttf') format('truetype');
+            font-weight: 700;
+        }
+        @font-face {
+            font-family: 'Samsung One';
+            src: url('../assets/fonts/SamsungOneLatinWeb-400.woff2') format('woff2'),
+                 url('../assets/fonts/SamsungOneLatinCompact-400.ttf') format('truetype');
+            font-weight: 400;
+        }
+
+        :root {
+            --color-primary: #1428A0;
+            --color-bg-page: #f8f9fa;
+            --color-bg-card: #ffffff;
+            --color-text-primary: #000000;
+            --color-text-secondary: #666666;
+            --color-border: #e0e0e0;
+            --font-display: 'Samsung Sharp Sans', sans-serif;
+            --font-body: 'Samsung One', -apple-system, sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--color-bg-page);
+            color: var(--color-text-primary);
+            min-height: 100vh;
+            padding: 24px;
+        }
+
+        .slide-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: var(--color-bg-card);
+            border-radius: 12px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+
+        .slide-header {
+            background: var(--color-primary);
+            color: white;
+            padding: 24px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .slide-header h1 {
+            font-family: var(--font-display);
+            font-size: 32px;
+            font-weight: 700;
+        }
+
+        .prompt-count {
+            font-size: 16px;
+            opacity: 0.9;
+            background: rgba(255,255,255,0.15);
+            padding: 8px 16px;
+            border-radius: 20px;
+        }
+
+        .slide-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr 1fr;
+            gap: 24px;
+            padding: 24px;
+        }
+
+        .section {
+            background: #fafafa;
+            border-radius: 8px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .section h2 {
+            font-family: var(--font-display);
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--color-text-primary);
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--color-primary);
+        }
+
+        .chart-container {
+            flex: 1;
+            position: relative;
+            min-height: 280px;
+        }
+
+        .insights {
+            margin-top: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .insight {
+            background: white;
+            padding: 12px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            line-height: 1.4;
+            border-left: 3px solid var(--color-primary);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .insight strong {
+            color: var(--color-primary);
+        }
+
+        .insight .highlight {
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <header class="slide-header">
+            <h1>Mini-LED</h1>
+            <span class="prompt-count">22 prompts analyzed</span>
+        </header>
+
+        <div class="slide-grid">
+            <div class="section platform">
+                <h2>AI Platform Distribution</h2>
+                <div id="platform-donut" class="chart-container"></div>
+                <div class="insights">
+                    <div class="insight">
+                        <strong>TCL Leads Mini-LED:</strong> <span class="highlight">3,641</span> mentions vs Samsung's 3,357
+                    </div>
+                    <div class="insight">
+                        <strong>Samsung Concept Depth:</strong> <span class="highlight">662</span> unique concepts (vs TCL's 607)
+                    </div>
+                    <div class="insight">
+                        <strong>Sony Best Sentiment:</strong> <span class="highlight">72.5%</span> positive (Samsung: 68.3%)
+                    </div>
+                </div>
+            </div>
+
+            <div class="section concepts">
+                <h2>Samsung Concepts & Sentiment</h2>
+                <div id="concept-treemap" class="chart-container"></div>
+            </div>
+
+            <div class="section competitors">
+                <h2>Competitive Analysis</h2>
+                <div id="competitor-radar" class="chart-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/slide-charts.js"></script>
+    <script>
+        // Platform data
+        const platformData = [
+            {"model":"search-gpt","prompts":22,"citations":5887},
+            {"model":"google-ai-mode","prompts":22,"citations":4279},
+            {"model":"google-ai-overview","prompts":22,"citations":2578}
+        ];
+
+        // Concept data for Samsung
+        const conceptData = [
+            {"concept":"brightness","sentiment":"positive","mentions":233},
+            {"concept":"contrast","sentiment":"positive","mentions":160},
+            {"concept":"mini-led technology","sentiment":"neutral","mentions":77},
+            {"concept":"mini-led technology","sentiment":"positive","mentions":70},
+            {"concept":"local dimming","sentiment":"positive","mentions":66},
+            {"concept":"hdr performance","sentiment":"positive","mentions":64},
+            {"concept":"color accuracy","sentiment":"positive","mentions":51},
+            {"concept":"motion handling","sentiment":"positive","mentions":47},
+            {"concept":"high brightness","sentiment":"positive","mentions":45},
+            {"concept":"brightness","sentiment":"neutral","mentions":45},
+            {"concept":"black levels","sentiment":"positive","mentions":45},
+            {"concept":"peak brightness","sentiment":"positive","mentions":43},
+            {"concept":"price","sentiment":"neutral","mentions":42},
+            {"concept":"contrast","sentiment":"neutral","mentions":41},
+            {"concept":"hdr","sentiment":"positive","mentions":35},
+            {"concept":"local dimming","sentiment":"neutral","mentions":35},
+            {"concept":"price","sentiment":"positive","mentions":33},
+            {"concept":"viewing angles","sentiment":"positive","mentions":30},
+            {"concept":"burn-in risk","sentiment":"positive","mentions":29},
+            {"concept":"reflection handling","sentiment":"positive","mentions":29}
+        ];
+
+        // Competitor data
+        const competitorData = [
+            {"brand_name":"TCL","mentions":3641,"unique_concepts":607,"positive_pct":"68.8","negative_pct":"0.5","neutral_pct":"30.7"},
+            {"brand_name":"Samsung","mentions":3357,"unique_concepts":662,"positive_pct":"68.3","negative_pct":"1.0","neutral_pct":"30.7"},
+            {"brand_name":"Hisense","mentions":2704,"unique_concepts":470,"positive_pct":"71.2","negative_pct":"0.6","neutral_pct":"28.1"},
+            {"brand_name":"Sony","mentions":2427,"unique_concepts":509,"positive_pct":"72.5","negative_pct":"0.7","neutral_pct":"26.8"},
+            {"brand_name":"LG","mentions":1515,"unique_concepts":383,"positive_pct":"62.6","negative_pct":"2.4","neutral_pct":"35.0"}
+        ];
+
+        // Render charts on load
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                renderDonut('platform-donut', platformData);
+                renderTreemap('concept-treemap', conceptData);
+                renderCompetitorBars('competitor-radar', competitorData);
+            }, 100);
+        });
+    </script>
+</body>
+</html>

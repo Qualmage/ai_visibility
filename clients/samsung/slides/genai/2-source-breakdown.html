@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GenAI Traffic | Source Breakdown - Samsung HE</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link rel="stylesheet" href="../css/slides.css">
+    <style>
+        .slide-grid-55-45 {
+            display: grid;
+            grid-template-columns: 55fr 45fr;
+            gap: 24px;
+            padding: 24px;
+        }
+        .source-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        .source-table th {
+            text-align: left;
+            padding: 12px 10px;
+            border-bottom: 2px solid var(--color-primary);
+            font-family: var(--font-display);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--color-text-secondary);
+        }
+        .source-table th:not(:first-child) {
+            text-align: right;
+        }
+        .source-table td {
+            padding: 14px 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .source-table td:not(:first-child) {
+            text-align: right;
+            font-family: 'SF Mono', 'Consolas', monospace;
+        }
+        .source-table tr:hover {
+            background: #f8f9fa;
+        }
+        .source-name {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .source-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        .source-label {
+            font-weight: 600;
+        }
+        .cvr-cell {
+            font-weight: 600;
+        }
+        .cvr-cell.high { color: #2e7d32; }
+        .cvr-cell.medium { color: #f57c00; }
+        .cvr-cell.low { color: #d32f2f; }
+        .aov-cell {
+            color: var(--color-primary);
+            font-weight: 600;
+        }
+        .forecast-vs-actual {
+            background: var(--color-bg-section);
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .forecast-vs-actual h3 {
+            font-family: var(--font-display);
+            font-size: 14px;
+            margin-bottom: 16px;
+            color: var(--color-text-primary);
+        }
+        .forecast-bar-container {
+            margin-bottom: 20px;
+        }
+        .forecast-bar-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            margin-bottom: 6px;
+        }
+        .forecast-bar-label .label-text {
+            color: var(--color-text-secondary);
+        }
+        .forecast-bar-label .label-value {
+            font-weight: 600;
+        }
+        .forecast-bar {
+            height: 28px;
+            background: #e8e8e8;
+            border-radius: 6px;
+            position: relative;
+            overflow: visible;
+        }
+        .forecast-bar .bar-fill {
+            height: 100%;
+            border-radius: 6px;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+        .forecast-bar .actual-marker {
+            position: absolute;
+            top: -4px;
+            width: 4px;
+            height: 36px;
+            background: #01c3b0;
+            border-radius: 2px;
+            z-index: 10;
+        }
+        .forecast-bar .actual-label {
+            position: absolute;
+            top: -22px;
+            transform: translateX(-50%);
+            font-size: 10px;
+            font-weight: 700;
+            color: #01c3b0;
+            white-space: nowrap;
+        }
+        .variance-note {
+            background: #fff3e0;
+            border-left: 4px solid #ff9800;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-top: 16px;
+        }
+        .variance-note .note-title {
+            font-family: var(--font-display);
+            font-size: 16px;
+            font-weight: 700;
+            color: #e65100;
+            margin-bottom: 4px;
+        }
+        .variance-note .note-text {
+            font-size: 14px;
+            line-height: 1.5;
+            color: #bf360c;
+        }
+        .graphic-placeholder {
+            background: linear-gradient(135deg, #f5f5f5 0%, #eeeeee 100%);
+            border: 2px dashed #ccc;
+            border-radius: 12px;
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            margin-top: 16px;
+        }
+        .graphic-placeholder .placeholder-icon {
+            font-size: 36px;
+            margin-bottom: 8px;
+            opacity: 0.5;
+        }
+        .graphic-placeholder .placeholder-text {
+            font-size: 13px;
+            font-weight: 600;
+        }
+        .graphic-placeholder .placeholder-hint {
+            font-size: 10px;
+            margin-top: 4px;
+        }
+        .key-insight {
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            border-left: 4px solid #4caf50;
+            border-radius: 8px;
+            padding: 14px 18px;
+            margin-top: 16px;
+        }
+        .key-insight .insight-title {
+            font-family: var(--font-display);
+            font-size: 16px;
+            font-weight: 700;
+            color: #2e7d32;
+            margin-bottom: 6px;
+        }
+        .key-insight .insight-text {
+            font-size: 14px;
+            line-height: 1.5;
+            color: #1b5e20;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <header class="slide-header">
+            <div>
+                <h1>GenAI Traffic<span class="subtitle">Source Breakdown</span></h1>
+            </div>
+            <span class="slide-badge">Home Entertainment | Jan 2026</span>
+        </header>
+
+        <div class="slide-grid-55-45">
+            <!-- Left: Source Table & Chart -->
+            <div class="section">
+                <h2>GenAI Referrer Performance (January 2026)</h2>
+
+                <table class="source-table">
+                    <thead>
+                        <tr>
+                            <th>Source</th>
+                            <th>Visits</th>
+                            <th>CVR</th>
+                            <th>AOV</th>
+                            <th>Revenue</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div class="source-name">
+                                    <div class="source-dot" style="background: #9e9e9e;"></div>
+                                    <span class="source-label">Direct (GenAI)*</span>
+                                </div>
+                            </td>
+                            <td>39,398</td>
+                            <td class="cvr-cell medium">0.56%</td>
+                            <td class="aov-cell">$557</td>
+                            <td>$122,741</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="source-name">
+                                    <div class="source-dot" style="background: #01c3b0;"></div>
+                                    <span class="source-label">ChatGPT</span>
+                                </div>
+                            </td>
+                            <td>18,590</td>
+                            <td class="cvr-cell medium">0.58%</td>
+                            <td class="aov-cell">$678</td>
+                            <td>$73,238</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="source-name">
+                                    <div class="source-dot" style="background: #feb447;"></div>
+                                    <span class="source-label">Gemini</span>
+                                </div>
+                            </td>
+                            <td>3,447</td>
+                            <td class="cvr-cell low">0.09%</td>
+                            <td class="aov-cell" style="color: #feb447;">$1,521</td>
+                            <td>$4,564</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="source-name">
+                                    <div class="source-dot" style="background: #7c4dff;"></div>
+                                    <span class="source-label">Perplexity</span>
+                                </div>
+                            </td>
+                            <td>2,470</td>
+                            <td class="cvr-cell medium">0.40%</td>
+                            <td class="aov-cell" style="color: #7c4dff;">$543</td>
+                            <td>$5,429</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="source-name">
+                                    <div class="source-dot" style="background: #0078d4;"></div>
+                                    <span class="source-label">Copilot</span>
+                                </div>
+                            </td>
+                            <td>1,257</td>
+                            <td class="cvr-cell low">0.08%</td>
+                            <td class="aov-cell">$950</td>
+                            <td>$950</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div id="source-donut" class="chart-container" style="min-height: 400px; margin-top: 16px;"></div>
+            </div>
+
+            <!-- Right: Forecast vs Actual -->
+            <div class="section">
+                <h2>January 2026: Forecast vs Actual</h2>
+
+                <div class="forecast-vs-actual">
+                    <h3>HE GenAI Traffic - Projection Scenarios</h3>
+
+                    <!-- Aggressive Forecast -->
+                    <div class="forecast-bar-container">
+                        <div class="forecast-bar-label">
+                            <span class="label-text">Aggressive Forecast</span>
+                            <span class="label-value" style="color: #1428A0;">17,514</span>
+                        </div>
+                        <div class="forecast-bar">
+                            <div class="bar-fill" style="width: 100%; background: linear-gradient(90deg, #1428A0 0%, #3949AB 100%); opacity: 0.3;"></div>
+                            <div class="actual-marker" style="left: calc(12242 / 17514 * 100% - 2px);"></div>
+                        </div>
+                    </div>
+
+                    <!-- Moderate Forecast -->
+                    <div class="forecast-bar-container">
+                        <div class="forecast-bar-label">
+                            <span class="label-text">Moderate Forecast</span>
+                            <span class="label-value" style="color: #1428A0;">15,180</span>
+                        </div>
+                        <div class="forecast-bar">
+                            <div class="bar-fill" style="width: 100%; background: linear-gradient(90deg, #1428A0 0%, #3949AB 100%); opacity: 0.5;"></div>
+                            <div class="actual-marker" style="left: calc(12242 / 15180 * 100% - 2px);"></div>
+                        </div>
+                    </div>
+
+                    <!-- Conservative Forecast -->
+                    <div class="forecast-bar-container">
+                        <div class="forecast-bar-label">
+                            <span class="label-text">Conservative Forecast</span>
+                            <span class="label-value" style="color: #1428A0;">13,427</span>
+                        </div>
+                        <div class="forecast-bar">
+                            <div class="bar-fill" style="width: 100%; background: linear-gradient(90deg, #1428A0 0%, #3949AB 100%); opacity: 0.7;"></div>
+                            <div class="actual-marker" style="left: calc(12242 / 13427 * 100% - 2px);"></div>
+                            <div class="actual-label" style="left: calc(12242 / 13427 * 100%);">Actual: 12,242</div>
+                        </div>
+                    </div>
+
+                    <div class="variance-note">
+                        <div class="note-title">Variance: -8.8% vs Conservative</div>
+                        <div class="note-text">
+                            Actual traffic (12,242) came in below even the conservative forecast (13,427).
+                            Post-holiday seasonality stronger than expected. <strong>Expect recovery in Feb-Mar</strong>
+                            with CES product launches and Super Bowl traffic.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="key-insight">
+                    <div class="insight-title" style="font-size: 16px;">Gemini: Highest Value Users</div>
+                    <div class="insight-text" style="font-size: 14px;">
+                        Despite low volume (3,447 visits), Gemini users have <strong>$1,521 AOV</strong> -
+                        2.2x higher than ChatGPT users ($678). Premium buyers researching high-end TVs.
+                    </div>
+                </div>
+
+                <div class="tracking-gap-note" style="background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 8px; padding: 14px 18px; margin-top: 16px;">
+                    <div style="font-family: var(--font-display); font-size: 16px; font-weight: 700; color: #856404; margin-bottom: 6px;">Google AI Mode: Hidden Traffic</div>
+                    <div style="font-size: 14px; line-height: 1.5; color: #856404;">
+                        Traffic from <strong>Google's AI Mode</strong> is untrackable - it appears as standard organic search
+                        (referring domain: google.com). This AI-driven traffic is likely <strong>already included in organic totals</strong>,
+                        meaning true GenAI traffic could be significantly <strong>underreported</strong>.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="slide-content">
+            <div class="insights horizontal">
+                <div class="insight-card positive">
+                    <strong>ChatGPT Dominates Volume</strong>
+                    <span class="highlight">8,947</span> identifiable visits with <span class="highlight">1.01% CVR</span> - highest conversion of any trackable source.
+                </div>
+                <div class="insight-card">
+                    <strong>$515K Total GenAI Revenue</strong>
+                    5-month total with <span class="highlight">832 orders</span>. November alone drove <span class="highlight">$235K</span>.
+                </div>
+                <div class="insight-card negative">
+                    <strong>Gemini & Copilot: Zero Conversions</strong>
+                    Traffic exists but no purchases yet - opportunity to optimize landing experience.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Source breakdown data for donut - January 2026
+        const sourceData = [
+            { source: 'Direct (GenAI)', visits: 39398, color: '#9e9e9e' },
+            { source: 'ChatGPT', visits: 18590, color: '#01c3b0' },
+            { source: 'Gemini', visits: 3447, color: '#feb447' },
+            { source: 'Perplexity', visits: 2470, color: '#7c4dff' },
+            { source: 'Copilot', visits: 1257, color: '#0078d4' }
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderSourceDonut();
+        });
+
+        function renderSourceDonut() {
+            const container = document.getElementById('source-donut');
+            const width = container.clientWidth;
+            const height = 400;
+            const radius = Math.min(width, height) / 2 - 20;
+
+            const svg = d3.select('#source-donut')
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height)
+                .append('g')
+                .attr('transform', `translate(${width / 2}, ${height / 2})`);
+
+            const total = d3.sum(sourceData, d => d.visits);
+
+            const pie = d3.pie()
+                .value(d => d.visits)
+                .sort(null);
+
+            const arc = d3.arc()
+                .innerRadius(radius * 0.55)
+                .outerRadius(radius);
+
+            const arcs = svg.selectAll('arc')
+                .data(pie(sourceData))
+                .enter()
+                .append('g');
+
+            arcs.append('path')
+                .attr('d', arc)
+                .attr('fill', d => d.data.color)
+                .attr('stroke', '#fff')
+                .attr('stroke-width', 2)
+                .style('cursor', 'pointer')
+                .on('mouseover', function(event, d) {
+                    d3.select(this).attr('opacity', 0.8);
+                })
+                .on('mouseout', function() {
+                    d3.select(this).attr('opacity', 1);
+                });
+
+            // Center text
+            svg.append('text')
+                .attr('text-anchor', 'middle')
+                .attr('dy', '-0.2em')
+                .style('font-family', 'Samsung Sharp Sans, sans-serif')
+                .style('font-size', '48px')
+                .style('font-weight', '700')
+                .text(total.toLocaleString());
+
+            svg.append('text')
+                .attr('text-anchor', 'middle')
+                .attr('dy', '1.6em')
+                .style('font-family', 'Samsung One, sans-serif')
+                .style('font-size', '18px')
+                .style('fill', '#666')
+                .text('total visits');
+
+            // Legend
+            const legend = d3.select('#source-donut')
+                .append('div')
+                .style('display', 'flex')
+                .style('justify-content', 'center')
+                .style('flex-wrap', 'wrap')
+                .style('gap', '20px')
+                .style('margin-top', '16px');
+
+            sourceData.forEach(d => {
+                const pct = ((d.visits / total) * 100).toFixed(0);
+                const item = legend.append('div')
+                    .style('display', 'flex')
+                    .style('align-items', 'center')
+                    .style('gap', '8px');
+
+                item.append('div')
+                    .style('width', '18px')
+                    .style('height', '18px')
+                    .style('border-radius', '4px')
+                    .style('background', d.color);
+
+                item.append('span')
+                    .style('font-size', '16px')
+                    .style('color', '#333')
+                    .text(`${d.source} (${pct}%)`);
+            });
+        }
+    </script>
+</body>
+</html>

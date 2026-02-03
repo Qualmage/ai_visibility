@@ -1,56 +1,10 @@
 <!-- CSS -->
-.charts-row {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--spacing-lg);
-    margin-bottom: var(--spacing-2xl);
-}
-
-.chart-card {
-    background: var(--color-bg-card);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-xl);
-    padding: var(--spacing-xl);
-}
-
-.chart-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: var(--spacing-lg);
-}
-
-.chart-title {
-    font-family: var(--font-display);
-    font-size: 16px;
-    font-weight: 700;
-    color: #333;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
+/* Line chart template-specific tooltip positioning */
 .chart-tooltip-icon {
     position: relative;
-    width: 18px;
-    height: 18px;
-    background: var(--color-accent-purple);
-    border-radius: 50%;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    cursor: help;
-    flex-shrink: 0;
 }
 
-.chart-tooltip-icon span {
-    color: white;
-    font-size: 12px;
-    font-weight: 700;
-    line-height: 1;
-}
-
-.chart-tooltip-text {
+.chart-tooltip-icon .chart-tooltip-text {
     visibility: hidden;
     opacity: 0;
     position: absolute;
@@ -71,7 +25,7 @@
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
-.chart-tooltip-text::before {
+.chart-tooltip-icon .chart-tooltip-text::before {
     content: '';
     position: absolute;
     top: -6px;
@@ -85,179 +39,6 @@
     visibility: visible;
     opacity: 1;
 }
-
-.download-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 4px;
-    color: var(--color-text-secondary);
-}
-
-.download-btn:hover {
-    color: var(--color-primary);
-}
-
-/* Chart + Insights Layout */
-.chart-content {
-    display: flex;
-    gap: 16px;
-}
-
-/* D3 Chart Styles */
-.chart-area {
-    flex: 1;
-    min-width: 0;
-    height: 280px;
-    overflow: hidden;
-}
-
-.chart-area svg {
-    width: 100%;
-    height: 100%;
-}
-
-/* Insights Box */
-.chart-insights {
-    width: 220px;
-    flex-shrink: 0;
-    background: #f8f9fa;
-    border-radius: 8px;
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
-
-.insight-item {
-    margin-bottom: 12px;
-    opacity: 0;
-    animation: fadeInUp 0.5s ease forwards;
-}
-
-.insight-item:last-child {
-    margin-bottom: 0;
-}
-
-.insight-item:nth-child(1) { animation-delay: 0.2s; }
-.insight-item:nth-child(2) { animation-delay: 0.6s; }
-.insight-item:nth-child(3) { animation-delay: 1.0s; }
-
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.insight-label {
-    font-size: 11px;
-    color: var(--color-text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 4px;
-}
-
-.insight-value {
-    font-family: var(--font-display);
-    font-size: 20px;
-    font-weight: 700;
-    color: var(--color-primary);
-}
-
-.insight-value.positive {
-    color: var(--color-accent-green);
-}
-
-.insight-value.negative {
-    color: var(--color-accent-red);
-}
-
-.insight-change {
-    font-size: 12px;
-    color: var(--color-text-secondary);
-}
-
-.grid-line {
-    stroke: #e8e8e8;
-    stroke-width: 1;
-}
-
-.axis-line {
-    stroke: #ccc;
-    stroke-width: 1;
-}
-
-.axis text {
-    font-family: var(--font-body);
-    font-size: 13px;
-    fill: var(--color-text-secondary);
-}
-
-.axis path,
-.axis line {
-    stroke: #ccc;
-}
-
-.data-line {
-    fill: none;
-    stroke-width: 2.5;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-}
-
-.data-point {
-    stroke-width: 2;
-    stroke: white;
-}
-
-.chart-legend {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 12px 16px;
-    margin-top: 16px;
-    padding-top: 12px;
-    border-top: 1px solid var(--color-border);
-    margin-right: 236px; /* align with chart area (220px insights + 16px gap) */
-}
-
-.legend-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 12px;
-    color: var(--color-text-secondary);
-}
-
-.legend-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-}
-
-/* Tooltip */
-.line-chart-tooltip {
-    position: absolute;
-    background: #333;
-    color: white;
-    padding: 8px 12px;
-    border-radius: 6px;
-    font-size: 12px;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.15s;
-    z-index: 100;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-}
-
-.line-chart-tooltip.visible {
-    opacity: 1;
-}
 <!-- END CSS -->
 
 <!-- HTML -->
@@ -269,9 +50,9 @@
             <div class="chart-header">
                 <div class="chart-title">
                     Share of Voice
-                    <div class="chart-tooltip-icon">
+                    <div class="tooltip-icon">
                         <span>?</span>
-                        <div class="chart-tooltip-text">Estimated share of audience likely to notice your brand in AI search results, based on prompt popularity and ranking position.</div>
+                        <div class="tooltip-text">Estimated share of audience likely to notice your brand in AI search results, based on prompt popularity and ranking position.</div>
                     </div>
                 </div>
                 <button class="download-btn" title="Download">
@@ -318,9 +99,9 @@
             <div class="chart-header">
                 <div class="chart-title">
                     Source Visibility
-                    <div class="chart-tooltip-icon">
+                    <div class="tooltip-icon">
                         <span>?</span>
-                        <div class="chart-tooltip-text">Percentage of AI responses that cite your website as a source.</div>
+                        <div class="tooltip-text">Percentage of AI responses that cite your website as a source.</div>
                     </div>
                 </div>
                 <button class="download-btn" title="Download">
@@ -370,9 +151,9 @@
             <div class="chart-header">
                 <div class="chart-title">
                     Referral Traffic
-                    <div class="chart-tooltip-icon">
+                    <div class="tooltip-icon">
                         <span>?</span>
-                        <div class="chart-tooltip-text">Total visits to your website from AI platforms.</div>
+                        <div class="tooltip-text">Total visits to your website from AI platforms.</div>
                     </div>
                 </div>
                 <button class="download-btn" title="Download">
@@ -419,9 +200,9 @@
             <div class="chart-header">
                 <div class="chart-title">
                     AI Visibility
-                    <div class="chart-tooltip-icon">
+                    <div class="tooltip-icon">
                         <span>?</span>
-                        <div class="chart-tooltip-text">Overall visibility score measuring your brand's presence across AI platforms.</div>
+                        <div class="tooltip-text">Overall visibility score measuring your brand's presence across AI platforms.</div>
                     </div>
                 </div>
                 <button class="download-btn" title="Download">

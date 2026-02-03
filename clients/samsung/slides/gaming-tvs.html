@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gaming TVs - Samsung AI Visibility</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        @font-face {
+            font-family: 'Samsung Sharp Sans';
+            src: url('../assets/fonts/SamsungSharpSansBd.woff2') format('woff2'),
+                 url('../assets/fonts/SamsungSharpSans-Bold.ttf') format('truetype');
+            font-weight: 700;
+        }
+        @font-face {
+            font-family: 'Samsung One';
+            src: url('../assets/fonts/SamsungOneLatinWeb-400.woff2') format('woff2'),
+                 url('../assets/fonts/SamsungOneLatinCompact-400.ttf') format('truetype');
+            font-weight: 400;
+        }
+
+        :root {
+            --color-primary: #1428A0;
+            --color-bg-page: #f8f9fa;
+            --color-bg-card: #ffffff;
+            --color-text-primary: #000000;
+            --color-text-secondary: #666666;
+            --color-border: #e0e0e0;
+            --font-display: 'Samsung Sharp Sans', sans-serif;
+            --font-body: 'Samsung One', -apple-system, sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--color-bg-page);
+            color: var(--color-text-primary);
+            min-height: 100vh;
+            padding: 24px;
+        }
+
+        .slide-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: var(--color-bg-card);
+            border-radius: 12px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+
+        .slide-header {
+            background: var(--color-primary);
+            color: white;
+            padding: 24px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .slide-header h1 {
+            font-family: var(--font-display);
+            font-size: 32px;
+            font-weight: 700;
+        }
+
+        .prompt-count {
+            font-size: 16px;
+            opacity: 0.9;
+            background: rgba(255,255,255,0.15);
+            padding: 8px 16px;
+            border-radius: 20px;
+        }
+
+        .slide-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr 1fr;
+            gap: 24px;
+            padding: 24px;
+        }
+
+        .section {
+            background: #fafafa;
+            border-radius: 8px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .section h2 {
+            font-family: var(--font-display);
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--color-text-primary);
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--color-primary);
+        }
+
+        .chart-container {
+            flex: 1;
+            position: relative;
+            min-height: 280px;
+        }
+
+        .insights {
+            margin-top: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .insight {
+            background: white;
+            padding: 12px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            line-height: 1.4;
+            border-left: 3px solid var(--color-primary);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .insight strong {
+            color: var(--color-primary);
+        }
+
+        .insight .highlight {
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <header class="slide-header">
+            <h1>Gaming TVs</h1>
+            <span class="prompt-count">40 prompts analyzed</span>
+        </header>
+
+        <div class="slide-grid">
+            <div class="section platform">
+                <h2>AI Platform Distribution</h2>
+                <div id="platform-donut" class="chart-container"></div>
+                <div class="insights">
+                    <div class="insight">
+                        <strong>SearchGPT Leads:</strong> Drives <span class="highlight">47%</span> of all gaming TV citations with 12,531 references
+                    </div>
+                    <div class="insight">
+                        <strong>Google AI Mode:</strong> Second with <span class="highlight">32%</span> share (8,543 citations)
+                    </div>
+                    <div class="insight">
+                        <strong>AI Overview:</strong> Contributes <span class="highlight">21%</span> with 5,565 citations
+                    </div>
+                </div>
+            </div>
+
+            <div class="section concepts">
+                <h2>Samsung Concepts & Sentiment</h2>
+                <div id="concept-treemap" class="chart-container"></div>
+            </div>
+
+            <div class="section competitors">
+                <h2>Competitive Analysis</h2>
+                <div id="competitor-radar" class="chart-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/slide-charts.js"></script>
+    <script>
+        // Platform data
+        const platformData = [
+            {"model":"search-gpt","prompts":40,"citations":12531},
+            {"model":"google-ai-mode","prompts":40,"citations":8543},
+            {"model":"google-ai-overview","prompts":40,"citations":5565}
+        ];
+
+        // Concept data for Samsung
+        const conceptData = [
+            {"concept":"brightness","sentiment":"positive","mentions":409},
+            {"concept":"4k resolution","sentiment":"positive","mentions":378},
+            {"concept":"low input lag","sentiment":"positive","mentions":354},
+            {"concept":"vrr","sentiment":"positive","mentions":320},
+            {"concept":"hdmi 2.1","sentiment":"positive","mentions":239},
+            {"concept":"hdmi 2.1 ports","sentiment":"positive","mentions":230},
+            {"concept":"input lag","sentiment":"positive","mentions":214},
+            {"concept":"gaming features","sentiment":"positive","mentions":206},
+            {"concept":"165hz refresh rate","sentiment":"positive","mentions":204},
+            {"concept":"allm","sentiment":"positive","mentions":200},
+            {"concept":"qd-oled panel","sentiment":"positive","mentions":191},
+            {"concept":"qd-oled","sentiment":"positive","mentions":172},
+            {"concept":"high brightness","sentiment":"positive","mentions":150},
+            {"concept":"refresh rate","sentiment":"positive","mentions":149},
+            {"concept":"hdmi 2.1","sentiment":"neutral","mentions":149},
+            {"concept":"144hz refresh rate","sentiment":"positive","mentions":144},
+            {"concept":"gaming performance","sentiment":"positive","mentions":137},
+            {"concept":"game mode","sentiment":"positive","mentions":134},
+            {"concept":"contrast","sentiment":"positive","mentions":128},
+            {"concept":"vrr","sentiment":"neutral","mentions":126}
+        ];
+
+        // Competitor data
+        const competitorData = [
+            {"brand_name":"LG","mentions":15952,"unique_concepts":1446,"positive_pct":"80.0","negative_pct":"0.2","neutral_pct":"19.8"},
+            {"brand_name":"Samsung","mentions":12546,"unique_concepts":1626,"positive_pct":"78.1","negative_pct":"0.2","neutral_pct":"21.7"},
+            {"brand_name":"Sony","mentions":6196,"unique_concepts":1114,"positive_pct":"65.4","negative_pct":"0.2","neutral_pct":"34.3"},
+            {"brand_name":"TCL","mentions":6121,"unique_concepts":839,"positive_pct":"76.0","negative_pct":"0.0","neutral_pct":"24.0"},
+            {"brand_name":"Hisense","mentions":4221,"unique_concepts":653,"positive_pct":"72.6","negative_pct":"0.2","neutral_pct":"27.2"}
+        ];
+
+        // Render charts on load
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                renderDonut('platform-donut', platformData);
+                renderTreemap('concept-treemap', conceptData);
+                renderCompetitorBars('competitor-radar', competitorData);
+            }, 100);
+        });
+    </script>
+</body>
+</html>
