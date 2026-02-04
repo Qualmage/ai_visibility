@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Owned Sources Deep Dive | AI Visibility - Samsung TV</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link rel="stylesheet" href="../css/slides.css">
+    <style>
+        .main-grid {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 24px;
+        }
+        .donut-container {
+            background: var(--color-bg-section);
+            border-radius: 8px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .donut-container h3 {
+            font-family: var(--font-display);
+            font-size: 16px;
+            margin-bottom: 16px;
+            color: var(--color-text-primary);
+            text-align: center;
+        }
+        .donut-legend {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-top: 16px;
+            width: 100%;
+        }
+        .legend-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 12px;
+            background: white;
+            border-radius: 6px;
+        }
+        .legend-row .info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .legend-row .color-swatch {
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
+        }
+        .legend-row .region-name {
+            font-weight: 600;
+            font-size: 12px;
+        }
+        .legend-row .citation-count {
+            font-size: 11px;
+            color: #666;
+        }
+        .legend-row .pct-value {
+            font-family: var(--font-display);
+            font-size: 14px;
+            font-weight: 700;
+        }
+        .legend-row.highlight {
+            background: #e3f2fd;
+            border-left: 3px solid var(--color-primary);
+        }
+
+        .right-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .table-container {
+            background: var(--color-bg-section);
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .table-container h3 {
+            font-family: var(--font-display);
+            font-size: 14px;
+            margin-bottom: 12px;
+            color: var(--color-text-primary);
+        }
+        .region-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+        .region-table th {
+            background: var(--color-primary);
+            color: white;
+            padding: 8px 10px;
+            text-align: right;
+            font-weight: 600;
+        }
+        .region-table th:first-child {
+            text-align: left;
+            border-radius: 6px 0 0 0;
+        }
+        .region-table th:last-child {
+            border-radius: 0 6px 0 0;
+        }
+        .region-table td {
+            padding: 7px 10px;
+            text-align: right;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .region-table td:first-child {
+            text-align: left;
+            font-weight: 600;
+        }
+        .region-table tr:hover td {
+            background: #f5f5f5;
+        }
+        .region-table tr.us-row td {
+            background: #e3f2fd;
+            font-weight: 600;
+        }
+        .region-table tr.total-row td {
+            background: #e8f4fd;
+            font-weight: 700;
+            border-top: 2px solid var(--color-primary);
+        }
+
+        .subdomain-panel {
+            background: var(--color-bg-section);
+            border-radius: 8px;
+            padding: 16px 20px;
+        }
+        .subdomain-panel h3 {
+            font-family: var(--font-display);
+            font-size: 14px;
+            margin-bottom: 12px;
+            color: var(--color-text-primary);
+        }
+        .subdomain-bars {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .subdomain-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .subdomain-label {
+            width: 140px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .subdomain-bar-bg {
+            flex: 1;
+            height: 20px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .subdomain-bar-fill {
+            height: 100%;
+            background: var(--color-primary);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 6px;
+        }
+        .subdomain-bar-fill span {
+            color: white;
+            font-size: 10px;
+            font-weight: 600;
+        }
+        .subdomain-value {
+            width: 50px;
+            text-align: right;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .callout-box {
+            background: linear-gradient(135deg, #f0f7ff 0%, #e8f4fd 100%);
+            border-left: 4px solid var(--color-primary);
+            border-radius: 8px;
+            padding: 16px 20px;
+        }
+        .callout-box .callout-title {
+            font-family: var(--font-display);
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--color-primary);
+            margin-bottom: 8px;
+        }
+        .callout-box .callout-text {
+            font-size: 13px;
+            line-height: 1.5;
+            color: var(--color-text-primary);
+        }
+        .insights-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 20px;
+        }
+        .tracking-note {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            border-radius: 8px;
+            padding: 14px 18px;
+            margin-top: 16px;
+        }
+        .tracking-note .note-title {
+            font-family: var(--font-display);
+            font-size: 12px;
+            font-weight: 700;
+            color: #856404;
+            margin-bottom: 6px;
+        }
+        .tracking-note .note-text {
+            font-size: 11px;
+            line-height: 1.5;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <header class="slide-header">
+            <div>
+                <h1>Owned Sources Deep Dive<span class="subtitle">Regional Citation Analysis</span></h1>
+            </div>
+            <span class="slide-badge">TV AI Visibility | Jan 31, 2026</span>
+        </header>
+
+        <div class="slide-content">
+            <div class="main-grid">
+                <!-- Donut Chart - Regional Breakdown -->
+                <div class="donut-container">
+                    <h3>Owned Citations by Region</h3>
+                    <div id="donut-chart"></div>
+                    <div class="donut-legend">
+                        <div class="legend-row highlight">
+                            <div class="info">
+                                <div class="color-swatch" style="background: #1428A0;"></div>
+                                <div>
+                                    <span class="region-name">US</span>
+                                    <span class="citation-count">546 citations</span>
+                                </div>
+                            </div>
+                            <span class="pct-value" style="color: #1428A0;">55.2%</span>
+                        </div>
+                        <div class="legend-row">
+                            <div class="info">
+                                <div class="color-swatch" style="background: #90caf9;"></div>
+                                <div>
+                                    <span class="region-name">Other/Unknown</span>
+                                    <span class="citation-count">169 citations</span>
+                                </div>
+                            </div>
+                            <span class="pct-value" style="color: #64b5f6;">17.1%</span>
+                        </div>
+                        <div class="legend-row">
+                            <div class="info">
+                                <div class="color-swatch" style="background: #5c6bc0;"></div>
+                                <div>
+                                    <span class="region-name">UK</span>
+                                    <span class="citation-count">75 citations</span>
+                                </div>
+                            </div>
+                            <span class="pct-value" style="color: #5c6bc0;">7.6%</span>
+                        </div>
+                        <div class="legend-row">
+                            <div class="info">
+                                <div class="color-swatch" style="background: #7e57c2;"></div>
+                                <div>
+                                    <span class="region-name">Global</span>
+                                    <span class="citation-count">52 citations</span>
+                                </div>
+                            </div>
+                            <span class="pct-value" style="color: #7e57c2;">5.3%</span>
+                        </div>
+                        <div class="legend-row">
+                            <div class="info">
+                                <div class="color-swatch" style="background: #9575cd;"></div>
+                                <div>
+                                    <span class="region-name">CA + AU + Others</span>
+                                    <span class="citation-count">148 citations</span>
+                                </div>
+                            </div>
+                            <span class="pct-value" style="color: #9575cd;">14.9%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Panel -->
+                <div class="right-panel">
+                    <!-- Regional Breakdown Table -->
+                    <div class="table-container">
+                        <h3>Citations by Region & Property</h3>
+                        <table class="region-table">
+                            <thead>
+                                <tr>
+                                    <th>Region</th>
+                                    <th>www</th>
+                                    <th>news</th>
+                                    <th>Other</th>
+                                    <th>Total</th>
+                                    <th>%</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="us-row">
+                                    <td>US</td>
+                                    <td>477</td>
+                                    <td>69</td>
+                                    <td>0</td>
+                                    <td>546</td>
+                                    <td>55.2%</td>
+                                </tr>
+                                <tr>
+                                    <td>Other/Unknown</td>
+                                    <td>144</td>
+                                    <td>20</td>
+                                    <td>5</td>
+                                    <td>169</td>
+                                    <td>17.1%</td>
+                                </tr>
+                                <tr>
+                                    <td>UK</td>
+                                    <td>65</td>
+                                    <td>10</td>
+                                    <td>0</td>
+                                    <td>75</td>
+                                    <td>7.6%</td>
+                                </tr>
+                                <tr>
+                                    <td>Global</td>
+                                    <td>1</td>
+                                    <td>51</td>
+                                    <td>0</td>
+                                    <td>52</td>
+                                    <td>5.3%</td>
+                                </tr>
+                                <tr>
+                                    <td>CA</td>
+                                    <td>33</td>
+                                    <td>0</td>
+                                    <td>0</td>
+                                    <td>33</td>
+                                    <td>3.3%</td>
+                                </tr>
+                                <tr>
+                                    <td>AU</td>
+                                    <td>17</td>
+                                    <td>4</td>
+                                    <td>0</td>
+                                    <td>21</td>
+                                    <td>2.1%</td>
+                                </tr>
+                                <tr>
+                                    <td>SG</td>
+                                    <td>20</td>
+                                    <td>0</td>
+                                    <td>0</td>
+                                    <td>20</td>
+                                    <td>2.0%</td>
+                                </tr>
+                                <tr>
+                                    <td>MY</td>
+                                    <td>17</td>
+                                    <td>0</td>
+                                    <td>0</td>
+                                    <td>17</td>
+                                    <td>1.7%</td>
+                                </tr>
+                                <tr>
+                                    <td>IN + Others</td>
+                                    <td>18</td>
+                                    <td>18</td>
+                                    <td>21</td>
+                                    <td>57</td>
+                                    <td>5.8%</td>
+                                </tr>
+                                <tr class="total-row">
+                                    <td>TOTAL</td>
+                                    <td>792</td>
+                                    <td>172</td>
+                                    <td>26</td>
+                                    <td>990</td>
+                                    <td>100%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Subdomain Breakdown -->
+                    <div class="subdomain-panel">
+                        <h3>Subdomain Contribution</h3>
+                        <div class="subdomain-bars">
+                            <div class="subdomain-item">
+                                <span class="subdomain-label">www.samsung.com</span>
+                                <div class="subdomain-bar-bg">
+                                    <div class="subdomain-bar-fill" style="width: 80%;"><span>80.0%</span></div>
+                                </div>
+                                <span class="subdomain-value">792</span>
+                            </div>
+                            <div class="subdomain-item">
+                                <span class="subdomain-label">news.samsung.com</span>
+                                <div class="subdomain-bar-bg">
+                                    <div class="subdomain-bar-fill" style="width: 17.1%; background: #42a5f5;"><span>17.1%</span></div>
+                                </div>
+                                <span class="subdomain-value">169</span>
+                            </div>
+                            <div class="subdomain-item">
+                                <span class="subdomain-label">community.samsung.com</span>
+                                <div class="subdomain-bar-bg">
+                                    <div class="subdomain-bar-fill" style="width: 1.5%; background: #64b5f6;"></div>
+                                </div>
+                                <span class="subdomain-value">15</span>
+                            </div>
+                            <div class="subdomain-item">
+                                <span class="subdomain-label">insights.samsung.com</span>
+                                <div class="subdomain-bar-bg">
+                                    <div class="subdomain-bar-fill" style="width: 0.9%; background: #90caf9;"></div>
+                                </div>
+                                <span class="subdomain-value">9</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Key Insights -->
+            <div class="insights-row">
+                <div class="callout-box">
+                    <div class="callout-title">US Drives Only 55% of Owned Citations</div>
+                    <div class="callout-text">
+                        samsung.com/us (477) + news.samsung.com/us (69) = <strong>546 citations</strong>.
+                        The remaining <strong>45% (444 citations)</strong> comes from other regions.
+                    </div>
+                </div>
+                <div class="callout-box">
+                    <div class="callout-title">Non-US Countries Cannibalize ~300 Citations</div>
+                    <div class="callout-text">
+                        UK (75), CA (33), AU (21), SG (20), MY (17), IN (16) etc. may be competing
+                        with US content in AI responses for US-based queries.
+                    </div>
+                </div>
+                <div class="callout-box">
+                    <div class="callout-title">Global Newsroom is Critical</div>
+                    <div class="callout-text">
+                        news.samsung.com/global contributes <strong>51 citations</strong> (5.3%) -
+                        the 4th largest source. Centralized PR content reaches AI models effectively.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Methodology Note -->
+            <div class="tracking-note">
+                <div class="note-title">Methodology</div>
+                <div class="note-text">
+                    Owned citations (990 total) extracted from semrush_prompt_urls where domain_type = 'Owned'.
+                    Region determined by URL path (e.g., /us/, /uk/) or subdomain region prefix.
+                    Single day snapshot: January 31, 2026.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Regional breakdown data
+        const regionalData = [
+            { region: 'US', value: 546, color: '#1428A0' },
+            { region: 'Other', value: 169, color: '#90caf9' },
+            { region: 'UK', value: 75, color: '#5c6bc0' },
+            { region: 'Global', value: 52, color: '#7e57c2' },
+            { region: 'CA+AU+Others', value: 148, color: '#9575cd' }
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderDonutChart();
+        });
+
+        function renderDonutChart() {
+            const width = 260;
+            const height = 260;
+            const radius = Math.min(width, height) / 2;
+            const innerRadius = radius * 0.55;
+
+            const svg = d3.select('#donut-chart')
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height)
+                .append('g')
+                .attr('transform', `translate(${width / 2}, ${height / 2})`);
+
+            const pie = d3.pie()
+                .value(d => d.value)
+                .sort(null);
+
+            const arc = d3.arc()
+                .innerRadius(innerRadius)
+                .outerRadius(radius - 10);
+
+            const arcs = svg.selectAll('arc')
+                .data(pie(regionalData))
+                .enter()
+                .append('g');
+
+            arcs.append('path')
+                .attr('d', arc)
+                .attr('fill', d => d.data.color)
+                .attr('stroke', 'white')
+                .attr('stroke-width', 2)
+                .style('opacity', 0.9);
+
+            // Center text
+            svg.append('text')
+                .attr('text-anchor', 'middle')
+                .attr('dy', '-0.3em')
+                .style('font-family', 'Samsung Sharp Sans, sans-serif')
+                .style('font-size', '28px')
+                .style('font-weight', '700')
+                .style('fill', '#1428A0')
+                .text('55.2%');
+
+            svg.append('text')
+                .attr('text-anchor', 'middle')
+                .attr('dy', '1.3em')
+                .style('font-family', 'Samsung One, sans-serif')
+                .style('font-size', '13px')
+                .style('fill', '#666')
+                .text('US Share');
+        }
+    </script>
+</body>
+</html>

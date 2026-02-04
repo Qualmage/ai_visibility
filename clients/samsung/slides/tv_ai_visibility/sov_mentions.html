@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Share of Voice | AI Concept Mentions - Samsung TV</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link rel="stylesheet" href="../css/slides.css">
+    <style>
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 24px;
+        }
+        .data-table-container {
+            background: var(--color-bg-section);
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .data-table-container h3 {
+            font-family: var(--font-display);
+            font-size: 16px;
+            margin-bottom: 16px;
+            color: var(--color-text-primary);
+        }
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        .data-table th {
+            background: var(--color-primary);
+            color: white;
+            padding: 10px 12px;
+            text-align: right;
+            font-weight: 600;
+            font-family: var(--font-display);
+        }
+        .data-table th:first-child {
+            text-align: left;
+            border-radius: 6px 0 0 0;
+        }
+        .data-table th:last-child {
+            border-radius: 0 6px 0 0;
+        }
+        .data-table td {
+            padding: 10px 12px;
+            text-align: right;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .data-table td:first-child {
+            text-align: left;
+            font-weight: 600;
+        }
+        .data-table .pct {
+            color: #888;
+            font-size: 11px;
+            margin-left: 4px;
+        }
+        .data-table tr:hover td {
+            background: #f5f5f5;
+        }
+        .data-table tr.total-row td {
+            background: #e8f4fd;
+            font-weight: 700;
+            border-top: 2px solid var(--color-primary);
+        }
+        .data-table tr.total-row td:first-child {
+            color: var(--color-primary);
+        }
+        .brand-samsung { color: var(--color-samsung); }
+        .brand-lg { color: var(--color-lg); }
+        .brand-sony { color: var(--color-sony); }
+        .brand-tcl { color: var(--color-tcl); }
+        .brand-hisense { color: var(--color-hisense); }
+
+        .donut-container {
+            background: var(--color-bg-section);
+            border-radius: 8px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .donut-container h3 {
+            font-family: var(--font-display);
+            font-size: 16px;
+            margin-bottom: 16px;
+            color: var(--color-text-primary);
+            text-align: center;
+        }
+        .donut-legend {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 16px;
+            width: 100%;
+        }
+        .legend-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 12px;
+            background: white;
+            border-radius: 6px;
+        }
+        .legend-row .brand-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .legend-row .color-swatch {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+        }
+        .legend-row .brand-name {
+            font-weight: 600;
+            font-size: 13px;
+        }
+        .legend-row .pct-value {
+            font-family: var(--font-display);
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .callout-box {
+            background: linear-gradient(135deg, #f0f7ff 0%, #e8f4fd 100%);
+            border-left: 4px solid var(--color-primary);
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin-top: 20px;
+        }
+        .callout-box .callout-title {
+            font-family: var(--font-display);
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--color-primary);
+            margin-bottom: 8px;
+        }
+        .callout-box .callout-text {
+            font-size: 13px;
+            line-height: 1.5;
+            color: var(--color-text-primary);
+        }
+
+        .tracking-note {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            border-radius: 8px;
+            padding: 14px 18px;
+            margin-top: 16px;
+        }
+        .tracking-note .note-title {
+            font-family: var(--font-display);
+            font-size: 12px;
+            font-weight: 700;
+            color: #856404;
+            margin-bottom: 6px;
+        }
+        .tracking-note .note-text {
+            font-size: 11px;
+            line-height: 1.5;
+            color: #856404;
+        }
+
+        .insights-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <header class="slide-header">
+            <div>
+                <h1>Share of Voice<span class="subtitle">AI Concept Mentions by Category</span></h1>
+            </div>
+            <span class="slide-badge">TV AI Visibility | Jan 31, 2026</span>
+        </header>
+
+        <div class="slide-content">
+            <div class="main-grid">
+                <!-- Data Table -->
+                <div class="data-table-container">
+                    <h3>Mentions by Tag Category & Brand</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Tag Category</th>
+                                <th class="brand-samsung">Samsung</th>
+                                <th class="brand-lg">LG</th>
+                                <th class="brand-sony">Sony</th>
+                                <th class="brand-hisense">Hisense</th>
+                                <th class="brand-tcl">TCL</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>QLED</td>
+                                <td>2,131 <span class="pct">(53.2%)</span></td>
+                                <td>158 <span class="pct">(3.9%)</span></td>
+                                <td>292 <span class="pct">(7.3%)</span></td>
+                                <td>391 <span class="pct">(9.8%)</span></td>
+                                <td>1,037 <span class="pct">(25.9%)</span></td>
+                            </tr>
+                            <tr>
+                                <td>Sports TVs</td>
+                                <td>1,970 <span class="pct">(34.1%)</span></td>
+                                <td>1,072 <span class="pct">(18.6%)</span></td>
+                                <td>778 <span class="pct">(13.5%)</span></td>
+                                <td>659 <span class="pct">(11.4%)</span></td>
+                                <td>1,299 <span class="pct">(22.5%)</span></td>
+                            </tr>
+                            <tr>
+                                <td>Gaming TVs</td>
+                                <td>1,746 <span class="pct">(29.6%)</span></td>
+                                <td>1,847 <span class="pct">(31.3%)</span></td>
+                                <td>787 <span class="pct">(13.3%)</span></td>
+                                <td>513 <span class="pct">(8.7%)</span></td>
+                                <td>1,011 <span class="pct">(17.1%)</span></td>
+                            </tr>
+                            <tr>
+                                <td>OLED</td>
+                                <td>1,685 <span class="pct">(44.5%)</span></td>
+                                <td>1,505 <span class="pct">(39.8%)</span></td>
+                                <td>357 <span class="pct">(9.4%)</span></td>
+                                <td>101 <span class="pct">(2.7%)</span></td>
+                                <td>138 <span class="pct">(3.6%)</span></td>
+                            </tr>
+                            <tr>
+                                <td>Micro RGB</td>
+                                <td>916 <span class="pct">(62.1%)</span></td>
+                                <td>355 <span class="pct">(24.1%)</span></td>
+                                <td>19 <span class="pct">(1.3%)</span></td>
+                                <td>157 <span class="pct">(10.7%)</span></td>
+                                <td>27 <span class="pct">(1.8%)</span></td>
+                            </tr>
+                            <tr>
+                                <td>Mini-LED</td>
+                                <td>828 <span class="pct">(28.8%)</span></td>
+                                <td>195 <span class="pct">(6.8%)</span></td>
+                                <td>567 <span class="pct">(19.7%)</span></td>
+                                <td>487 <span class="pct">(16.9%)</span></td>
+                                <td>798 <span class="pct">(27.8%)</span></td>
+                            </tr>
+                            <tr>
+                                <td>Movies & Cinema</td>
+                                <td>542 <span class="pct">(32.2%)</span></td>
+                                <td>342 <span class="pct">(20.3%)</span></td>
+                                <td>343 <span class="pct">(20.4%)</span></td>
+                                <td>155 <span class="pct">(9.2%)</span></td>
+                                <td>299 <span class="pct">(17.8%)</span></td>
+                            </tr>
+                            <tr>
+                                <td>AI</td>
+                                <td>308 <span class="pct">(42.5%)</span></td>
+                                <td>230 <span class="pct">(31.8%)</span></td>
+                                <td>153 <span class="pct">(21.1%)</span></td>
+                                <td>5 <span class="pct">(0.7%)</span></td>
+                                <td>28 <span class="pct">(3.9%)</span></td>
+                            </tr>
+                            <tr>
+                                <td>Art TV</td>
+                                <td>102 <span class="pct">(36.4%)</span></td>
+                                <td>32 <span class="pct">(11.4%)</span></td>
+                                <td>28 <span class="pct">(10.0%)</span></td>
+                                <td>66 <span class="pct">(23.6%)</span></td>
+                                <td>52 <span class="pct">(18.6%)</span></td>
+                            </tr>
+                            <tr>
+                                <td>Outdoor TV</td>
+                                <td>97 <span class="pct">(82.9%)</span></td>
+                                <td>0 <span class="pct">(0%)</span></td>
+                                <td>0 <span class="pct">(0%)</span></td>
+                                <td>10 <span class="pct">(8.5%)</span></td>
+                                <td>10 <span class="pct">(8.5%)</span></td>
+                            </tr>
+                            <tr class="total-row">
+                                <td>TOTAL</td>
+                                <td>10,325</td>
+                                <td>5,736</td>
+                                <td>3,324</td>
+                                <td>2,544</td>
+                                <td>4,699</td>
+                            </tr>
+                            <tr class="total-row">
+                                <td>Share %</td>
+                                <td class="brand-samsung">38.8%</td>
+                                <td class="brand-lg">21.5%</td>
+                                <td class="brand-sony">12.5%</td>
+                                <td class="brand-hisense">9.6%</td>
+                                <td class="brand-tcl">17.6%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Donut Chart -->
+                <div class="donut-container">
+                    <h3>Competitor Share of Voice</h3>
+                    <div id="donut-chart"></div>
+                    <div class="donut-legend">
+                        <div class="legend-row">
+                            <div class="brand-info">
+                                <div class="color-swatch" style="background: var(--color-samsung);"></div>
+                                <span class="brand-name">Samsung</span>
+                            </div>
+                            <span class="pct-value brand-samsung">38.8%</span>
+                        </div>
+                        <div class="legend-row">
+                            <div class="brand-info">
+                                <div class="color-swatch" style="background: var(--color-lg);"></div>
+                                <span class="brand-name">LG</span>
+                            </div>
+                            <span class="pct-value brand-lg">21.5%</span>
+                        </div>
+                        <div class="legend-row">
+                            <div class="brand-info">
+                                <div class="color-swatch" style="background: var(--color-tcl);"></div>
+                                <span class="brand-name">TCL</span>
+                            </div>
+                            <span class="pct-value brand-tcl">17.6%</span>
+                        </div>
+                        <div class="legend-row">
+                            <div class="brand-info">
+                                <div class="color-swatch" style="background: var(--color-sony);"></div>
+                                <span class="brand-name">Sony</span>
+                            </div>
+                            <span class="pct-value brand-sony">12.5%</span>
+                        </div>
+                        <div class="legend-row">
+                            <div class="brand-info">
+                                <div class="color-swatch" style="background: var(--color-hisense);"></div>
+                                <span class="brand-name">Hisense</span>
+                            </div>
+                            <span class="pct-value brand-hisense">9.6%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Key Insights -->
+            <div class="insights-row">
+                <div class="callout-box">
+                    <div class="callout-title">Samsung Leads Overall SOV at 38.8%</div>
+                    <div class="callout-text">
+                        Samsung commands the largest share of AI concept mentions across all 10 tag categories,
+                        with <strong>10,325 total mentions</strong> - nearly double the second-place competitor LG (5,736).
+                    </div>
+                </div>
+                <div class="callout-box">
+                    <div class="callout-title">LG Dominates Gaming TVs</div>
+                    <div class="callout-text">
+                        LG is the only category where a competitor outperforms Samsung - capturing
+                        <strong>1,847 mentions vs Samsung's 1,746</strong> in Gaming TVs, a high-value segment.
+                    </div>
+                </div>
+                <div class="callout-box">
+                    <div class="callout-title">QLED is Samsung's Strongest Category</div>
+                    <div class="callout-text">
+                        Samsung dominates QLED with <strong>2,131 mentions (53% category share)</strong> -
+                        more than 2x the nearest competitor TCL (1,037). This reflects Samsung's brand ownership of the QLED term.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Methodology Note -->
+            <div class="tracking-note">
+                <div class="note-title">Methodology</div>
+                <div class="note-text">
+                    Data sourced from SEMrush AI Visibility platform. Mentions aggregated across 3 AI models
+                    (SearchGPT, Google AI Overview, Google AI Mode) for 10 TV-related tag categories.
+                    Single day snapshot: January 31, 2026.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Donut chart data
+        const sovData = [
+            { brand: 'Samsung', value: 10325, pct: 38.8, color: '#1428A0' },
+            { brand: 'LG', value: 5736, pct: 21.5, color: '#A50034' },
+            { brand: 'TCL', value: 4699, pct: 17.6, color: '#E31937' },
+            { brand: 'Sony', value: 3324, pct: 12.5, color: '#000000' },
+            { brand: 'Hisense', value: 2544, pct: 9.6, color: '#00A0DF' }
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderDonutChart();
+        });
+
+        function renderDonutChart() {
+            const container = document.getElementById('donut-chart');
+            const width = 280;
+            const height = 280;
+            const radius = Math.min(width, height) / 2;
+            const innerRadius = radius * 0.55;
+
+            const svg = d3.select('#donut-chart')
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height)
+                .append('g')
+                .attr('transform', `translate(${width / 2}, ${height / 2})`);
+
+            const pie = d3.pie()
+                .value(d => d.value)
+                .sort(null);
+
+            const arc = d3.arc()
+                .innerRadius(innerRadius)
+                .outerRadius(radius - 10);
+
+            const arcs = svg.selectAll('arc')
+                .data(pie(sovData))
+                .enter()
+                .append('g');
+
+            arcs.append('path')
+                .attr('d', arc)
+                .attr('fill', d => d.data.color)
+                .attr('stroke', 'white')
+                .attr('stroke-width', 2)
+                .style('opacity', 0.9);
+
+            // Center text
+            svg.append('text')
+                .attr('text-anchor', 'middle')
+                .attr('dy', '-0.2em')
+                .style('font-family', 'Samsung Sharp Sans, sans-serif')
+                .style('font-size', '32px')
+                .style('font-weight', '700')
+                .style('fill', '#1428A0')
+                .text('38.8%');
+
+            svg.append('text')
+                .attr('text-anchor', 'middle')
+                .attr('dy', '1.5em')
+                .style('font-family', 'Samsung One, sans-serif')
+                .style('font-size', '14px')
+                .style('fill', '#666')
+                .text('Samsung');
+        }
+    </script>
+</body>
+</html>
