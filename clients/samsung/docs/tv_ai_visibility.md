@@ -437,6 +437,287 @@ ORDER BY citations DESC;
 
 ---
 
+### 6. Sentiment Overview - Brand Comparison
+
+**File Path:** `clients/samsung/slides/tv_ai_visibility/sentiment_overview.html`
+
+**Date Created:** 2026-02-04
+
+**Data Source:**
+- Supabase table: `semrush_concept_mentions_by_tag`
+
+**Query Details:**
+- **Date:** 2026-01-31 (single day snapshot)
+- **Brands:** Samsung, LG, Sony, Hisense, TCL
+- **AI Models:** All 3 (search-gpt, google-ai-overview, google-ai-mode)
+- **Tags:** Same 10 TV categories as Slides 1-5
+
+**SQL Query Used:**
+```sql
+SELECT
+  brand,
+  SUM(mentions) as total_mentions,
+  SUM(sentiment_positive) as positive,
+  SUM(sentiment_negative) as negative,
+  SUM(sentiment_neutral) as neutral
+FROM semrush_concept_mentions_by_tag
+WHERE tag IN (
+  'TV Models__QLED', 'TV Models__Sports TVs', 'TV Models__Gaming TVs',
+  'TV Models__OLED', 'TV Models__Micro RGB', 'TV Models__Mini-LED',
+  'TV Models__Movies & Cinema', 'TV Features__AI', 'TV Models__Art TV',
+  'TV Models__Outdoor TV'
+)
+GROUP BY brand
+ORDER BY total_mentions DESC;
+```
+
+**Key Metrics:**
+
+**Sentiment by Brand:**
+| Brand | Mentions | Positive | Negative | Neutral | Pos % | Neg % |
+|-------|----------|----------|----------|---------|-------|-------|
+| Samsung | 10,325 | 7,787 | 134 | 2,404 | 75.4% | 1.3% |
+| LG | 5,736 | 4,495 | 18 | 1,223 | 78.4% | 0.3% |
+| TCL | 4,699 | 3,738 | 17 | 944 | 79.5% | 0.4% |
+| Sony | 3,324 | 2,541 | 9 | 774 | 76.4% | 0.3% |
+| Hisense | 2,544 | 1,839 | 23 | 682 | 72.3% | 0.9% |
+
+**Samsung Sentiment by AI Model:**
+| Model | Mentions | Positive | Negative | Pos % |
+|-------|----------|----------|----------|-------|
+| Google AI Mode | 4,278 | 3,205 | 78 | 74.9% |
+| Google AI Overview | 3,153 | 2,437 | 33 | 77.3% |
+| SearchGPT | 3,156 | 2,315 | 26 | 73.4% |
+
+**Visualizations:**
+1. Sentiment by Brand table with positive/negative percentages
+2. Donut chart showing Samsung's sentiment breakdown (75.4% positive)
+3. Samsung Sentiment by AI Model table
+
+**Key Insights (displayed on slide):**
+
+1. **Samsung Leads Volume, Higher Negative Count**
+   - 134 negative mentions vs competitors' combined 67
+   - More visibility = more scrutiny
+   - Focus on addressing specific product feedback
+
+2. **AI Overview Most Favorable to Samsung**
+   - 77.3% positive rate - highest among all 3 AI models
+   - Google's snippet format favors Samsung's well-structured product content
+
+3. **TCL Has Highest Positive %**
+   - 79.5% positive rate despite fewer mentions
+   - Budget-friendly positioning and value messaging resonates well with AI models
+
+**Methodology Notes:**
+- Data from `semrush_concept_mentions_by_tag` table
+- Filtered to 10 TV categories: QLED, OLED, Mini-LED, Micro RGB, Gaming TVs, Sports TVs, Movies & Cinema, Art TV, Outdoor TV, AI Features
+- Single day snapshot: January 31, 2026
+- Sentiment classification performed by SEMrush AI analysis
+
+---
+
+### 7. Sentiment Drivers - What's Driving Positive & Negative Sentiment
+
+**File Path:** `clients/samsung/slides/tv_ai_visibility/sentiment_drivers.html`
+
+**Date Created:** 2026-02-04
+
+**Data Source:**
+- Supabase table: `semrush_concept_prompts`
+
+**Query Details:**
+- **Date:** 2026-01-31 (single day snapshot)
+- **Brand:** Samsung
+- **Sentiment Types:** positive, negative
+- **Aggregation:** By concept, with top product association
+
+**SQL Query Used:**
+```sql
+-- Positive Drivers
+SELECT
+  concept,
+  sentiment,
+  COUNT(*) as count,
+  MODE() WITHIN GROUP (ORDER BY products[1]) as top_product
+FROM semrush_concept_prompts
+WHERE brand = 'Samsung'
+  AND sentiment = 'positive'
+GROUP BY concept, sentiment
+ORDER BY count DESC
+LIMIT 7;
+
+-- Negative Drivers
+SELECT
+  concept,
+  sentiment,
+  COUNT(*) as count,
+  MODE() WITHIN GROUP (ORDER BY products[1]) as top_product
+FROM semrush_concept_prompts
+WHERE brand = 'Samsung'
+  AND sentiment = 'negative'
+GROUP BY concept, sentiment
+ORDER BY count DESC
+LIMIT 7;
+```
+
+**Key Metrics:**
+
+**Top Positive Sentiment Drivers (Samsung):**
+| Concept | Product | Count |
+|---------|---------|-------|
+| Brightness | S95F | 338 |
+| 4K Resolution | OLED 4K S95F TV | 136 |
+| Contrast | Neo QLED | 134 |
+| Picture Quality | S95F OLED | 121 |
+| Gaming Features | S95F | 112 |
+| Color Accuracy | S95F | 104 |
+| Motion Handling | S95F | 75 |
+
+**Top Negative Sentiment Drivers (Samsung):**
+| Concept | Product | Count |
+|---------|---------|-------|
+| Contrast | DU8000 | 22 |
+| Remote Control | Crystal UHD | 13 |
+| Brightness | U8000F | 9 |
+| Price | QN990F | 9 |
+| Input Lag | QN990F | 8 |
+| Dolby Vision Support | QN90D | 8 |
+| Black Levels | The Frame / Pro | 7 |
+
+**Visualizations:**
+1. Side-by-side tables for positive and negative drivers
+2. Green/red color-coded bars showing relative magnitude
+3. Representative quotes from AI responses
+
+**Key Insights (displayed on slide):**
+
+1. **Brightness is Samsung's #1 Positive Driver**
+   - 338 mentions - Samsung's peak brightness and anti-glare technology are key differentiators driving positive sentiment in AI responses
+
+2. **Contrast Appears in Both Positive & Negative**
+   - 134 positive vs 22 negative mentions
+   - Context matters: Neo QLED praised in general but criticized when compared to OLED's perfect blacks
+
+3. **Remote Control is a Known Pain Point**
+   - 13 negative mentions specifically about laggy remote control
+   - Actionable UX feedback for product team to address in future models
+
+**Representative Quotes:**
+
+- **Positive:** "Samsung S95F (QD-OLED) - Best overall for sports: superb brightness for an OLED, almost-perfect viewing angles, excellent motion and color, and an anti-glare finish that helps in bright rooms."
+
+- **Negative:** "It lacks local dimming and has poor contrast, so blacks look grayish and the image appears washed out in a dark room." (About Crystal UHD DU7200)
+
+**Methodology Notes:**
+- Data from `semrush_concept_prompts` table
+- Concepts aggregated by sentiment type for Samsung brand
+- Quotes extracted from AI responses
+- Single day snapshot: January 31, 2026
+
+---
+
+### 8. Competitor Sentiment Drivers - LG, Sony, TCL & Hisense Analysis
+
+**File Path:** `clients/samsung/slides/tv_ai_visibility/competitor_sentiment.html`
+
+**Date Created:** 2026-02-04
+
+**Data Source:**
+- Supabase tables:
+  - `semrush_concept_mentions_by_tag` (for sentiment percentages)
+  - `semrush_concept_prompts` (for concept drivers)
+
+**Query Details:**
+- **Date:** 2026-01-31 (single day snapshot)
+- **Brands:** LG, Sony, TCL, Hisense
+- **Tags:** Same 10 TV categories as other slides
+- **Sentiment Types:** positive, negative
+
+**SQL Queries Used:**
+```sql
+-- Sentiment percentages (from semrush_concept_mentions_by_tag)
+SELECT
+  brand,
+  SUM(mentions) as total_mentions,
+  SUM(sentiment_positive) as positive,
+  SUM(sentiment_negative) as negative,
+  ROUND(SUM(sentiment_positive)::decimal / SUM(mentions) * 100, 1) as pos_pct
+FROM semrush_concept_mentions_by_tag
+WHERE tag IN (
+  'TV Models__QLED', 'TV Models__Sports TVs', 'TV Models__Gaming TVs',
+  'TV Models__OLED', 'TV Models__Micro RGB', 'TV Models__Mini-LED',
+  'TV Models__Movies & Cinema', 'TV Features__AI', 'TV Models__Art TV',
+  'TV Models__Outdoor TV'
+)
+AND brand IN ('LG', 'Sony', 'TCL', 'Hisense')
+GROUP BY brand;
+
+-- Concept drivers (from semrush_concept_prompts)
+SELECT
+  brand,
+  concept,
+  sentiment,
+  COUNT(*) as count
+FROM semrush_concept_prompts
+WHERE brand IN ('LG', 'Sony', 'TCL', 'Hisense')
+  AND sentiment = 'positive'
+GROUP BY brand, concept, sentiment
+ORDER BY brand, count DESC;
+```
+
+**Key Metrics:**
+
+**LG (78.4% Positive)**
+- Hero Products: C5 OLED / G5 OLED
+- Top Positive Drivers: Brightness (88), Picture Quality (84), Gaming Features (84), Contrast (83)
+- Differentiator: OLED technology leadership (67 mentions)
+- Top Negative: Motion Smoothing (3)
+
+**Sony (76.4% Positive)**
+- Hero Products: Bravia 9 / Bravia 8 II
+- Top Positive Drivers: Brightness (63), Contrast (44), Color Accuracy (38), Image Processing (30)
+- Differentiator: Upscaling & Image Processing (unique strengths)
+- Top Negative: Motion Smoothing (2)
+
+**TCL (79.5% Positive)**
+- Hero Products: QM8K / QM6K
+- Top Positive Drivers: Brightness (142), Value (91), Mini-LED (77), Contrast (75)
+- Differentiator: Value messaging dominates positioning
+- Top Negative: Off-axis Viewing (1)
+
+**Hisense (72.3% Positive)**
+- Hero Products: U8N / U8 Series
+- Top Positive Drivers: Brightness (88), Value (65), Mini-LED (50), Contrast (37)
+- Differentiator: Budget-friendly positioning with premium features
+- Top Negative: Viewing Angles (2)
+
+**Visualizations:**
+1. 4-column grid with brand cards for LG, Sony, TCL, Hisense
+2. Each card shows: brand color header, sentiment %, hero products, top 4 positive drivers, differentiator, top negative
+
+**Key Insights (displayed on slide):**
+
+1. **Brightness is Universal #1 Driver**
+   - All 4 competitors have "brightness" as their top positive driver
+   - Samsung leads with 338 mentions - brightness messaging is working
+
+2. **TCL & Hisense Own "Value" Messaging**
+   - "Value" appears in top 5 for TCL (91) and Hisense (65) but NOT for LG, Sony, or Samsung
+   - Budget positioning is effective in AI responses
+
+3. **Sony Differentiates on Processing**
+   - Sony is the only brand with "image processing" and "upscaling" in top 5
+   - Samsung can counter with Vision AI messaging
+
+**Methodology Notes:**
+- Sentiment % from `semrush_concept_mentions_by_tag` (10 TV categories)
+- Concept drivers from `semrush_concept_prompts`
+- Competitors have fewer negative mentions (67 combined vs Samsung's 134) due to lower overall visibility
+- Single day snapshot: January 31, 2026
+
+---
+
 ## Slide Index
 
 | # | Slide Name | File Path | Status |
@@ -446,6 +727,9 @@ ORDER BY citations DESC;
 | 3 | Citations Analysis - Samsung vs Competitors | `slides/tv_ai_visibility/citations_vs_competitors.html` | Complete |
 | 4 | Citation Sources - Domain Type Analysis | `slides/tv_ai_visibility/citation_sources.html` | Complete |
 | 5 | Owned Sources Deep Dive - Regional Analysis | `slides/tv_ai_visibility/owned_sources.html` | Complete |
+| 6 | Sentiment Overview - Brand Comparison | `slides/tv_ai_visibility/sentiment_overview.html` | Complete |
+| 7 | Sentiment Drivers - Positive & Negative | `slides/tv_ai_visibility/sentiment_drivers.html` | Complete |
+| 8 | Competitor Sentiment Drivers | `slides/tv_ai_visibility/competitor_sentiment.html` | Complete |
 
 ---
 

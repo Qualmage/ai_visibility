@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentiment Drivers | AI Visibility - Samsung TV</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link rel="stylesheet" href="../css/slides.css">
+    <style>
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .section-container {
+            background: var(--color-bg-section);
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .section-container h3 {
+            font-family: var(--font-display);
+            font-size: 15px;
+            margin-bottom: 14px;
+            color: var(--color-text-primary);
+        }
+        .positive-header { color: #2e7d32; }
+        .negative-header { color: #c62828; }
+
+        .drivers-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+        .drivers-table th {
+            padding: 8px 10px;
+            text-align: left;
+            font-weight: 600;
+            font-family: var(--font-display);
+            border-bottom: 2px solid #e0e0e0;
+        }
+        .drivers-table th.positive-bg {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        .drivers-table th.negative-bg {
+            background: #ffebee;
+            color: #c62828;
+        }
+        .drivers-table th:first-child {
+            border-radius: 6px 0 0 0;
+        }
+        .drivers-table th:last-child {
+            border-radius: 0 6px 0 0;
+            text-align: right;
+        }
+        .drivers-table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .drivers-table td:last-child {
+            text-align: right;
+            font-weight: 600;
+        }
+        .drivers-table tr:hover td {
+            background: #f5f5f5;
+        }
+        .concept-name {
+            font-weight: 600;
+            text-transform: capitalize;
+        }
+        .product-name {
+            font-size: 10px;
+            color: #666;
+            margin-top: 2px;
+        }
+        .bar-positive {
+            background: #4caf50;
+            height: 8px;
+            border-radius: 4px;
+            margin-top: 4px;
+        }
+        .bar-negative {
+            background: #c62828;
+            height: 8px;
+            border-radius: 4px;
+            margin-top: 4px;
+        }
+
+        .quotes-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-top: 16px;
+        }
+        .quote-box {
+            border-radius: 8px;
+            padding: 16px;
+        }
+        .quote-positive {
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            border-left: 4px solid #4caf50;
+        }
+        .quote-negative {
+            background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+            border-left: 4px solid #c62828;
+        }
+        .quote-label {
+            font-family: var(--font-display);
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+        .quote-positive .quote-label { color: #2e7d32; }
+        .quote-negative .quote-label { color: #c62828; }
+        .quote-text {
+            font-size: 12px;
+            line-height: 1.5;
+            color: #333;
+            font-style: italic;
+        }
+        .quote-source {
+            font-size: 10px;
+            color: #666;
+            margin-top: 8px;
+            font-style: normal;
+        }
+
+        .callout-box {
+            background: linear-gradient(135deg, #f0f7ff 0%, #e8f4fd 100%);
+            border-left: 4px solid var(--color-primary);
+            border-radius: 8px;
+            padding: 14px 18px;
+        }
+        .callout-box .callout-title {
+            font-family: var(--font-display);
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--color-primary);
+            margin-bottom: 6px;
+        }
+        .callout-box .callout-text {
+            font-size: 12px;
+            line-height: 1.5;
+            color: var(--color-text-primary);
+        }
+        .insights-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 16px;
+        }
+        .tracking-note {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-top: 14px;
+        }
+        .tracking-note .note-title {
+            font-family: var(--font-display);
+            font-size: 11px;
+            font-weight: 700;
+            color: #856404;
+            margin-bottom: 4px;
+        }
+        .tracking-note .note-text {
+            font-size: 10px;
+            line-height: 1.4;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <header class="slide-header">
+            <div>
+                <h1>Sentiment Drivers<span class="subtitle">What's Driving Positive & Negative Sentiment</span></h1>
+            </div>
+            <span class="slide-badge">TV AI Visibility | Jan 31, 2026</span>
+        </header>
+
+        <div class="slide-content">
+            <div class="main-grid">
+                <!-- Positive Drivers -->
+                <div class="section-container">
+                    <h3 class="positive-header">Top Positive Sentiment Drivers (Samsung)</h3>
+                    <table class="drivers-table">
+                        <thead>
+                            <tr>
+                                <th class="positive-bg">Concept</th>
+                                <th class="positive-bg">Product</th>
+                                <th class="positive-bg" style="text-align: right;">Count</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <span class="concept-name">Brightness</span>
+                                    <div class="bar-positive" style="width: 100%;"></div>
+                                </td>
+                                <td><span class="product-name">S95F</span></td>
+                                <td>338</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <span class="concept-name">4K Resolution</span>
+                                    <div class="bar-positive" style="width: 40%;"></div>
+                                </td>
+                                <td><span class="product-name">OLED 4K S95F TV</span></td>
+                                <td>136</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <span class="concept-name">Contrast</span>
+                                    <div class="bar-positive" style="width: 40%;"></div>
+                                </td>
+                                <td><span class="product-name">Neo QLED</span></td>
+                                <td>134</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <span class="concept-name">Picture Quality</span>
+                                    <div class="bar-positive" style="width: 36%;"></div>
+                                </td>
+                                <td><span class="product-name">S95F OLED</span></td>
+                                <td>121</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <span class="concept-name">Gaming Features</span>
+                                    <div class="bar-positive" style="width: 33%;"></div>
+                                </td>
+                                <td><span class="product-name">S95F</span></td>
+                                <td>112</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <span class="concept-name">Color Accuracy</span>
+                                    <div class="bar-positive" style="width: 31%;"></div>
+                                </td>
+                                <td><span class="product-name">S95F</span></td>
+                                <td>104</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <span class="concept-name">Motion Handling</span>
+                                    <div class="bar-positive" style="width: 22%;"></div>
+                                </td>
+                                <td><span class="product-name">S95F</span></td>
+                                <td>75</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Negative Drivers -->
+                <div class="section-container">
+                    <h3 class="negative-header">Top Negative Sentiment Drivers (Samsung)</h3>
+                    <table class="drivers-table">
+                        <thead>
+                            <tr>
+                                <th class="negative-bg">Concept</th>
+                                <th class="negative-bg">Product</th>
+                                <th class="negative-bg" style="text-align: right;">Count</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <span class="concept-name">Contrast</span>
+                                    <div class="bar-negative" style="width: 100%;"></div>
+                                </td>
+                                <td><span class="product-name">DU8000</span></td>
+                                <td>22</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <span class="concept-name">Remote Control</span>
+                                    <div class="bar-negative" style="width: 59%;"></div>
+                                </td>
+                                <td><span class="product-name">Crystal UHD</span></td>
+                                <td>13</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <span class="concept-name">Brightness</span>
+                                    <div class="bar-negative" style="width: 41%;"></div>
+                                </td>
+                                <td><span class="product-name">U8000F</span></td>
+                                <td>9</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <span class="concept-name">Price</span>
+                                    <div class="bar-negative" style="width: 41%;"></div>
+                                </td>
+                                <td><span class="product-name">QN990F</span></td>
+                                <td>9</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <span class="concept-name">Input Lag</span>
+                                    <div class="bar-negative" style="width: 36%;"></div>
+                                </td>
+                                <td><span class="product-name">QN990F</span></td>
+                                <td>8</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <span class="concept-name">Dolby Vision Support</span>
+                                    <div class="bar-negative" style="width: 36%;"></div>
+                                </td>
+                                <td><span class="product-name">QN90D</span></td>
+                                <td>8</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <span class="concept-name">Black Levels</span>
+                                    <div class="bar-negative" style="width: 32%;"></div>
+                                </td>
+                                <td><span class="product-name">The Frame / Pro</span></td>
+                                <td>7</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Quote Highlights -->
+            <div class="quotes-section">
+                <div class="quote-box quote-positive">
+                    <div class="quote-label">Positive Quote</div>
+                    <div class="quote-text">
+                        "Samsung S95F (QD-OLED) - Best overall for sports: superb brightness for an OLED,
+                        almost-perfect viewing angles, excellent motion and color, and an anti-glare finish
+                        that helps in bright rooms."
+                    </div>
+                    <div class="quote-source">- AI response about Sports TVs</div>
+                </div>
+                <div class="quote-box quote-negative">
+                    <div class="quote-label">Negative Quote</div>
+                    <div class="quote-text">
+                        "It lacks local dimming and has poor contrast, so blacks look grayish and the image
+                        appears washed out in a dark room."
+                    </div>
+                    <div class="quote-source">- AI response about Crystal UHD DU7200</div>
+                </div>
+            </div>
+
+            <!-- Key Insights -->
+            <div class="insights-row">
+                <div class="callout-box">
+                    <div class="callout-title">Brightness is Samsung's #1 Positive Driver</div>
+                    <div class="callout-text">
+                        <strong>338 mentions</strong> - Samsung's peak brightness and anti-glare technology
+                        are key differentiators driving positive sentiment in AI responses.
+                    </div>
+                </div>
+                <div class="callout-box">
+                    <div class="callout-title">Contrast Appears in Both Positive & Negative</div>
+                    <div class="callout-text">
+                        <strong>134 positive vs 22 negative</strong> mentions. Context matters - Neo QLED praised
+                        in general but criticized when compared to OLED's perfect blacks.
+                    </div>
+                </div>
+                <div class="callout-box">
+                    <div class="callout-title">Remote Control is a Known Pain Point</div>
+                    <div class="callout-text">
+                        <strong>13 negative mentions</strong> specifically about laggy remote control.
+                        Actionable UX feedback for product team to address in future models.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Methodology Note -->
+            <div class="tracking-note">
+                <div class="note-title">Methodology</div>
+                <div class="note-text">
+                    Data from semrush_concept_prompts table. Concepts aggregated by sentiment type for Samsung brand.
+                    Quotes extracted from AI responses. Single day snapshot: January 31, 2026.
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

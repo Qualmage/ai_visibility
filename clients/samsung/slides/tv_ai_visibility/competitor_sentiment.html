@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Competitor Sentiment Drivers | AI Visibility - Samsung TV</title>
+    <link rel="stylesheet" href="../css/slides.css">
+    <style>
+        .brand-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+        .brand-card {
+            background: var(--color-bg-section);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .brand-header {
+            padding: 12px 16px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .brand-header h3 {
+            font-family: var(--font-display);
+            font-size: 16px;
+            font-weight: 700;
+            margin: 0;
+        }
+        .brand-header .sentiment-badge {
+            font-size: 11px;
+            font-weight: 600;
+            background: rgba(255,255,255,0.2);
+            padding: 3px 8px;
+            border-radius: 12px;
+        }
+        .brand-lg .brand-header { background: #A50034; }
+        .brand-sony .brand-header { background: #333333; }
+        .brand-tcl .brand-header { background: #E31937; }
+        .brand-hisense .brand-header { background: #00A0DF; }
+
+        .brand-body {
+            padding: 14px 16px;
+        }
+        .hero-product {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 6px;
+            padding: 10px 12px;
+            margin-bottom: 12px;
+        }
+        .hero-product .label {
+            font-size: 9px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #666;
+            margin-bottom: 2px;
+        }
+        .hero-product .product-name {
+            font-family: var(--font-display);
+            font-size: 13px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .drivers-list {
+            margin-bottom: 12px;
+        }
+        .drivers-list .section-label {
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #2e7d32;
+            margin-bottom: 6px;
+        }
+        .driver-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .driver-row:last-child {
+            border-bottom: none;
+        }
+        .driver-row .concept {
+            font-size: 12px;
+            font-weight: 500;
+            color: #333;
+            text-transform: capitalize;
+        }
+        .driver-row .count {
+            font-family: var(--font-display);
+            font-size: 12px;
+            font-weight: 700;
+            color: #2e7d32;
+        }
+
+        .negative-section {
+            background: #fff5f5;
+            border-radius: 6px;
+            padding: 8px 10px;
+            margin-top: 10px;
+        }
+        .negative-section .section-label {
+            font-size: 9px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #c62828;
+            margin-bottom: 4px;
+        }
+        .negative-section .negative-item {
+            font-size: 11px;
+            color: #666;
+        }
+        .negative-section .negative-item strong {
+            color: #c62828;
+        }
+
+        .differentiator {
+            background: #e8f5e9;
+            border-left: 3px solid #4caf50;
+            border-radius: 0 6px 6px 0;
+            padding: 8px 10px;
+            margin-top: 10px;
+        }
+        .differentiator .label {
+            font-size: 9px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #2e7d32;
+            margin-bottom: 2px;
+        }
+        .differentiator .text {
+            font-size: 11px;
+            color: #333;
+        }
+
+        .callout-box {
+            background: linear-gradient(135deg, #f0f7ff 0%, #e8f4fd 100%);
+            border-left: 4px solid var(--color-primary);
+            border-radius: 8px;
+            padding: 14px 18px;
+        }
+        .callout-box .callout-title {
+            font-family: var(--font-display);
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--color-primary);
+            margin-bottom: 6px;
+        }
+        .callout-box .callout-text {
+            font-size: 12px;
+            line-height: 1.5;
+            color: var(--color-text-primary);
+        }
+        .insights-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 16px;
+        }
+        .tracking-note {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-top: 14px;
+        }
+        .tracking-note .note-title {
+            font-family: var(--font-display);
+            font-size: 11px;
+            font-weight: 700;
+            color: #856404;
+            margin-bottom: 4px;
+        }
+        .tracking-note .note-text {
+            font-size: 10px;
+            line-height: 1.4;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <header class="slide-header">
+            <div>
+                <h1>Competitor Sentiment Drivers<span class="subtitle">What Drives Positive Sentiment for LG, Sony, TCL & Hisense</span></h1>
+            </div>
+            <span class="slide-badge">TV AI Visibility | Jan 31, 2026</span>
+        </header>
+
+        <div class="slide-content">
+            <!-- 4-Column Brand Grid -->
+            <div class="brand-grid">
+                <!-- LG Card -->
+                <div class="brand-card brand-lg">
+                    <div class="brand-header">
+                        <h3>LG</h3>
+                        <span class="sentiment-badge">78.4% Positive</span>
+                    </div>
+                    <div class="brand-body">
+                        <div class="hero-product">
+                            <div class="label">Hero Products</div>
+                            <div class="product-name">C5 OLED / G5 OLED</div>
+                        </div>
+                        <div class="drivers-list">
+                            <div class="section-label">Top Positive Drivers</div>
+                            <div class="driver-row">
+                                <span class="concept">Brightness</span>
+                                <span class="count">88</span>
+                            </div>
+                            <div class="driver-row">
+                                <span class="concept">Picture Quality</span>
+                                <span class="count">84</span>
+                            </div>
+                            <div class="driver-row">
+                                <span class="concept">Gaming Features</span>
+                                <span class="count">84</span>
+                            </div>
+                            <div class="driver-row">
+                                <span class="concept">Contrast</span>
+                                <span class="count">83</span>
+                            </div>
+                        </div>
+                        <div class="differentiator">
+                            <div class="label">Differentiator</div>
+                            <div class="text">OLED technology leadership (67 mentions)</div>
+                        </div>
+                        <div class="negative-section">
+                            <div class="section-label">Top Negative</div>
+                            <div class="negative-item">Motion Smoothing <strong>(3)</strong></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sony Card -->
+                <div class="brand-card brand-sony">
+                    <div class="brand-header">
+                        <h3>Sony</h3>
+                        <span class="sentiment-badge">76.4% Positive</span>
+                    </div>
+                    <div class="brand-body">
+                        <div class="hero-product">
+                            <div class="label">Hero Products</div>
+                            <div class="product-name">Bravia 9 / Bravia 8 II</div>
+                        </div>
+                        <div class="drivers-list">
+                            <div class="section-label">Top Positive Drivers</div>
+                            <div class="driver-row">
+                                <span class="concept">Brightness</span>
+                                <span class="count">63</span>
+                            </div>
+                            <div class="driver-row">
+                                <span class="concept">Contrast</span>
+                                <span class="count">44</span>
+                            </div>
+                            <div class="driver-row">
+                                <span class="concept">Color Accuracy</span>
+                                <span class="count">38</span>
+                            </div>
+                            <div class="driver-row">
+                                <span class="concept">Image Processing</span>
+                                <span class="count">30</span>
+                            </div>
+                        </div>
+                        <div class="differentiator">
+                            <div class="label">Differentiator</div>
+                            <div class="text">Upscaling & Image Processing (unique strengths)</div>
+                        </div>
+                        <div class="negative-section">
+                            <div class="section-label">Top Negative</div>
+                            <div class="negative-item">Motion Smoothing <strong>(2)</strong></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TCL Card -->
+                <div class="brand-card brand-tcl">
+                    <div class="brand-header">
+                        <h3>TCL</h3>
+                        <span class="sentiment-badge">79.5% Positive</span>
+                    </div>
+                    <div class="brand-body">
+                        <div class="hero-product">
+                            <div class="label">Hero Products</div>
+                            <div class="product-name">QM8K / QM6K</div>
+                        </div>
+                        <div class="drivers-list">
+                            <div class="section-label">Top Positive Drivers</div>
+                            <div class="driver-row">
+                                <span class="concept">Brightness</span>
+                                <span class="count">142</span>
+                            </div>
+                            <div class="driver-row">
+                                <span class="concept">Value</span>
+                                <span class="count">91</span>
+                            </div>
+                            <div class="driver-row">
+                                <span class="concept">Mini-LED</span>
+                                <span class="count">77</span>
+                            </div>
+                            <div class="driver-row">
+                                <span class="concept">Contrast</span>
+                                <span class="count">75</span>
+                            </div>
+                        </div>
+                        <div class="differentiator">
+                            <div class="label">Differentiator</div>
+                            <div class="text">Value messaging dominates positioning</div>
+                        </div>
+                        <div class="negative-section">
+                            <div class="section-label">Top Negative</div>
+                            <div class="negative-item">Off-axis Viewing <strong>(1)</strong></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hisense Card -->
+                <div class="brand-card brand-hisense">
+                    <div class="brand-header">
+                        <h3>Hisense</h3>
+                        <span class="sentiment-badge">72.3% Positive</span>
+                    </div>
+                    <div class="brand-body">
+                        <div class="hero-product">
+                            <div class="label">Hero Products</div>
+                            <div class="product-name">U8N / U8 Series</div>
+                        </div>
+                        <div class="drivers-list">
+                            <div class="section-label">Top Positive Drivers</div>
+                            <div class="driver-row">
+                                <span class="concept">Brightness</span>
+                                <span class="count">88</span>
+                            </div>
+                            <div class="driver-row">
+                                <span class="concept">Value</span>
+                                <span class="count">65</span>
+                            </div>
+                            <div class="driver-row">
+                                <span class="concept">Mini-LED</span>
+                                <span class="count">50</span>
+                            </div>
+                            <div class="driver-row">
+                                <span class="concept">Contrast</span>
+                                <span class="count">37</span>
+                            </div>
+                        </div>
+                        <div class="differentiator">
+                            <div class="label">Differentiator</div>
+                            <div class="text">Budget-friendly positioning with premium features</div>
+                        </div>
+                        <div class="negative-section">
+                            <div class="section-label">Top Negative</div>
+                            <div class="negative-item">Viewing Angles <strong>(2)</strong></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Key Insights -->
+            <div class="insights-row">
+                <div class="callout-box">
+                    <div class="callout-title">Brightness is Universal #1 Driver</div>
+                    <div class="callout-text">
+                        All 4 competitors have "brightness" as their top positive driver.
+                        <strong>Samsung leads with 338 mentions</strong> - brightness messaging is working.
+                    </div>
+                </div>
+                <div class="callout-box">
+                    <div class="callout-title">TCL & Hisense Own "Value" Messaging</div>
+                    <div class="callout-text">
+                        "Value" appears in top 5 for TCL (91) and Hisense (65) but
+                        <strong>NOT for LG, Sony, or Samsung</strong>. Budget positioning is effective in AI.
+                    </div>
+                </div>
+                <div class="callout-box">
+                    <div class="callout-title">Sony Differentiates on Processing</div>
+                    <div class="callout-text">
+                        Sony is the only brand with "image processing" and "upscaling" in top 5.
+                        <strong>Samsung can counter with Vision AI messaging.</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Methodology Note -->
+            <div class="tracking-note">
+                <div class="note-title">Methodology</div>
+                <div class="note-text">
+                    Sentiment % from semrush_concept_mentions_by_tag (10 TV categories). Concept drivers from semrush_concept_prompts.
+                    Competitors have fewer negative mentions (67 combined vs Samsung's 134) due to lower overall visibility.
+                    Single day snapshot: January 31, 2026.
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
