@@ -1,0 +1,32 @@
+MINI-LED KEY TAKEAWAYS
+Strategic Recommendations
+
+
+CHALLENGE: Volume Lead, Sentiment Gap
+• Samsung leads mentions but trails sentiment by 9.4 percentage points (70.7% vs 80.1%)
+• Samsung has 16 negatives vs TCL's 3
+• Action: Investigate negative sentiment drivers, especially AI Mode (10 negatives vs TCL's 0)
+
+
+OPPORTUNITY: Counter TCL's Value Positioning
+• TCL has strong value-based messaging
+• AI platforms associate TCL with affordability
+• Action: Develop content highlighting Samsung Mini LED (also known as Neo QLED) premium-value proposition ahead of the 2025 Mini LED TV product launch
+
+
+STRENGTH: Owned Media Driving Citations
+• samsung.com ranks #2 in citations (1,171), ahead of tcl.com (495)
+• 64% from samsung.com/us/ pages
+• Action: Continue investing in samsung.com product content, especially US pages
+
+
+FOCUS: ChatGPT Delivers Best Results
+• ChatGPT shows 77.0% positive with zero negatives
+• Samsung's best platform performance
+• Action: Analyze ChatGPT patterns and apply learnings to other platforms
+
+
+WATCH: TCL is the Primary Threat
+• TCL (27.8%) nearly matches Samsung while LG has only 6.8%
+• TCL owns Mini-LED positioning in AI responses
+• Action: Prioritize TCL competitive intelligence over LG in Mini-LED

@@ -6,109 +6,19 @@
     <title>Mini-LED Key Takeaways | Samsung TV AI Visibility</title>
     <link rel="stylesheet" href="../css/slides.css">
     <style>
-        /* Head-to-Head Comparison Section */
-        .head-to-head {
-            background: var(--color-bg-section);
-            border-radius: 8px;
-            padding: 16px 24px;
-            margin-bottom: 24px;
-        }
-
-        .head-to-head h3 {
-            font-family: var(--font-display);
-            font-size: 16px;
-            font-weight: 700;
-            color: var(--color-text-primary);
-            margin-bottom: 12px;
-            text-align: center;
-        }
-
-        .comparison-row {
-            display: grid;
-            grid-template-columns: 1fr auto 1fr;
-            gap: 24px;
-            align-items: center;
-        }
-
-        .brand-stat {
-            text-align: center;
-            padding: 12px;
-        }
-
-        .brand-stat .brand-name {
-            font-family: var(--font-display);
-            font-size: 18px;
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
-
-        .brand-stat.samsung .brand-name {
-            color: var(--color-samsung);
-        }
-
-        .brand-stat.tcl .brand-name {
-            color: var(--color-tcl);
-        }
-
-        .stat-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 16px;
-            margin-top: 8px;
-        }
-
-        .stat-item {
-            text-align: center;
-        }
-
-        .stat-item .stat-value {
-            font-family: var(--font-display);
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--color-text-primary);
-        }
-
-        .stat-item .stat-value.positive {
-            color: #2e7d32;
-        }
-
-        .stat-item .stat-value.negative {
-            color: #c62828;
-        }
-
-        .stat-item .stat-label {
-            font-size: 11px;
-            color: var(--color-text-secondary);
-            margin-top: 2px;
-        }
-
-        .vs-badge {
-            font-family: var(--font-display);
-            font-size: 16px;
-            font-weight: 700;
-            color: white;
-            background: linear-gradient(135deg, var(--color-samsung) 0%, var(--color-tcl) 100%);
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
         /* Takeaway Cards Grid */
         .takeaways-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 16px;
+            gap: 20px;
         }
 
         .takeaway-card {
             background: white;
-            border-radius: 8px;
-            padding: 16px 20px;
+            border-radius: 10px;
+            padding: 20px 24px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-            border-top: 5px solid;
+            border-top: 6px solid;
         }
 
         .takeaway-card.challenge {
@@ -138,11 +48,11 @@
         }
 
         .card-label {
-            font-size: 10px;
+            font-size: 12px;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 1px;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
         }
 
         .takeaway-card.challenge .card-label {
@@ -167,17 +77,17 @@
 
         .card-title {
             font-family: var(--font-display);
-            font-size: 15px;
+            font-size: 18px;
             font-weight: 700;
             color: var(--color-text-primary);
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
 
         .card-insight {
-            font-size: 13px;
-            line-height: 1.5;
+            font-size: 15px;
+            line-height: 1.6;
             color: var(--color-text-primary);
-            margin-bottom: 12px;
+            margin-bottom: 16px;
         }
 
         .card-insight .highlight {
@@ -187,9 +97,9 @@
         .card-action {
             background: var(--color-bg-section);
             border-radius: 6px;
-            padding: 10px 12px;
-            font-size: 12px;
-            line-height: 1.4;
+            padding: 12px 14px;
+            font-size: 14px;
+            line-height: 1.5;
             color: var(--color-text-secondary);
         }
 
@@ -209,48 +119,6 @@
         </header>
 
         <div class="slide-content">
-            <!-- Head-to-Head Comparison -->
-            <div class="head-to-head">
-                <h3>Samsung vs TCL: Head-to-Head</h3>
-                <div class="comparison-row">
-                    <div class="brand-stat samsung">
-                        <div class="brand-name">Samsung</div>
-                        <div class="stat-grid">
-                            <div class="stat-item">
-                                <div class="stat-value">828</div>
-                                <div class="stat-label">Mentions (28.8%)</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-value">70.7%</div>
-                                <div class="stat-label">Positive</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-value negative">16</div>
-                                <div class="stat-label">Negatives</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="vs-badge">VS</div>
-                    <div class="brand-stat tcl">
-                        <div class="brand-name">TCL</div>
-                        <div class="stat-grid">
-                            <div class="stat-item">
-                                <div class="stat-value">798</div>
-                                <div class="stat-label">Mentions (27.8%)</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-value positive">80.1%</div>
-                                <div class="stat-label">Positive</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-value positive">3</div>
-                                <div class="stat-label">Negatives</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <!-- Takeaway Cards -->
             <div class="takeaways-grid">
                 <!-- Card 1: Challenge -->
@@ -273,7 +141,7 @@
                         TCL has strong value-based messaging. AI platforms associate TCL with affordability.
                     </div>
                     <div class="card-action">
-                        <strong>Action:</strong> Develop content highlighting Samsung Neo QLED's premium-value proposition.
+                        <strong>Action:</strong> Develop content highlighting Samsung Mini LED (also known as Neo QLED) premium-value proposition ahead of the 2025 Mini LED TV product launch.
                     </div>
                 </div>
 
@@ -282,22 +150,22 @@
                     <div class="card-label">Strength</div>
                     <div class="card-title">Owned Media Driving Citations</div>
                     <div class="card-insight">
-                        samsung.com ranks <span class="highlight">#2 in citations (1,155)</span>, ahead of tcl.com (480).
+                        samsung.com ranks <span class="highlight">#2 in citations (1,171)</span>, ahead of tcl.com (495). <span class="highlight">64% from samsung.com/us/</span> pages.
                     </div>
                     <div class="card-action">
-                        <strong>Action:</strong> Continue investing in samsung.com product content.
+                        <strong>Action:</strong> Continue investing in samsung.com product content, especially US pages.
                     </div>
                 </div>
 
                 <!-- Card 4: Focus -->
                 <div class="takeaway-card focus">
                     <div class="card-label">Focus</div>
-                    <div class="card-title">SearchGPT Delivers Best Results</div>
+                    <div class="card-title">ChatGPT Delivers Best Results</div>
                     <div class="card-insight">
-                        SearchGPT shows <span class="highlight">77.0% positive with zero negatives</span> — Samsung's best platform performance.
+                        ChatGPT shows <span class="highlight">77.0% positive with zero negatives</span> — Samsung's best platform performance.
                     </div>
                     <div class="card-action">
-                        <strong>Action:</strong> Analyze SearchGPT patterns and apply learnings to other platforms.
+                        <strong>Action:</strong> Analyze ChatGPT patterns and apply learnings to other platforms.
                     </div>
                 </div>
 

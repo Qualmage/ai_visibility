@@ -8,8 +8,8 @@
     <style>
         .competitor-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
         }
 
         .competitor-card {
@@ -19,36 +19,34 @@
         }
 
         .competitor-header {
-            padding: 16px 20px;
+            padding: 12px 14px;
             color: white;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
         }
 
         .competitor-header h3 {
             font-family: var(--font-display);
-            font-size: 22px;
+            font-size: 20px;
             font-weight: 700;
-            margin: 0;
+            margin: 0 0 6px 0;
         }
 
         .header-stats {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
+            flex-wrap: wrap;
         }
 
         .sentiment-badge {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 700;
             background: rgba(255,255,255,0.25);
-            padding: 6px 14px;
-            border-radius: 14px;
+            padding: 4px 10px;
+            border-radius: 12px;
         }
 
         .mention-count {
-            font-size: 14px;
+            font-size: 13px;
             opacity: 0.9;
         }
 
@@ -59,18 +57,18 @@
         .competitor-lg .competitor-header { background: #A50034; }
 
         .competitor-body {
-            padding: 16px 20px;
+            padding: 12px 14px;
         }
 
         .position-tag {
             display: inline-block;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            padding: 5px 12px;
+            padding: 4px 10px;
             border-radius: 4px;
-            margin-bottom: 14px;
+            margin-bottom: 10px;
         }
 
         .competitor-tcl .position-tag {
@@ -94,23 +92,23 @@
         }
 
         .concepts-section {
-            margin-bottom: 14px;
+            margin-bottom: 10px;
         }
 
         .concepts-section .section-label {
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             color: #2e7d32;
-            margin-bottom: 10px;
+            margin-bottom: 6px;
         }
 
         .concept-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 8px 0;
+            padding: 5px 0;
             border-bottom: 1px solid #eee;
         }
 
@@ -119,7 +117,7 @@
         }
 
         .concept-name {
-            font-size: 15px;
+            font-size: 13px;
             font-weight: 500;
             color: #333;
         }
@@ -127,32 +125,32 @@
         .concept-stats {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 6px;
         }
 
         .concept-count {
             font-family: var(--font-display);
-            font-size: 17px;
+            font-size: 14px;
             font-weight: 700;
             color: #333;
-            min-width: 32px;
+            min-width: 28px;
             text-align: right;
         }
 
         .concept-sentiment {
-            font-size: 14px;
+            font-size: 12px;
             color: #2e7d32;
             background: rgba(46, 125, 50, 0.1);
-            padding: 3px 8px;
-            border-radius: 10px;
+            padding: 2px 6px;
+            border-radius: 8px;
         }
 
         .differentiator-callout {
             background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            border-left: 4px solid;
+            border-left: 3px solid;
             border-radius: 0 6px 6px 0;
-            padding: 12px 14px;
-            margin-top: 14px;
+            padding: 8px 10px;
+            margin-top: 10px;
         }
 
         .competitor-tcl .differentiator-callout { border-color: #E31937; }
@@ -161,16 +159,16 @@
         .competitor-lg .differentiator-callout { border-color: #A50034; }
 
         .differentiator-callout .diff-label {
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             color: #666;
-            margin-bottom: 4px;
+            margin-bottom: 3px;
         }
 
         .differentiator-callout .diff-text {
-            font-size: 15px;
+            font-size: 13px;
             font-weight: 600;
             color: #333;
         }
@@ -178,20 +176,20 @@
         .negative-indicator {
             display: flex;
             align-items: center;
-            gap: 8px;
-            margin-top: 12px;
-            padding: 8px 12px;
+            gap: 6px;
+            margin-top: 8px;
+            padding: 6px 10px;
             background: #fff5f5;
-            border-radius: 6px;
+            border-radius: 4px;
         }
 
         .negative-indicator .neg-label {
-            font-size: 13px;
+            font-size: 11px;
             color: #666;
         }
 
         .negative-indicator .neg-count {
-            font-size: 16px;
+            font-size: 14px;
             font-weight: 700;
             color: #c62828;
         }
@@ -204,15 +202,15 @@
         .insights-row {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
-            margin-top: 16px;
+            gap: 14px;
+            margin-top: 14px;
         }
 
         .insight-box {
             background: linear-gradient(135deg, #f0f7ff 0%, #e8f4fd 100%);
             border-left: 4px solid var(--color-primary);
             border-radius: 8px;
-            padding: 12px 16px;
+            padding: 10px 14px;
         }
 
         .insight-box.warning {
@@ -227,10 +225,10 @@
 
         .insight-box .insight-title {
             font-family: var(--font-display);
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 700;
             color: var(--color-primary);
-            margin-bottom: 6px;
+            margin-bottom: 4px;
         }
 
         .insight-box.warning .insight-title {
@@ -242,8 +240,8 @@
         }
 
         .insight-box .insight-text {
-            font-size: 14px;
-            line-height: 1.5;
+            font-size: 13px;
+            line-height: 1.4;
             color: var(--color-text-primary);
         }
 
