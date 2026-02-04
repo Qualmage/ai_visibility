@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Citation Sources | Mini-LED Deep Dive</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link rel="stylesheet" href="../css/slides.css">
+    <style>
+        .main-grid {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 20px;
+        }
+
+        .donut-container {
+            background: var(--color-bg-section);
+            border-radius: 8px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .donut-container h3 {
+            font-family: var(--font-display);
+            font-size: 16px;
+            margin-bottom: 16px;
+            color: var(--color-text-primary);
+            text-align: center;
+        }
+
+        .donut-legend {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-top: 12px;
+            width: 100%;
+        }
+
+        .legend-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 10px;
+            background: white;
+            border-radius: 6px;
+        }
+
+        .legend-row .brand-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .legend-row .color-swatch {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+        }
+
+        .legend-row .type-name {
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .legend-row .citation-count {
+            font-size: 10px;
+            color: #666;
+        }
+
+        .legend-row .pct-value {
+            font-family: var(--font-display);
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .legend-row .pct-comparison {
+            font-size: 9px;
+            color: #888;
+            margin-top: 2px;
+        }
+
+        .right-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .table-container {
+            background: var(--color-bg-section);
+            border-radius: 8px;
+            padding: 16px 20px;
+        }
+
+        .table-container h3 {
+            font-family: var(--font-display);
+            font-size: 16px;
+            margin-bottom: 12px;
+            color: var(--color-text-primary);
+        }
+
+        .domains-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        .domains-table th {
+            background: var(--color-primary);
+            color: white;
+            padding: 6px 10px;
+            text-align: left;
+            font-weight: 600;
+            font-family: var(--font-display);
+        }
+
+        .domains-table th:first-child {
+            border-radius: 6px 0 0 0;
+            width: 36px;
+            text-align: center;
+        }
+
+        .domains-table th:nth-child(3) {
+            text-align: right;
+            width: 80px;
+        }
+
+        .domains-table th:last-child {
+            border-radius: 0 6px 0 0;
+            width: 90px;
+        }
+
+        .domains-table td {
+            padding: 5px 10px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .domains-table td:first-child {
+            text-align: center;
+            font-weight: 700;
+            color: var(--color-primary);
+        }
+
+        .domains-table td:nth-child(3) {
+            text-align: right;
+            font-weight: 600;
+        }
+
+        .domains-table tr:hover td {
+            background: #f5f5f5;
+        }
+
+        .type-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .type-owned { background: #e3f2fd; color: #1565c0; }
+        .type-earned { background: #e8f5e9; color: #2e7d32; }
+        .type-social { background: #fff3e0; color: #e65100; }
+        .type-competitor { background: #ffebee; color: #c62828; }
+        .type-other { background: #f5f5f5; color: #616161; }
+
+        .comparison-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .brand-citation-card {
+            background: white;
+            border-radius: 8px;
+            padding: 16px 20px;
+            border-top: 4px solid;
+            text-align: center;
+        }
+
+        .brand-citation-card.samsung {
+            border-color: var(--color-samsung);
+        }
+
+        .brand-citation-card.tcl {
+            border-color: var(--color-tcl);
+        }
+
+        .brand-citation-card .brand-name {
+            font-family: var(--font-display);
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .brand-citation-card.samsung .brand-name {
+            color: var(--color-samsung);
+        }
+
+        .brand-citation-card.tcl .brand-name {
+            color: var(--color-tcl);
+        }
+
+        .brand-citation-card .citation-value {
+            font-family: var(--font-display);
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--color-text-primary);
+        }
+
+        .brand-citation-card .citation-label {
+            font-size: 12px;
+            color: var(--color-text-secondary);
+            margin-top: 4px;
+        }
+
+        .brand-citation-card .lead-badge {
+            display: inline-block;
+            background: #e8f5e9;
+            color: #2e7d32;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 12px;
+            margin-top: 8px;
+        }
+
+        .insights-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .callout-box {
+            background: linear-gradient(135deg, #f0f7ff 0%, #e8f4fd 100%);
+            border-left: 4px solid var(--color-primary);
+            border-radius: 8px;
+            padding: 14px 18px;
+        }
+
+        .callout-box .callout-title {
+            font-family: var(--font-display);
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--color-primary);
+            margin-bottom: 6px;
+        }
+
+        .callout-box .callout-text {
+            font-size: 12px;
+            line-height: 1.5;
+            color: var(--color-text-primary);
+        }
+
+        .callout-box .callout-text strong {
+            color: var(--color-primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <header class="slide-header">
+            <div>
+                <h1>Citation Sources<span class="subtitle">Domain Type Analysis</span></h1>
+            </div>
+            <span class="slide-badge">Mini-LED Deep Dive | Jan 31, 2026</span>
+        </header>
+
+        <div class="slide-content">
+            <div class="main-grid">
+                <!-- Donut Chart -->
+                <div class="donut-container">
+                    <h3>Citations by Domain Type</h3>
+                    <div id="donut-chart"></div>
+                    <div class="donut-legend">
+                        <div class="legend-row">
+                            <div class="brand-info">
+                                <div class="color-swatch" style="background: #757575;"></div>
+                                <div>
+                                    <span class="type-name">Other</span>
+                                    <div class="citation-count">9,551 citations</div>
+                                </div>
+                            </div>
+                            <div style="text-align: right;">
+                                <span class="pct-value" style="color: #757575;">57.3%</span>
+                                <div class="pct-comparison">vs 58.4% overall</div>
+                            </div>
+                        </div>
+                        <div class="legend-row">
+                            <div class="brand-info">
+                                <div class="color-swatch" style="background: #4caf50;"></div>
+                                <div>
+                                    <span class="type-name">Earned</span>
+                                    <div class="citation-count">3,820 citations</div>
+                                </div>
+                            </div>
+                            <div style="text-align: right;">
+                                <span class="pct-value" style="color: #4caf50;">22.9%</span>
+                                <div class="pct-comparison">vs 20.8% overall</div>
+                            </div>
+                        </div>
+                        <div class="legend-row">
+                            <div class="brand-info">
+                                <div class="color-swatch" style="background: #ff9800;"></div>
+                                <div>
+                                    <span class="type-name">Social</span>
+                                    <div class="citation-count">1,347 citations</div>
+                                </div>
+                            </div>
+                            <div style="text-align: right;">
+                                <span class="pct-value" style="color: #ff9800;">8.1%</span>
+                                <div class="pct-comparison">vs 8.2% overall</div>
+                            </div>
+                        </div>
+                        <div class="legend-row">
+                            <div class="brand-info">
+                                <div class="color-swatch" style="background: #1428A0;"></div>
+                                <div>
+                                    <span class="type-name">Owned</span>
+                                    <div class="citation-count">1,171 citations</div>
+                                </div>
+                            </div>
+                            <div style="text-align: right;">
+                                <span class="pct-value" style="color: #1428A0;">7.0%</span>
+                                <div class="pct-comparison">vs 7.5% overall</div>
+                            </div>
+                        </div>
+                        <div class="legend-row">
+                            <div class="brand-info">
+                                <div class="color-swatch" style="background: #c62828;"></div>
+                                <div>
+                                    <span class="type-name">Competitors</span>
+                                    <div class="citation-count">787 citations</div>
+                                </div>
+                            </div>
+                            <div style="text-align: right;">
+                                <span class="pct-value" style="color: #c62828;">4.7%</span>
+                                <div class="pct-comparison">vs 5.3% overall</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Panel -->
+                <div class="right-panel">
+                    <!-- Top Domains Table -->
+                    <div class="table-container">
+                        <h3>Top 10 Cited Domains</h3>
+                        <table class="domains-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Domain</th>
+                                    <th>Citations</th>
+                                    <th>Type</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>1</td>
+                                    <td>rtings.com</td>
+                                    <td>1,323</td>
+                                    <td><span class="type-badge type-other">Other</span></td>
+                                </tr>
+                                <tr>
+                                    <td>2</td>
+                                    <td>samsung.com</td>
+                                    <td>1,155</td>
+                                    <td><span class="type-badge type-owned">Owned</span></td>
+                                </tr>
+                                <tr>
+                                    <td>3</td>
+                                    <td>techradar.com</td>
+                                    <td>1,022</td>
+                                    <td><span class="type-badge type-earned">Earned</span></td>
+                                </tr>
+                                <tr>
+                                    <td>4</td>
+                                    <td>youtube.com</td>
+                                    <td>780</td>
+                                    <td><span class="type-badge type-social">Social</span></td>
+                                </tr>
+                                <tr>
+                                    <td>5</td>
+                                    <td>tomsguide.com</td>
+                                    <td>630</td>
+                                    <td><span class="type-badge type-earned">Earned</span></td>
+                                </tr>
+                                <tr>
+                                    <td>6</td>
+                                    <td>tcl.com</td>
+                                    <td>480</td>
+                                    <td><span class="type-badge type-competitor">Competitor</span></td>
+                                </tr>
+                                <tr>
+                                    <td>7</td>
+                                    <td>reddit.com</td>
+                                    <td>461</td>
+                                    <td><span class="type-badge type-social">Social</span></td>
+                                </tr>
+                                <tr>
+                                    <td>8</td>
+                                    <td>cnet.com</td>
+                                    <td>423</td>
+                                    <td><span class="type-badge type-earned">Earned</span></td>
+                                </tr>
+                                <tr>
+                                    <td>9</td>
+                                    <td>cramptonandmoore.co.uk</td>
+                                    <td>404</td>
+                                    <td><span class="type-badge type-other">Other</span></td>
+                                </tr>
+                                <tr>
+                                    <td>10</td>
+                                    <td>tech.yahoo.com</td>
+                                    <td>320</td>
+                                    <td><span class="type-badge type-earned">Earned</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Samsung vs TCL Citation Comparison -->
+                    <div class="comparison-cards">
+                        <div class="brand-citation-card samsung">
+                            <div class="brand-name">Samsung</div>
+                            <div class="citation-value">1,171</div>
+                            <div class="citation-label">Owned Citations</div>
+                            <div style="font-size: 12px; color: var(--color-samsung); font-weight: 600; margin-top: 6px;">64% from samsung.com/us/</div>
+                            <div class="lead-badge">2.4x Lead</div>
+                        </div>
+                        <div class="brand-citation-card tcl">
+                            <div class="brand-name">TCL</div>
+                            <div class="citation-value">495</div>
+                            <div class="citation-label">Owned Citations</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Key Insights -->
+            <div class="insights-row">
+                <div class="callout-box">
+                    <div class="callout-title">Rtings.com Dominates Citations</div>
+                    <div class="callout-text">
+                        <strong>1,323 citations</strong> - the #1 source, beating even Samsung.com. Independent review sites carry significant weight in AI responses about Mini-LED TVs.
+                    </div>
+                </div>
+                <div class="callout-box">
+                    <div class="callout-title">Samsung Owns the Owned Media Lead</div>
+                    <div class="callout-text">
+                        Samsung.com citations (<strong>1,155</strong>) are <strong>2.4x higher</strong> than TCL.com (480). Strong product page optimization is paying off.
+                    </div>
+                </div>
+                <div class="callout-box">
+                    <div class="callout-title">Earned Media is Critical</div>
+                    <div class="callout-text">
+                        TechRadar (1,022) + TomsGuide (630) + CNET (423) = <strong>2,075 citations</strong>. Tech media relationships directly impact Mini-LED visibility.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Domain type data (verified)
+        const domainTypeData = [
+            { type: 'Other', value: 9551, color: '#757575' },
+            { type: 'Earned', value: 3820, color: '#4caf50' },
+            { type: 'Social', value: 1347, color: '#ff9800' },
+            { type: 'Owned', value: 1171, color: '#1428A0' },
+            { type: 'Competitors', value: 787, color: '#c62828' }
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderDonutChart();
+        });
+
+        function renderDonutChart() {
+            const width = 220;
+            const height = 220;
+            const radius = Math.min(width, height) / 2;
+            const innerRadius = radius * 0.55;
+
+            const svg = d3.select('#donut-chart')
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height)
+                .append('g')
+                .attr('transform', `translate(${width / 2}, ${height / 2})`);
+
+            const pie = d3.pie()
+                .value(d => d.value)
+                .sort(null);
+
+            const arc = d3.arc()
+                .innerRadius(innerRadius)
+                .outerRadius(radius - 10);
+
+            const arcs = svg.selectAll('arc')
+                .data(pie(domainTypeData))
+                .enter()
+                .append('g');
+
+            arcs.append('path')
+                .attr('d', arc)
+                .attr('fill', d => d.data.color)
+                .attr('stroke', 'white')
+                .attr('stroke-width', 2)
+                .style('opacity', 0.9);
+
+            // Center text - total citations
+            svg.append('text')
+                .attr('text-anchor', 'middle')
+                .attr('dy', '-0.1em')
+                .style('font-family', 'Samsung Sharp Sans, sans-serif')
+                .style('font-size', '22px')
+                .style('font-weight', '700')
+                .style('fill', '#333')
+                .text('16,676');
+
+            svg.append('text')
+                .attr('text-anchor', 'middle')
+                .attr('dy', '1.3em')
+                .style('font-family', 'Samsung One, sans-serif')
+                .style('font-size', '11px')
+                .style('fill', '#666')
+                .text('Total Citations');
+        }
+    </script>
+</body>
+</html>

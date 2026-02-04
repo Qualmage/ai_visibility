@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini-LED Competitor Deep Dive | Samsung TV AI Visibility</title>
+    <link rel="stylesheet" href="../css/slides.css">
+    <style>
+        .competitor-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .competitor-card {
+            background: var(--color-bg-section);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .competitor-header {
+            padding: 16px 20px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .competitor-header h3 {
+            font-family: var(--font-display);
+            font-size: 22px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .header-stats {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .sentiment-badge {
+            font-size: 16px;
+            font-weight: 700;
+            background: rgba(255,255,255,0.25);
+            padding: 6px 14px;
+            border-radius: 14px;
+        }
+
+        .mention-count {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        /* Brand-specific header colors */
+        .competitor-tcl .competitor-header { background: #E31937; }
+        .competitor-sony .competitor-header { background: #333333; }
+        .competitor-hisense .competitor-header { background: #00A0DF; }
+        .competitor-lg .competitor-header { background: #A50034; }
+
+        .competitor-body {
+            padding: 16px 20px;
+        }
+
+        .position-tag {
+            display: inline-block;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 5px 12px;
+            border-radius: 4px;
+            margin-bottom: 14px;
+        }
+
+        .competitor-tcl .position-tag {
+            background: rgba(227, 25, 55, 0.1);
+            color: #E31937;
+        }
+
+        .competitor-sony .position-tag {
+            background: rgba(0, 0, 0, 0.08);
+            color: #333;
+        }
+
+        .competitor-hisense .position-tag {
+            background: rgba(0, 160, 223, 0.1);
+            color: #0088bb;
+        }
+
+        .competitor-lg .position-tag {
+            background: rgba(165, 0, 52, 0.1);
+            color: #A50034;
+        }
+
+        .concepts-section {
+            margin-bottom: 14px;
+        }
+
+        .concepts-section .section-label {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #2e7d32;
+            margin-bottom: 10px;
+        }
+
+        .concept-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .concept-row:last-child {
+            border-bottom: none;
+        }
+
+        .concept-name {
+            font-size: 15px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .concept-stats {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .concept-count {
+            font-family: var(--font-display);
+            font-size: 17px;
+            font-weight: 700;
+            color: #333;
+            min-width: 32px;
+            text-align: right;
+        }
+
+        .concept-sentiment {
+            font-size: 14px;
+            color: #2e7d32;
+            background: rgba(46, 125, 50, 0.1);
+            padding: 3px 8px;
+            border-radius: 10px;
+        }
+
+        .differentiator-callout {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-left: 4px solid;
+            border-radius: 0 6px 6px 0;
+            padding: 12px 14px;
+            margin-top: 14px;
+        }
+
+        .competitor-tcl .differentiator-callout { border-color: #E31937; }
+        .competitor-sony .differentiator-callout { border-color: #333; }
+        .competitor-hisense .differentiator-callout { border-color: #00A0DF; }
+        .competitor-lg .differentiator-callout { border-color: #A50034; }
+
+        .differentiator-callout .diff-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+
+        .differentiator-callout .diff-text {
+            font-size: 15px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .negative-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 12px;
+            padding: 8px 12px;
+            background: #fff5f5;
+            border-radius: 6px;
+        }
+
+        .negative-indicator .neg-label {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .negative-indicator .neg-count {
+            font-size: 16px;
+            font-weight: 700;
+            color: #c62828;
+        }
+
+        .negative-indicator .neg-count.zero {
+            color: #2e7d32;
+        }
+
+        /* Insights section */
+        .insights-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .insight-box {
+            background: linear-gradient(135deg, #f0f7ff 0%, #e8f4fd 100%);
+            border-left: 4px solid var(--color-primary);
+            border-radius: 8px;
+            padding: 12px 16px;
+        }
+
+        .insight-box.warning {
+            background: linear-gradient(135deg, #fff8e6 0%, #fff3cd 100%);
+            border-color: #f5a623;
+        }
+
+        .insight-box.opportunity {
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            border-color: #4caf50;
+        }
+
+        .insight-box .insight-title {
+            font-family: var(--font-display);
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--color-primary);
+            margin-bottom: 6px;
+        }
+
+        .insight-box.warning .insight-title {
+            color: #8b6914;
+        }
+
+        .insight-box.opportunity .insight-title {
+            color: #2e7d32;
+        }
+
+        .insight-box .insight-text {
+            font-size: 14px;
+            line-height: 1.5;
+            color: var(--color-text-primary);
+        }
+
+        .insight-box .highlight {
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <header class="slide-header">
+            <div>
+                <h1>Mini-LED Competitor Deep Dive<span class="subtitle">What Drives Positive Sentiment for TCL, Sony, Hisense & LG</span></h1>
+            </div>
+            <span class="slide-badge">Mini-LED Deep Dive | Jan 31, 2026</span>
+        </header>
+
+        <div class="slide-content">
+            <!-- 2x2 Competitor Grid -->
+            <div class="competitor-grid">
+                <!-- TCL Card -->
+                <div class="competitor-card competitor-tcl">
+                    <div class="competitor-header">
+                        <h3>TCL</h3>
+                        <div class="header-stats">
+                            <span class="mention-count">798 mentions</span>
+                            <span class="sentiment-badge">80.1% Positive</span>
+                        </div>
+                    </div>
+                    <div class="competitor-body">
+                        <span class="position-tag">Mini-LED Leader</span>
+                        <div class="concepts-section">
+                            <div class="section-label">Top Positive Drivers</div>
+                            <div class="concept-row">
+                                <span class="concept-name">Picture Quality</span>
+                                <div class="concept-stats">
+                                    <span class="concept-count">121</span>
+                                    <span class="concept-sentiment">84.3%</span>
+                                </div>
+                            </div>
+                            <div class="concept-row">
+                                <span class="concept-name">Brightness & HDR</span>
+                                <div class="concept-stats">
+                                    <span class="concept-count">62</span>
+                                    <span class="concept-sentiment">85.5%</span>
+                                </div>
+                            </div>
+                            <div class="concept-row">
+                                <span class="concept-name">Motion & Gaming</span>
+                                <div class="concept-stats">
+                                    <span class="concept-count">38</span>
+                                    <span class="concept-sentiment">89.5%</span>
+                                </div>
+                            </div>
+                            <div class="concept-row">
+                                <span class="concept-name">Value Positioning</span>
+                                <div class="concept-stats">
+                                    <span class="concept-count">38</span>
+                                    <span class="concept-sentiment">76.3%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="differentiator-callout">
+                            <div class="diff-label">Differentiator</div>
+                            <div class="diff-text">"Value + Gaming" messaging drives perception</div>
+                        </div>
+                        <div class="negative-indicator">
+                            <span class="neg-label">Negative Mentions:</span>
+                            <span class="neg-count">3</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sony Card -->
+                <div class="competitor-card competitor-sony">
+                    <div class="competitor-header">
+                        <h3>Sony</h3>
+                        <div class="header-stats">
+                            <span class="mention-count">567 mentions</span>
+                            <span class="sentiment-badge">77.6% Positive</span>
+                        </div>
+                    </div>
+                    <div class="competitor-body">
+                        <span class="position-tag">Processing Premium</span>
+                        <div class="concepts-section">
+                            <div class="section-label">Top Positive Drivers</div>
+                            <div class="concept-row">
+                                <span class="concept-name">Picture Quality</span>
+                                <div class="concept-stats">
+                                    <span class="concept-count">100</span>
+                                    <span class="concept-sentiment">85.0%</span>
+                                </div>
+                            </div>
+                            <div class="concept-row">
+                                <span class="concept-name">Brightness & HDR</span>
+                                <div class="concept-stats">
+                                    <span class="concept-count">50</span>
+                                    <span class="concept-sentiment">86.0%</span>
+                                </div>
+                            </div>
+                            <div class="concept-row">
+                                <span class="concept-name">Contrast & Black</span>
+                                <div class="concept-stats">
+                                    <span class="concept-count">33</span>
+                                    <span class="concept-sentiment">84.8%</span>
+                                </div>
+                            </div>
+                            <div class="concept-row">
+                                <span class="concept-name">Processing/Upscaling</span>
+                                <div class="concept-stats">
+                                    <span class="concept-count">12</span>
+                                    <span class="concept-sentiment">91.7%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="differentiator-callout">
+                            <div class="diff-label">Differentiator</div>
+                            <div class="diff-text">Cognitive XR processing strength</div>
+                        </div>
+                        <div class="negative-indicator">
+                            <span class="neg-label">Negative Mentions:</span>
+                            <span class="neg-count zero">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hisense Card -->
+                <div class="competitor-card competitor-hisense">
+                    <div class="competitor-header">
+                        <h3>Hisense</h3>
+                        <div class="header-stats">
+                            <span class="mention-count">487 mentions</span>
+                            <span class="sentiment-badge">73.7% Positive</span>
+                        </div>
+                    </div>
+                    <div class="competitor-body">
+                        <span class="position-tag">Budget Disruptor</span>
+                        <div class="concepts-section">
+                            <div class="section-label">Top Positive Drivers</div>
+                            <div class="concept-row">
+                                <span class="concept-name">Picture Quality</span>
+                                <div class="concept-stats">
+                                    <span class="concept-count">79</span>
+                                    <span class="concept-sentiment">78.5%</span>
+                                </div>
+                            </div>
+                            <div class="concept-row">
+                                <span class="concept-name">Brightness & HDR</span>
+                                <div class="concept-stats">
+                                    <span class="concept-count">46</span>
+                                    <span class="concept-sentiment">78.3%</span>
+                                </div>
+                            </div>
+                            <div class="concept-row">
+                                <span class="concept-name">Display Tech</span>
+                                <div class="concept-stats">
+                                    <span class="concept-count">37</span>
+                                    <span class="concept-sentiment">67.6%</span>
+                                </div>
+                            </div>
+                            <div class="concept-row">
+                                <span class="concept-name">Value Positioning</span>
+                                <div class="concept-stats">
+                                    <span class="concept-count">26</span>
+                                    <span class="concept-sentiment">69.2%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="differentiator-callout">
+                            <div class="diff-label">Differentiator</div>
+                            <div class="diff-text">Budget Mini-LED with premium features</div>
+                        </div>
+                        <div class="negative-indicator">
+                            <span class="neg-label">Negative Mentions:</span>
+                            <span class="neg-count">6</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- LG Card -->
+                <div class="competitor-card competitor-lg">
+                    <div class="competitor-header">
+                        <h3>LG</h3>
+                        <div class="header-stats">
+                            <span class="mention-count">195 mentions</span>
+                            <span class="sentiment-badge">65.1% Positive</span>
+                        </div>
+                    </div>
+                    <div class="competitor-body">
+                        <span class="position-tag">OLED-First Strategy</span>
+                        <div class="concepts-section">
+                            <div class="section-label">Top Positive Drivers</div>
+                            <div class="concept-row">
+                                <span class="concept-name">Display Tech</span>
+                                <div class="concept-stats">
+                                    <span class="concept-count">27</span>
+                                    <span class="concept-sentiment">51.9%</span>
+                                </div>
+                            </div>
+                            <div class="concept-row">
+                                <span class="concept-name">Picture Quality</span>
+                                <div class="concept-stats">
+                                    <span class="concept-count">24</span>
+                                    <span class="concept-sentiment">79.2%</span>
+                                </div>
+                            </div>
+                            <div class="concept-row">
+                                <span class="concept-name">OLED</span>
+                                <div class="concept-stats">
+                                    <span class="concept-count">13</span>
+                                    <span class="concept-sentiment">76.9%</span>
+                                </div>
+                            </div>
+                            <div class="concept-row">
+                                <span class="concept-name">Mini-LED</span>
+                                <div class="concept-stats">
+                                    <span class="concept-count">8</span>
+                                    <span class="concept-sentiment">37.5%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="differentiator-callout">
+                            <div class="diff-label">Differentiator</div>
+                            <div class="diff-text">OLED focus leaves Mini-LED weak</div>
+                        </div>
+                        <div class="negative-indicator">
+                            <span class="neg-label">Negative Mentions:</span>
+                            <span class="neg-count zero">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Key Insights -->
+            <div class="insights-row">
+                <div class="insight-box warning">
+                    <div class="insight-title">TCL Owns Gaming Narrative</div>
+                    <div class="insight-text">
+                        TCL's <span class="highlight">89.5% gaming sentiment</span> beats all competitors.
+                        Their "Value + Gaming" message resonates with AI models recommending budget gaming TVs.
+                    </div>
+                </div>
+                <div class="insight-box">
+                    <div class="insight-title">Sony's Processing Edge</div>
+                    <div class="insight-text">
+                        Sony achieves <span class="highlight">91.7% sentiment on processing</span> - the highest single-concept score.
+                        Cognitive XR chip narrative is working in AI responses.
+                    </div>
+                </div>
+                <div class="insight-box opportunity">
+                    <div class="insight-title">LG Vulnerability in Mini-LED</div>
+                    <div class="insight-text">
+                        LG's Mini-LED sentiment is just <span class="highlight">37.5%</span> - their OLED focus creates a gap Samsung can exploit with Neo QLED messaging.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

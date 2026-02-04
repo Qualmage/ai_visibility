@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini-LED Key Takeaways | Samsung TV AI Visibility</title>
+    <link rel="stylesheet" href="../css/slides.css">
+    <style>
+        /* Head-to-Head Comparison Section */
+        .head-to-head {
+            background: var(--color-bg-section);
+            border-radius: 8px;
+            padding: 16px 24px;
+            margin-bottom: 24px;
+        }
+
+        .head-to-head h3 {
+            font-family: var(--font-display);
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--color-text-primary);
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        .comparison-row {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 24px;
+            align-items: center;
+        }
+
+        .brand-stat {
+            text-align: center;
+            padding: 12px;
+        }
+
+        .brand-stat .brand-name {
+            font-family: var(--font-display);
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .brand-stat.samsung .brand-name {
+            color: var(--color-samsung);
+        }
+
+        .brand-stat.tcl .brand-name {
+            color: var(--color-tcl);
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px;
+            margin-top: 8px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-item .stat-value {
+            font-family: var(--font-display);
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--color-text-primary);
+        }
+
+        .stat-item .stat-value.positive {
+            color: #2e7d32;
+        }
+
+        .stat-item .stat-value.negative {
+            color: #c62828;
+        }
+
+        .stat-item .stat-label {
+            font-size: 11px;
+            color: var(--color-text-secondary);
+            margin-top: 2px;
+        }
+
+        .vs-badge {
+            font-family: var(--font-display);
+            font-size: 16px;
+            font-weight: 700;
+            color: white;
+            background: linear-gradient(135deg, var(--color-samsung) 0%, var(--color-tcl) 100%);
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Takeaway Cards Grid */
+        .takeaways-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .takeaway-card {
+            background: white;
+            border-radius: 8px;
+            padding: 16px 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            border-top: 5px solid;
+        }
+
+        .takeaway-card.challenge {
+            border-color: #c62828;
+        }
+
+        .takeaway-card.opportunity {
+            border-color: #2e7d32;
+        }
+
+        .takeaway-card.strength {
+            border-color: var(--color-samsung);
+        }
+
+        .takeaway-card.focus {
+            border-color: #00838f;
+        }
+
+        .takeaway-card.watch {
+            border-color: #ef6c00;
+        }
+
+        .takeaway-card.centered {
+            grid-column: 1 / -1;
+            max-width: 50%;
+            justify-self: center;
+        }
+
+        .card-label {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+        }
+
+        .takeaway-card.challenge .card-label {
+            color: #c62828;
+        }
+
+        .takeaway-card.opportunity .card-label {
+            color: #2e7d32;
+        }
+
+        .takeaway-card.strength .card-label {
+            color: var(--color-samsung);
+        }
+
+        .takeaway-card.focus .card-label {
+            color: #00838f;
+        }
+
+        .takeaway-card.watch .card-label {
+            color: #ef6c00;
+        }
+
+        .card-title {
+            font-family: var(--font-display);
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--color-text-primary);
+            margin-bottom: 10px;
+        }
+
+        .card-insight {
+            font-size: 13px;
+            line-height: 1.5;
+            color: var(--color-text-primary);
+            margin-bottom: 12px;
+        }
+
+        .card-insight .highlight {
+            font-weight: 600;
+        }
+
+        .card-action {
+            background: var(--color-bg-section);
+            border-radius: 6px;
+            padding: 10px 12px;
+            font-size: 12px;
+            line-height: 1.4;
+            color: var(--color-text-secondary);
+        }
+
+        .card-action strong {
+            color: var(--color-text-primary);
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <header class="slide-header">
+            <div>
+                <h1>Mini-LED Key Takeaways<span class="subtitle">Strategic Recommendations</span></h1>
+            </div>
+            <span class="slide-badge">Mini-LED Deep Dive | Jan 31, 2026</span>
+        </header>
+
+        <div class="slide-content">
+            <!-- Head-to-Head Comparison -->
+            <div class="head-to-head">
+                <h3>Samsung vs TCL: Head-to-Head</h3>
+                <div class="comparison-row">
+                    <div class="brand-stat samsung">
+                        <div class="brand-name">Samsung</div>
+                        <div class="stat-grid">
+                            <div class="stat-item">
+                                <div class="stat-value">828</div>
+                                <div class="stat-label">Mentions (28.8%)</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">70.7%</div>
+                                <div class="stat-label">Positive</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value negative">16</div>
+                                <div class="stat-label">Negatives</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="vs-badge">VS</div>
+                    <div class="brand-stat tcl">
+                        <div class="brand-name">TCL</div>
+                        <div class="stat-grid">
+                            <div class="stat-item">
+                                <div class="stat-value">798</div>
+                                <div class="stat-label">Mentions (27.8%)</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value positive">80.1%</div>
+                                <div class="stat-label">Positive</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value positive">3</div>
+                                <div class="stat-label">Negatives</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Takeaway Cards -->
+            <div class="takeaways-grid">
+                <!-- Card 1: Challenge -->
+                <div class="takeaway-card challenge">
+                    <div class="card-label">Challenge</div>
+                    <div class="card-title">Volume Lead, Sentiment Gap</div>
+                    <div class="card-insight">
+                        Samsung leads mentions but trails sentiment by <span class="highlight">9.4 percentage points</span> (70.7% vs 80.1%). Samsung has <span class="highlight">16 negatives</span> vs TCL's 3.
+                    </div>
+                    <div class="card-action">
+                        <strong>Action:</strong> Investigate negative sentiment drivers, especially AI Mode (10 negatives vs TCL's 0).
+                    </div>
+                </div>
+
+                <!-- Card 2: Opportunity -->
+                <div class="takeaway-card opportunity">
+                    <div class="card-label">Opportunity</div>
+                    <div class="card-title">Counter TCL's Value Positioning</div>
+                    <div class="card-insight">
+                        TCL has strong value-based messaging. AI platforms associate TCL with affordability.
+                    </div>
+                    <div class="card-action">
+                        <strong>Action:</strong> Develop content highlighting Samsung Neo QLED's premium-value proposition.
+                    </div>
+                </div>
+
+                <!-- Card 3: Strength -->
+                <div class="takeaway-card strength">
+                    <div class="card-label">Strength</div>
+                    <div class="card-title">Owned Media Driving Citations</div>
+                    <div class="card-insight">
+                        samsung.com ranks <span class="highlight">#2 in citations (1,155)</span>, ahead of tcl.com (480).
+                    </div>
+                    <div class="card-action">
+                        <strong>Action:</strong> Continue investing in samsung.com product content.
+                    </div>
+                </div>
+
+                <!-- Card 4: Focus -->
+                <div class="takeaway-card focus">
+                    <div class="card-label">Focus</div>
+                    <div class="card-title">SearchGPT Delivers Best Results</div>
+                    <div class="card-insight">
+                        SearchGPT shows <span class="highlight">77.0% positive with zero negatives</span> — Samsung's best platform performance.
+                    </div>
+                    <div class="card-action">
+                        <strong>Action:</strong> Analyze SearchGPT patterns and apply learnings to other platforms.
+                    </div>
+                </div>
+
+                <!-- Card 5: Watch (Centered) -->
+                <div class="takeaway-card watch centered">
+                    <div class="card-label">Watch</div>
+                    <div class="card-title">TCL is the Primary Threat</div>
+                    <div class="card-insight">
+                        TCL (27.8%) nearly matches Samsung while LG has only <span class="highlight">6.8%</span>. TCL owns Mini-LED positioning in AI responses.
+                    </div>
+                    <div class="card-action">
+                        <strong>Action:</strong> Prioritize TCL competitive intelligence over LG in Mini-LED.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

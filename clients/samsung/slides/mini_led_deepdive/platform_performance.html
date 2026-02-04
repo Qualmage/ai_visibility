@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini-LED Platform Performance | Samsung vs TCL</title>
+    <link rel="stylesheet" href="../css/slides.css">
+    <style>
+        .platform-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-top: 16px;
+        }
+
+        .platform-card {
+            background: var(--color-bg-section);
+            border-radius: 12px;
+            padding: 20px 24px;
+            border-top: 5px solid;
+        }
+
+        .platform-card.ai-overview {
+            border-color: var(--color-ai-overview);
+        }
+
+        .platform-card.ai-mode {
+            border-color: var(--color-ai-mode);
+        }
+
+        .platform-card.searchgpt {
+            border-color: var(--color-searchgpt);
+        }
+
+        .platform-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .platform-name {
+            font-family: var(--font-display);
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--color-text-primary);
+        }
+
+        .platform-card.ai-overview .platform-name { color: var(--color-ai-overview); }
+        .platform-card.ai-mode .platform-name { color: #d99b30; }
+        .platform-card.searchgpt .platform-name { color: var(--color-searchgpt); }
+
+        .platform-tag {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 12px;
+            background: rgba(0,0,0,0.06);
+            color: var(--color-text-secondary);
+        }
+
+        .brand-comparison {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .brand-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        }
+
+        .brand-row.samsung {
+            border-left: 4px solid var(--color-samsung);
+        }
+
+        .brand-row.tcl {
+            border-left: 4px solid var(--color-tcl);
+        }
+
+        .brand-label {
+            font-family: var(--font-display);
+            font-size: 14px;
+            font-weight: 700;
+            width: 70px;
+            flex-shrink: 0;
+        }
+
+        .brand-row.samsung .brand-label { color: var(--color-samsung); }
+        .brand-row.tcl .brand-label { color: var(--color-tcl); }
+
+        .brand-stats {
+            flex: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .mentions-count {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--color-text-primary);
+        }
+
+        .sentiment-pct {
+            font-family: var(--font-display);
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .brand-row.samsung .sentiment-pct {
+            color: var(--color-text-secondary);
+        }
+
+        .brand-row.tcl .sentiment-pct {
+            color: var(--color-positive);
+        }
+
+        .winner-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--color-positive);
+            background: rgba(150, 213, 81, 0.15);
+            padding: 3px 8px;
+            border-radius: 10px;
+            margin-left: 8px;
+        }
+
+        .winner-badge::before {
+            content: '\2713';
+            font-weight: 900;
+        }
+
+        .negative-count {
+            font-size: 12px;
+            color: var(--color-text-secondary);
+            margin-top: 4px;
+        }
+
+        .negative-count.has-negatives {
+            color: var(--color-negative);
+        }
+
+        .sentiment-bar-mini {
+            width: 100%;
+            height: 6px;
+            background: #e0e0e0;
+            border-radius: 3px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+
+        .sentiment-bar-mini .fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        .brand-row.samsung .sentiment-bar-mini .fill {
+            background: var(--color-samsung);
+        }
+
+        .brand-row.tcl .sentiment-bar-mini .fill {
+            background: var(--color-tcl);
+        }
+
+        .insight-banner {
+            background: linear-gradient(135deg, #fef3f3 0%, #fee8e8 100%);
+            border-left: 5px solid var(--color-tcl);
+            border-radius: 8px;
+            padding: 20px 28px;
+            margin-top: 24px;
+        }
+
+        .insight-banner .insight-title {
+            font-family: var(--font-display);
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--color-tcl);
+            margin-bottom: 10px;
+        }
+
+        .insight-banner .insight-text {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #5a1a1f;
+        }
+
+        .insight-banner .highlight {
+            font-weight: 700;
+            color: #8b1a22;
+        }
+
+        .gap-highlight {
+            display: inline-block;
+            background: rgba(227, 25, 55, 0.1);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 700;
+            color: var(--color-tcl);
+        }
+
+        .platform-insights {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .platform-insight-card {
+            background: white;
+            padding: 14px 18px;
+            border-radius: 8px;
+            font-size: 13px;
+            line-height: 1.5;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+            border-top: 3px solid;
+        }
+
+        .platform-insight-card.ai-overview { border-color: var(--color-ai-overview); }
+        .platform-insight-card.ai-mode { border-color: var(--color-ai-mode); }
+        .platform-insight-card.searchgpt { border-color: var(--color-searchgpt); }
+
+        .platform-insight-card strong {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 14px;
+        }
+
+        .platform-insight-card.ai-overview strong { color: var(--color-ai-overview); }
+        .platform-insight-card.ai-mode strong { color: #d99b30; }
+        .platform-insight-card.searchgpt strong { color: var(--color-searchgpt); }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <header class="slide-header">
+            <div>
+                <h1>Mini-LED Platform Performance<span class="subtitle">Samsung vs TCL</span></h1>
+            </div>
+            <span class="slide-badge">Mini-LED Deep Dive | Jan 31, 2026</span>
+        </header>
+
+        <div class="slide-content">
+            <!-- Platform Comparison Cards -->
+            <div class="platform-grid">
+                <!-- AI Overview -->
+                <div class="platform-card ai-overview">
+                    <div class="platform-header">
+                        <span class="platform-name">AI Overview</span>
+                        <span class="platform-tag">Highest Volume</span>
+                    </div>
+                    <div class="brand-comparison">
+                        <div class="brand-row samsung">
+                            <span class="brand-label">Samsung</span>
+                            <div class="brand-stats">
+                                <div>
+                                    <span class="mentions-count">328 mentions</span>
+                                    <div class="negative-count has-negatives">6 negative</div>
+                                </div>
+                                <span class="sentiment-pct">71.0%</span>
+                            </div>
+                        </div>
+                        <div class="brand-row tcl">
+                            <span class="brand-label">TCL</span>
+                            <div class="brand-stats">
+                                <div>
+                                    <span class="mentions-count">346 mentions</span>
+                                    <div class="negative-count">3 negative</div>
+                                </div>
+                                <span class="sentiment-pct">78.0%<span class="winner-badge">WIN</span></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Mode -->
+                <div class="platform-card ai-mode">
+                    <div class="platform-header">
+                        <span class="platform-name">AI Mode</span>
+                        <span class="platform-tag">Conversational</span>
+                    </div>
+                    <div class="brand-comparison">
+                        <div class="brand-row samsung">
+                            <span class="brand-label">Samsung</span>
+                            <div class="brand-stats">
+                                <div>
+                                    <span class="mentions-count">326 mentions</span>
+                                    <div class="negative-count has-negatives">10 negative</div>
+                                </div>
+                                <span class="sentiment-pct">66.9%</span>
+                            </div>
+                        </div>
+                        <div class="brand-row tcl">
+                            <span class="brand-label">TCL</span>
+                            <div class="brand-stats">
+                                <div>
+                                    <span class="mentions-count">278 mentions</span>
+                                    <div class="negative-count">0 negative</div>
+                                </div>
+                                <span class="sentiment-pct">71.2%<span class="winner-badge">WIN</span></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SearchGPT -->
+                <div class="platform-card searchgpt">
+                    <div class="platform-header">
+                        <span class="platform-name">ChatGPT</span>
+                        <span class="platform-tag">Biggest Gap</span>
+                    </div>
+                    <div class="brand-comparison">
+                        <div class="brand-row samsung">
+                            <span class="brand-label">Samsung</span>
+                            <div class="brand-stats">
+                                <div>
+                                    <span class="mentions-count">174 mentions</span>
+                                    <div class="negative-count">0 negative</div>
+                                </div>
+                                <span class="sentiment-pct">77.0%</span>
+                            </div>
+                        </div>
+                        <div class="brand-row tcl">
+                            <span class="brand-label">TCL</span>
+                            <div class="brand-stats">
+                                <div>
+                                    <span class="mentions-count">174 mentions</span>
+                                    <div class="negative-count">0 negative</div>
+                                </div>
+                                <span class="sentiment-pct">98.3%<span class="winner-badge">WIN</span></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Platform-specific Insights -->
+            <div class="platform-insights">
+                <div class="platform-insight-card ai-overview">
+                    <strong>AI Overview</strong>
+                    TCL leads volume (346 vs 328) and sentiment with a <span class="gap-highlight">+7.0pp</span> advantage
+                </div>
+                <div class="platform-insight-card ai-mode">
+                    <strong>AI Mode</strong>
+                    Samsung's worst platform: 10 negatives vs TCL's zero. Gap of <span class="gap-highlight">+4.3pp</span>
+                </div>
+                <div class="platform-insight-card searchgpt">
+                    <strong>ChatGPT</strong>
+                    Largest gap: TCL 98.3% vs Samsung 77.0% = <span class="gap-highlight">+21.3pp</span> difference
+                </div>
+            </div>
+
+            <!-- Key Insight Banner -->
+            <div class="insight-banner">
+                <div class="insight-title">TCL Leads Sentiment Across All 3 Platforms</div>
+                <div class="insight-text">
+                    TCL outperforms Samsung on positive sentiment on every platform measured. On ChatGPT, TCL reaches
+                    <span class="highlight">98.3% positive</span> vs Samsung's 77.0%. On AI Mode, Samsung has
+                    <span class="highlight">10 negative mentions</span> compared to TCL's zero.
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
