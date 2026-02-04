@@ -10,6 +10,393 @@ A detailed journal of the General Analytics development process. Each session do
 
 ---
 
+## 2026-02-03 (Session 17): Prompt Responses - AI Model Tracking Enhancement
+
+### Session Goals
+Enhance the `semrush_prompt_responses` table and fetch script to properly track which AI model (ChatGPT, Google AI Overview, Google AI Mode) generated each response.
+
+---
+
+### Part 1: The Problem - Missing Model Information
+
+#### What Was Happening
+
+The initial prompt responses fetch (Session 16) retrieved response text, but we discovered that:
+- Each AI model gives different responses to the same prompt
+- Without the `CBF_model` filter, the API returned mixed responses with no model attribution
+- We needed to track which model said what for competitive analysis
+
+#### Plain English
+
+Imagine you asked 3 different people the same question and wrote down their answers, but forgot to note who said what. You have the answers, but you cannot tell which answer came from which person. That is what was happening - we had AI responses but did not know if ChatGPT, Google AI Overview, or Google AI Mode said them.
+
+---
+
+### Part 2: API Investigation - The CBF_model Filter
+
+#### What We Discovered
+
+The SEMrush API has a filter called `CBF_model` that controls which AI model's responses are returned:
+
+| API Value | Model Name | Description |
+|-----------|------------|-------------|
+| 4 | `search-gpt` | ChatGPT (SearchGPT) |
+| 5 | `google-ai-overview` | Google AI Overview (featured snippets) |
+| 6 | `google-ai-mode` | Google AI Mode (conversational) |
+
+#### Technical Detail
+
+The filter is passed in the `advancedFiltersList` parameter:
+```json
+{
+  "advancedFiltersList": [
+    { "id": "CBF_model", "value": 4 }
+  ]
+}
+```
+
+#### Plain English
+
+Think of it like a radio tuner. By default, you hear all stations mixed together (confusing). By setting `CBF_model` to a specific value, you tune into just one station at a time. Value 4 tunes to ChatGPT, value 5 to Google AI Overview, value 6 to Google AI Mode.
+
+---
+
+### Part 3: Database Schema Update
+
+#### Why We Needed to Recreate the Table
+
+The original table had:
+- Unique constraint on `(date, prompt, response_index)`
+- No `model` column
+
+The new table needed:
+- Unique constraint on `(date, prompt, model)`
+- `model` column to store the AI model name
+
+Attempting to ALTER the table would fail because existing rows would violate the new constraint (same prompt+date could now have multiple valid rows, one per model).
+
+#### New Schema
+
+```sql
+CREATE TABLE semrush_prompt_responses (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    date DATE NOT NULL,
+    prompt TEXT NOT NULL,
+    model TEXT NOT NULL,
+    response_text TEXT,
+    fetched_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE UNIQUE INDEX idx_prompt_responses_unique
+ON semrush_prompt_responses(date, prompt, model);
+```
+
+#### Data Loss Note
+
+Previous data (1 day: Jan 31, 2026) was lost during migration. This was acceptable because:
+- Only 1 day of data existed
+- Data can be re-fetched with the updated script
+- Correct schema is more important than preserving flawed data
+
+#### Plain English
+
+We had to tear down the old filing cabinet and build a new one with an extra drawer (the model column). The few files in the old cabinet were discarded, but we can easily refetch them using the improved system.
+
+---
+
+### Part 4: Script Updates
+
+#### Changes to `fetch_prompt_responses.py`
+
+1. **Three API calls per prompt per day** instead of one:
+   - One for `search-gpt` (value=4)
+   - One for `google-ai-overview` (value=5)
+   - One for `google-ai-mode` (value=6)
+
+2. **Model name storage:**
+   - Converts API value to human-readable name
+   - Stores `search-gpt`, `google-ai-overview`, or `google-ai-mode` in database
+
+3. **New `--model` argument:**
+   ```bash
+   # Fetch all models (default)
+   python fetch_prompt_responses.py --date 2026-01-31
+
+   # Fetch specific model only
+   python fetch_prompt_responses.py --date 2026-01-31 --model search-gpt
+   ```
+
+#### Technical Implementation
+
+```python
+MODEL_MAPPING = {
+    4: "search-gpt",
+    5: "google-ai-overview",
+    6: "google-ai-mode"
+}
+
+# For each prompt, for each model
+for model_value, model_name in MODEL_MAPPING.items():
+    filters = {
+        "advancedFiltersList": [
+            {"id": "CBF_model", "value": model_value}
+        ]
+    }
+    # Fetch and store with model_name
+```
+
+#### Plain English
+
+The script now asks SEMrush three separate questions for each prompt: "What did ChatGPT say?", "What did Google AI Overview say?", and "What did Google AI Mode say?" It labels each answer with who said it before filing it away.
+
+---
+
+### Part 5: Data Results
+
+#### Jan 31, 2026 Fetch Results
+
+| Metric | Value |
+|--------|-------|
+| Total prompts | 383 |
+| API calls made | 1,149 (383 prompts x 3 models) |
+| Records stored | 1,149 |
+| Time taken | ~20 minutes |
+
+#### Model Breakdown
+
+| Model | Records | Notes |
+|-------|---------|-------|
+| search-gpt | 383 | ChatGPT responses |
+| google-ai-overview | 383 | Google AI Overview responses |
+| google-ai-mode | 383 | Google AI Mode responses |
+
+#### Plain English
+
+For January 31st, we successfully retrieved what all three AI assistants said about each of the 383 questions we track. That is 1,149 labeled answers in our database.
+
+---
+
+### Part 6: Backfill Considerations
+
+#### Rate Limit Constraint
+
+- SEMrush API limit: 600 requests/hour
+- Backfill need: Jan 15-30 = 16 days
+- Calls needed: 383 prompts x 3 models x 16 days = 18,384 calls
+- Time required: ~31 hours of API calls (at rate limit)
+
+#### Backfill Strategy
+
+Run in batches:
+1. One day at a time
+2. Monitor API rate limits
+3. Resume if interrupted (upsert handles duplicates)
+
+#### Plain English
+
+We can only make 600 requests per hour to SEMrush. To fill in the past 16 days of data, we need about 18,000 requests. That means about 31 hours of running the script, spread over several sessions to avoid hitting the rate limit.
+
+---
+
+### Session Summary
+
+| Task | Status |
+|------|--------|
+| Discover CBF_model API parameter | Complete |
+| Map API values to model names | Complete |
+| Recreate database table with model column | Complete |
+| Update fetch script for per-model fetching | Complete |
+| Add --model CLI argument | Complete |
+| Fetch Jan 31 data (all models) | Complete |
+| Document in semrush-api-endpoints.md | Complete |
+| Backfill Jan 15-30 | Pending (rate limit constraint) |
+
+### Files Modified
+
+| File | Changes |
+|------|---------|
+| `clients/samsung/fetch_prompt_responses.py` | Added per-model fetching, --model argument, model storage |
+| `clients/samsung/semrush-api-endpoints.md` | Added CBF_model parameter documentation |
+
+### Supabase Changes
+
+| Change | Details |
+|--------|---------|
+| Table recreated | `semrush_prompt_responses` with new `model` column |
+| Index created | Unique on `(date, prompt, model)` |
+| Data reset | Previous data dropped, Jan 31 re-fetched with model tracking |
+
+### Decisions Made
+
+| Decision | Why | Alternative Rejected |
+|----------|-----|---------------------|
+| Separate API calls per model | Each model gives different responses; enables model comparison | Single combined fetch (loses model attribution) |
+| Store model name not API value | Human-readable for queries and dashboards | Store raw values (harder to interpret) |
+| Drop and recreate table | Cleanest way to change constraint; minimal data loss | ALTER TABLE migration (would fail on constraints) |
+
+### Lessons Learned
+
+1. **API filters matter:** The same endpoint can return very different data depending on filters. Always investigate filter options early.
+2. **Schema changes can require table recreation:** When unique constraints change fundamentally, ALTER TABLE may not be feasible.
+3. **Rate limits affect backfill strategy:** 600 requests/hour is fine for daily fetches but requires planning for historical backfill.
+4. **Model tracking enables analysis:** Knowing which AI said what allows competitive analysis between AI platforms.
+
+---
+
+## 2026-02-03 (Session 16): Prompt Responses Data Pipeline - Full AI Response Text
+
+### Session Goals
+Extend the Samsung AI visibility data pipeline to capture the complete text of AI responses, not just metadata about mentions and citations.
+
+---
+
+### Part 1: Why We Need Full Response Text
+
+#### The Gap in Our Data
+
+Previously, we had:
+- **Concept mentions:** "Samsung was mentioned in this prompt with positive sentiment"
+- **Citations:** "AI cited samsung.com/us/televisions/"
+- **Prompts:** The questions users asked
+
+What we were missing:
+- **The actual AI response text:** What did the AI actually say about Samsung?
+
+#### Plain English
+Imagine you're tracking how often someone mentions your name in conversations. Before, we knew "They mentioned you 5 times today, mostly positive." Now we can read the actual transcript of what they said. This is much more useful for understanding context, tone, and competitive positioning.
+
+---
+
+### Part 2: The Solution - Prompt Responses Table
+
+#### Supabase Table Structure
+
+Created `semrush_prompt_responses` table:
+
+| Column | Type | Purpose |
+|--------|------|---------|
+| `id` | bigint | Auto-incrementing primary key |
+| `date` | date | Date the response was captured |
+| `prompt` | text | The user's question/query |
+| `response_text` | text | Full AI response content |
+| `response_index` | integer | Which response variation (0, 1, 2, etc.) |
+| `fetched_at` | timestamp | When we fetched this data |
+
+#### Why `response_index`?
+
+SEMrush captures multiple response variations per prompt. When you ask an AI the same question, you might get slightly different answers each time. The `response_index` field tracks which variation this is (e.g., response 0, 1, 2).
+
+#### Plain English
+Think of it like asking the same question to three different ChatGPT sessions. Each might give a slightly different answer. We store all three, numbered 0, 1, 2, so we can analyze the range of possible responses.
+
+---
+
+### Part 3: The Fetch Script
+
+#### Script: `clients/samsung/fetch_prompt_responses.py`
+
+Created a Python script to:
+1. Query SEMrush API endpoint `f1d71cca-00af-454e-80a6-4af6c5d5117a`
+2. Iterate through all tracked prompts
+3. Fetch full response text for each prompt/date combination
+4. Upsert to Supabase (insert or update if exists)
+
+#### Technical Details
+```python
+# SEMrush API endpoint for prompt responses
+ELEMENT_ID = "f1d71cca-00af-454e-80a6-4af6c5d5117a"
+
+# Each API call returns responses for a specific prompt on a specific date
+# Response includes: prompt, response_text, response_index
+```
+
+#### Plain English
+The script acts like a librarian who goes to the SEMrush archive, looks up each question we're tracking, copies down the full AI response text, and files it in our Supabase database. It's smart enough to skip responses we've already saved.
+
+---
+
+### Part 4: Data Volume Discovery
+
+#### Test Results (Jan 31, 2026)
+
+| Metric | Value |
+|--------|-------|
+| Prompts tracked | 383 |
+| Responses fetched | 1,149 |
+| Average responses per prompt | ~3 |
+
+#### Why ~3 Responses Per Prompt?
+
+SEMrush captures response variations across:
+- Different AI models (ChatGPT, Google AI Overview, Google AI Mode)
+- Different sessions/times
+- Response variability (AI doesn't always give identical answers)
+
+#### Plain English
+When we track 383 questions, we don't get 383 answers - we get about 1,149 (roughly 3 per question). That's because the same question can get different answers from different AI systems or even different answers from the same AI on different occasions.
+
+---
+
+### Part 5: API Endpoint Documentation
+
+#### Added to `semrush-api-endpoints.md`
+
+| Endpoint ID | Purpose |
+|-------------|---------|
+| `f1d71cca-00af-454e-80a6-4af6c5d5117a` | Prompt Responses - Full AI response text for tracked prompts |
+
+This joins the existing documented endpoints:
+- `28977430-d565-4529-97eb-2dfe2959b86b` - Source Visibility by Domain
+- `3c29aa85-4f06-4f14-a376-b02333c6e3fa` - Cited URLs with prompts
+- `3a16b2b2-b227-4a41-9ef2-9c657e64d47e` - Topics with citation counts
+
+---
+
+### Part 6: Backfill Status
+
+#### Initial Load
+- **Completed:** Jan 31, 2026 (test run)
+- **In Progress:** Jan 15-30, 2026 (full backfill running in background)
+
+#### Plain English
+We've successfully tested the system with one day's data. Now we're going back to fill in the past two weeks of data so we have a complete historical record.
+
+---
+
+### Files Created
+
+| File | Purpose |
+|------|---------|
+| `clients/samsung/fetch_prompt_responses.py` | Python script to fetch and store response text |
+
+### Supabase Changes
+
+| Change | Details |
+|--------|---------|
+| New table | `semrush_prompt_responses` with columns: id, date, prompt, response_text, response_index, fetched_at |
+
+---
+
+### Business Value
+
+1. **Content Analysis:** Can now analyze what AI actually says about Samsung, not just that it was mentioned
+2. **Quote Extraction:** Can pull exact quotes from AI responses for reporting
+3. **Competitive Context:** Can see how Samsung is positioned relative to competitors in the same response
+4. **Response Quality:** Can assess if responses are accurate, outdated, or misleading
+5. **Trend Analysis:** Can track how AI response content changes over time
+
+---
+
+### Lessons Learned
+
+1. **Response Multiplicity:** SEMrush captures ~3 response variations per prompt, not just one. This is valuable for understanding response variance.
+
+2. **Data Volume:** 383 prompts x 3 responses x 16 days = ~18,000+ rows for a two-week period. Plan storage accordingly.
+
+3. **Incremental Loads:** The upsert pattern (insert or update) makes re-runs safe and allows incremental data loading.
+
+---
+
 ## 2026-02-02 (Session 15): Samsung TV Panel Type Slides - 5-Slide Restructure (QLED Prototype)
 
 ### Session Goals

@@ -102,6 +102,87 @@ See `docs/build-log.md` for detailed troubleshooting and plain-English explanati
 
 ## Session Progress
 
+### 2026-02-03 (Session 17): Prompt Responses - AI Model Tracking Enhancement
+
+**Summary:** Enhanced the `semrush_prompt_responses` table and fetch script to properly track which AI model generated each response. Discovered SEMrush API model mapping and updated the data pipeline to fetch responses separately per model.
+
+#### What Was Done
+
+1. **Discovered SEMrush API Model Mapping:**
+   - `CBF_model` filter parameter controls which AI model's responses are returned
+   - Mapped API `value` field to human-readable model names:
+     - value=4 -> `search-gpt` (ChatGPT)
+     - value=5 -> `google-ai-overview`
+     - value=6 -> `google-ai-mode`
+
+2. **Recreated Supabase Table: `semrush_prompt_responses`**
+   - New schema: `id`, `date`, `prompt`, `model`, `response_text`, `fetched_at`
+   - Added unique index on `(date, prompt, model)` to prevent duplicates
+   - **Note:** Previous data was lost during migration (drop/recreate required due to duplicate constraint issue)
+
+3. **Updated Fetch Script: `clients/samsung/fetch_prompt_responses.py`**
+   - Now makes 3 API calls per prompt per day (one per model)
+   - Uses `CBF_model` filter in advanced filters to fetch each model separately
+   - Added `--model` CLI argument to fetch specific model only
+   - Stores model name (`search-gpt`, `google-ai-overview`, `google-ai-mode`) in database
+
+4. **Initial Data Load Completed:**
+   - Jan 31, 2026: 1,149 records (383 prompts x 3 models)
+   - All three models complete
+
+#### Important Notes
+
+- **SEMrush API Rate Limit:** 600 requests/hour
+- **Backfill Remaining:** Jan 15-30 (~19,000+ API calls needed)
+
+#### Files Modified
+- `clients/samsung/fetch_prompt_responses.py`
+
+#### Supabase Changes
+- Recreated: `semrush_prompt_responses` table with new `model` column
+
+---
+
+### 2026-02-03 (Session 16): Prompt Responses Data Pipeline - Full AI Response Text
+
+**Summary:** Extended the Samsung AI visibility data pipeline to capture the complete text of AI responses. Previously we only had concept mentions and citations; now we store the full response text for each prompt, enabling deeper content analysis, quote extraction, and response quality assessment.
+
+#### What Was Done
+
+1. **Created Supabase Table: `semrush_prompt_responses`**
+   - Columns: `id`, `date`, `prompt`, `response_text`, `response_index`, `fetched_at`
+   - Stores the complete AI response text for each prompt
+   - `response_index` handles multiple responses per prompt (SEMrush returns multiple response variations)
+   - Primary key on `(date, prompt, response_index)` ensures no duplicates
+
+2. **Created Data Fetch Script: `clients/samsung/fetch_prompt_responses.py`**
+   - Fetches AI response text from SEMrush API endpoint `f1d71cca-00af-454e-80a6-4af6c5d5117a`
+   - Iterates through all tracked prompts and retrieves full response content
+   - Handles pagination and rate limiting
+   - Upserts to Supabase to avoid duplicates on re-runs
+
+3. **Documented SEMrush API Endpoint**
+   - Endpoint ID: `f1d71cca-00af-454e-80a6-4af6c5d5117a`
+   - Added to `clients/samsung/docs/semrush-api-endpoints.md`
+
+4. **Initial Data Load Completed**
+   - Test run for Jan 31, 2026: 383 prompts yielded 1,149 responses (~3 responses per prompt)
+   - Full backfill (Jan 15-30, 2026) running in background
+
+#### Why This Matters
+
+- **Full Response Text:** Previously we only knew "Samsung was mentioned with positive sentiment." Now we have the actual AI response text.
+- **Response Variations:** SEMrush captures multiple response variations per prompt (~3 per prompt), showing how AI responses can differ.
+- **Content Analysis:** Enables future features like response length analysis, brand mention context, competitor comparison within responses.
+
+#### Files Created
+- `clients/samsung/fetch_prompt_responses.py`
+
+#### Supabase Changes
+- Created: `semrush_prompt_responses` table
+
+---
+
 ### 2026-02-02 (Session 15): Samsung TV Panel Type Slides - 5-Slide Restructure (QLED Prototype)
 
 **Summary:** Created a new 5-slide presentation structure for Samsung TV panel types, using QLED as the prototype. Each slide focuses on a specific analytical angle: platform distribution, concepts & sentiment, citations, trends over time, and competitive branded vs generic prompt analysis. All data pulled from Supabase (not fabricated).
@@ -2077,6 +2158,9 @@ uv run clients/samsung/scripts/assemble_dashboard.py clients/samsung/configs/sco
 
 | Date | Decision | Why | Alternatives Rejected |
 |------|----------|-----|----------------------|
+| 2026-02-03 | Separate API calls per AI model instead of combined response fetch | Each AI model (ChatGPT, Google AI Overview, Google AI Mode) may give different responses to the same prompt; combining them loses the ability to compare model behavior; enables model-specific analysis | Single combined fetch (loses model attribution), filter client-side (API doesn't return model info without filter) |
+| 2026-02-03 | Store model name (`search-gpt`, `google-ai-overview`, `google-ai-mode`) instead of API value (4, 5, 6) | Human-readable names are easier to query and display in dashboards; API values are implementation details that could change | Store raw API values (harder to interpret), store both (redundant) |
+| 2026-02-03 | Drop and recreate table instead of ALTER TABLE migration | Unique constraint change required dropping existing duplicates; simpler to recreate with correct schema than complex migration; data was minimal (1 day) | ALTER TABLE (would fail on duplicate constraint), delete duplicates then alter (complex, error-prone) |
 | 2026-02-02 | 5-slide structure per panel type (platform, concepts, citations, trends, competitive) | Each slide has single analytical focus for clearer storytelling; allows deeper drill-down per topic; better for stakeholder presentations with Q&A | 3-section single page (too dense), 10+ slides (too many), single overview page (not enough detail) |
 | 2026-02-02 | Dual donut charts for Platform slide (Mentions vs Citations) | Clearly separates two distinct metrics that stakeholders often conflate; visual side-by-side comparison highlights platform differences | Single donut with toggle (loses comparison), stacked bar (harder to read percentages), table only (not visual enough) |
 | 2026-02-02 | Horizontal stacked sentiment bars for Concepts slide | Shows sentiment breakdown per concept at a glance; horizontal layout fits more concept names; stacked bars show proportion not just counts | Vertical bars (truncates long concept names), treemap (loses granular % breakdown), pie charts per concept (too many charts) |
@@ -2170,6 +2254,13 @@ uv run clients/samsung/scripts/assemble_dashboard.py clients/samsung/configs/sco
 ## Changelog
 
 ### [Unreleased]
+
+#### Changed
+- **Prompt Responses Table Schema Update** - Recreated `semrush_prompt_responses` table with new `model` column to track which AI model generated each response; schema now: `id`, `date`, `prompt`, `model`, `response_text`, `fetched_at`; unique index on `(date, prompt, model)`
+- **Fetch Script Per-Model Processing** - Updated `clients/samsung/fetch_prompt_responses.py` to fetch each AI model separately using `CBF_model` filter; now makes 3 API calls per prompt per day; added `--model` argument for selective fetching
+
+#### Added
+- **SEMrush API Model Mapping Documentation** - Documented `CBF_model` filter values: value=4 (search-gpt/ChatGPT), value=5 (google-ai-overview), value=6 (google-ai-mode); added to `clients/samsung/semrush-api-endpoints.md`
 
 #### Added
 - **Samsung QLED 5-Slide Prototype** - New 5-slide presentation structure in `clients/samsung/slides/qled/`:

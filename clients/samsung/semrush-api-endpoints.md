@@ -783,6 +783,93 @@ ORDER BY date DESC;
 
 ---
 
+## Prompt Responses Endpoint Details
+
+Returns the full AI-generated response text for a specific prompt on a specific date. **Data loaded into Supabase `semrush_prompt_responses` table.**
+
+### Endpoint Information
+
+| Parameter | Value |
+|-----------|-------|
+| Element ID | `f1d71cca-00af-454e-80a6-4af6c5d5117a` |
+| Product | `ai` |
+| Element Name | Prompt Responses |
+
+### Request Payload
+
+```json
+{
+  "render_data": {
+    "project_id": "b7880549-ea08-4d82-81d0-9633f4dcab58",
+    "filters": {
+      "simple": {
+        "keyword": "best 55 inch tv",
+        "end_date": "2026-01-31"
+      }
+    }
+  }
+}
+```
+
+### Filter Options
+
+| Filter | Description |
+|--------|-------------|
+| `keyword` | The prompt text to fetch response for |
+| `end_date` | The date to fetch (single day) |
+
+### Response Structure
+
+```json
+{
+  "blocks": {
+    "data": [
+      {
+        "text": "## Best 55-Inch TVs for 2026\n\nHere are the top recommendations...",
+        "value": 1
+      }
+    ]
+  }
+}
+```
+
+### Response Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `text` | string | Full AI response in markdown format |
+| `value` | integer | Response index (usually 1) |
+
+### Supabase Table
+
+Data is stored in `semrush_prompt_responses` table:
+
+```sql
+-- Get all responses for a prompt
+SELECT date, response_text, response_index
+FROM semrush_prompt_responses
+WHERE prompt = 'best 55 inch tv'
+ORDER BY date DESC;
+
+-- Find prompts mentioning a brand
+SELECT DISTINCT prompt, date
+FROM semrush_prompt_responses
+WHERE response_text ILIKE '%samsung%'
+ORDER BY date DESC;
+```
+
+### Rate Limiting
+
+This endpoint requires one API call per prompt per day. With 383 tracked prompts:
+- **Daily fetch:** 383 calls (~40 minutes at rate limit)
+- **Historical backfill:** 383 × days (~6,500 calls for 17 days = ~11 hours)
+
+### Scripts
+
+- `fetch_prompt_responses.py` - Fetches daily responses → Supabase `semrush_prompt_responses`
+
+---
+
 ## Notes
 
 - The API key is stored in `.env` as `SEMRUSH_API_KEY`

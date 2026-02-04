@@ -52,8 +52,9 @@ def fetch_day(date_str: str) -> list:
 
 
 def main():
-    # Date range: Jan 1, 2026 to today
-    start_date = datetime(2026, 1, 1)
+    # Date range: Start from last loaded date + 1
+    # Change start_date to fetch only new data
+    start_date = datetime(2026, 1, 30)  # Day after last loaded (2026-01-29)
     end_date = datetime.now()
 
     print(f"Fetching data from {start_date.date()} to {end_date.date()}")
