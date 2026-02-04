@@ -102,6 +102,42 @@ See `docs/build-log.md` for detailed troubleshooting and plain-English explanati
 
 ## Session Progress
 
+### 2026-02-04 (Session 16): TV AI Visibility Presentation - Methodology Slide
+
+**Summary:** Created a new methodology slide (slide #6) for the TV AI Visibility presentation that explains data sources, KPI definitions, and tracked AI platforms. This slide provides the foundational context needed for stakeholders to understand how the metrics in the presentation are calculated.
+
+#### What Was Done
+
+1. **Created Methodology Slide (`clients/samsung/slides/tv_ai_visibility/methodology.html`):**
+   - **Data Sources Section:** Explains the two primary sources:
+     - SEMrush AI Visibility (brand mentions in AI responses)
+     - Adobe Analytics (traffic and revenue from AI referrals)
+   - **KPI Definitions Section:** Defines all metrics used in the presentation:
+     - Mentions, Share of Voice (SOV), Citations, Visibility Score
+     - Conversion Rate (CVR), Average Order Value (AOV), Revenue
+   - **AI Platforms Tracked Section:** Shows which platforms each data source covers:
+     - SEMrush: ChatGPT, Google AI Overview, Google AI Mode, Perplexity, Claude
+     - Adobe Analytics: Referral traffic from AI platforms
+   - **Data Limitations Section:** Placeholder for user to fill in known caveats
+
+2. **Updated Presentation Documentation (`clients/samsung/docs/tv_ai_visibility.md`):**
+   - Added slide #6 documentation to the slide inventory
+   - Documents slide purpose and content sections
+
+#### Files Created
+- `clients/samsung/slides/tv_ai_visibility/methodology.html`
+
+#### Files Modified
+- `clients/samsung/docs/tv_ai_visibility.md`
+
+#### Business Value
+- Provides transparency about data sources for stakeholder trust
+- Defines KPIs consistently to avoid interpretation confusion
+- Documents which AI platforms are monitored vs not
+- Creates space to acknowledge data limitations upfront
+
+---
+
 ### 2026-02-02 (Session 15): Samsung TV Panel Type Slides - 5-Slide Restructure (QLED Prototype)
 
 **Summary:** Created a new 5-slide presentation structure for Samsung TV panel types, using QLED as the prototype. Each slide focuses on a specific analytical angle: platform distribution, concepts & sentiment, citations, trends over time, and competitive branded vs generic prompt analysis. All data pulled from Supabase (not fabricated).

@@ -10,6 +10,147 @@ A detailed journal of the General Analytics development process. Each session do
 
 ---
 
+## 2026-02-04 (Session 16): TV AI Visibility Presentation - Methodology Slide
+
+### Session Goals
+Create a methodology slide for the TV AI Visibility presentation that explains where the data comes from, how KPIs are calculated, and which AI platforms are tracked. This slide provides essential context for stakeholders viewing the presentation.
+
+---
+
+### Part 1: Why a Methodology Slide?
+
+#### The Problem
+Presentations showing AI visibility metrics often raise questions from stakeholders: "Where does this data come from?", "What exactly does Share of Voice mean?", "Are we tracking ChatGPT or just Google?" Without a methodology slide, these questions interrupt the flow and require verbal explanations that may be inconsistent.
+
+#### The Solution
+A dedicated methodology slide that:
+1. Lists all data sources with what each provides
+2. Defines every KPI with its formula
+3. Shows which AI platforms are tracked by each source
+4. Acknowledges known data limitations upfront
+
+#### Plain English
+Think of it like the "fine print" section of a financial report, but made readable and placed upfront. Instead of stakeholders wondering "how did you calculate this?", they can reference a single slide that explains everything. It builds trust because it shows transparency about both what we measure and what we cannot measure.
+
+---
+
+### Part 2: The Methodology Slide Structure
+
+#### Data Sources Section
+
+The slide explains two primary data sources:
+
+**SEMrush AI Visibility:**
+- Tracks when Samsung is mentioned in AI responses
+- Monitors brand mentions, concepts, sentiment, and citations
+- Captures which prompts trigger Samsung appearances
+
+**Adobe Analytics:**
+- Tracks actual traffic and revenue from AI referrals
+- Measures conversion rates and order values
+- Shows business impact of AI visibility
+
+#### Plain English
+SEMrush tells us "how often do AI assistants talk about Samsung?" while Adobe Analytics tells us "when AI sends people to Samsung.com, do they buy anything?" One measures visibility (are we being seen?), the other measures results (is it working?).
+
+---
+
+### Part 3: KPI Definitions
+
+The slide defines all metrics used throughout the presentation:
+
+| KPI | Definition | Plain English |
+|-----|------------|---------------|
+| Mentions | Count of times Samsung appears in AI responses | How many times AI assistants say "Samsung" |
+| Share of Voice (SOV) | Samsung mentions / Total brand mentions x 100 | What percentage of the conversation is about us vs competitors |
+| Citations | Count of Samsung URLs linked by AI | How many times AI assistants link to Samsung.com |
+| Visibility Score | Cited URLs / Total tracked URLs x 100 | What percentage of our pages are being referenced by AI |
+| CVR (Conversion Rate) | Purchases / Sessions x 100 | What percentage of AI-referred visitors buy something |
+| AOV (Average Order Value) | Revenue / Number of orders | How much the average AI-referred customer spends |
+| Revenue | Total sales from AI-referred traffic | Actual dollars generated from AI visibility |
+
+#### Why Define Every KPI?
+Different stakeholders may interpret "Share of Voice" differently. A PR person might think it means media coverage; a marketing person might think it means ad impressions. By defining it explicitly as "Samsung mentions divided by total brand mentions in AI responses", everyone is aligned.
+
+---
+
+### Part 4: AI Platforms Tracked
+
+The slide shows which AI platforms are monitored by each data source:
+
+**SEMrush Tracks:**
+- ChatGPT
+- Google AI Overview
+- Google AI Mode
+- Perplexity
+- Claude
+
+**Adobe Analytics Tracks:**
+- Referral traffic from ai.com, chatgpt.com domains
+- Referral traffic from AI-related Google properties
+- Referral traffic from perplexity.ai
+
+#### Plain English
+SEMrush monitors what AI assistants say about Samsung across five major platforms. Adobe Analytics monitors when people click links from those AI assistants and visit Samsung.com. Together they paint a complete picture: visibility (SEMrush) and impact (Adobe).
+
+---
+
+### Part 5: Data Limitations Section
+
+The slide includes a placeholder section for documenting known caveats. This is intentionally left for the user to fill in based on their specific context. Common limitations might include:
+
+- Date range limitations (e.g., "Data starts from December 2025")
+- Platform coverage gaps (e.g., "Bing Copilot not yet tracked")
+- Attribution challenges (e.g., "Some AI referrals may be misclassified as direct traffic")
+- Data refresh frequency (e.g., "Updated weekly, may lag 24-48 hours")
+
+#### Why Include Limitations?
+Acknowledging what you cannot measure builds more trust than pretending everything is perfect. Stakeholders appreciate honesty about data boundaries.
+
+---
+
+### Part 6: Files Created and Modified
+
+#### Files Created
+| File | Purpose |
+|------|---------|
+| `clients/samsung/slides/tv_ai_visibility/methodology.html` | Methodology slide explaining data sources, KPIs, and platforms |
+
+#### Files Modified
+| File | Changes |
+|------|---------|
+| `clients/samsung/docs/tv_ai_visibility.md` | Added slide #6 documentation |
+
+---
+
+### Session Summary
+
+| Task | Status |
+|------|--------|
+| Create methodology slide HTML | Complete |
+| Add data sources section | Complete |
+| Add KPI definitions section | Complete |
+| Add AI platforms section | Complete |
+| Add data limitations placeholder | Complete |
+| Update presentation documentation | Complete |
+
+### Decisions Made
+
+| Decision | Why | Alternative Rejected |
+|----------|-----|---------------------|
+| Separate methodology slide | Dedicated space for context, referenceable | Inline notes on each slide (scattered, repetitive) |
+| Two data source categories | Clear distinction between visibility and impact | Single merged list (confuses what each provides) |
+| Table format for KPIs | Easy to scan, clear formula column | Paragraph text (harder to reference) |
+| Placeholder for limitations | User knows their specific caveats better | Pre-filled generic limitations (may not apply) |
+
+### Lessons Learned
+
+1. **Methodology slides build trust** - Transparency about data sources makes stakeholders more confident in the numbers
+2. **Define KPIs explicitly** - Different roles interpret the same term differently; explicit definitions align everyone
+3. **Acknowledge limitations** - Admitting what you cannot measure is more credible than pretending completeness
+
+---
+
 ## 2026-02-02 (Session 15): Samsung TV Panel Type Slides - 5-Slide Restructure (QLED Prototype)
 
 ### Session Goals

@@ -718,6 +718,55 @@ ORDER BY brand, count DESC;
 
 ---
 
+### 9. Reporting Methodology - Data Sources & KPI Definitions
+
+**File Path:** `clients/samsung/slides/tv_ai_visibility/methodology.html`
+
+**Date Created:** 2026-02-04
+
+**Purpose:**
+Executive-friendly overview slide explaining the data sources, KPIs, and definitions used throughout the TV AI Visibility presentation.
+
+**Data Sources Explained:**
+
+#### 1. SEMrush AI Visibility Platform
+- **What it measures:** Brand mentions, citations, and sentiment in AI-generated responses
+- **AI Models Tracked:** ChatGPT, Google AI Overview, Google AI Mode
+
+**SEMrush KPIs:**
+| KPI | Definition |
+|-----|------------|
+| Mentions | Number of times a brand is named in AI responses |
+| Share of Voice (SOV) | Samsung's % of total brand mentions vs competitors |
+| Citations | URLs the AI uses as sources in its answers |
+| Citation Share | What % of source links point to samsung.com vs competitors |
+| Sentiment | Positive, neutral, or negative tone of brand mentions |
+
+#### 2. Adobe Analytics
+- **What it measures:** Traffic and revenue from AI platform referrals
+- **Platforms Tracked:** ChatGPT, Gemini, Perplexity, Copilot
+
+**Adobe Analytics KPIs:**
+| KPI | Definition |
+|-----|------------|
+| Organic Visits | Baseline traffic from search engines (includes Google AIO & AI Mode) |
+| GenAI Visits | Incremental traffic from AI platforms with identifiable referrers |
+| CVR (Conversion Rate) | % of visitors who made a purchase |
+| AOV (Average Order Value) | Average $ spent per order |
+| Revenue | Total $ generated from traffic source |
+
+**Reporting Caveats:**
+1. SEMrush data is based on 383 tracked prompts across 3 AI surfaces - a representative sample from a larger prompt universe
+2. SEMrush and Adobe track different AI platforms - direct comparison between visibility and traffic requires caution
+3. Adobe referrer data has gaps - a significant portion of AI-driven traffic cannot be attributed to specific platforms
+4. Google AI Overview & AI Mode traffic appears as Organic in Adobe due to referrer limitations
+
+**Methodology Notes:**
+- This is a reference slide, not data-driven
+- Designed for executive audiences unfamiliar with AI visibility metrics
+
+---
+
 ## Slide Index
 
 | # | Slide Name | File Path | Status |
@@ -730,6 +779,7 @@ ORDER BY brand, count DESC;
 | 6 | Sentiment Overview - Brand Comparison | `slides/tv_ai_visibility/sentiment_overview.html` | Complete |
 | 7 | Sentiment Drivers - Positive & Negative | `slides/tv_ai_visibility/sentiment_drivers.html` | Complete |
 | 8 | Competitor Sentiment Drivers | `slides/tv_ai_visibility/competitor_sentiment.html` | Complete |
+| 9 | Reporting Methodology | `slides/tv_ai_visibility/methodology.html` | Complete |
 
 ---
 
