@@ -304,6 +304,7 @@ dependencies = [
     { name = "flask-cors" },
     { name = "google-analytics-admin" },
     { name = "google-analytics-data" },
+    { name = "google-search-results" },
     { name = "httpx" },
     { name = "python-dotenv" },
     { name = "requests" },
@@ -316,6 +317,7 @@ requires-dist = [
     { name = "flask-cors", specifier = ">=6.0.2" },
     { name = "google-analytics-admin", specifier = ">=0.27.0" },
     { name = "google-analytics-data", specifier = ">=0.20.0" },
+    { name = "google-search-results", specifier = ">=2.4.2" },
     { name = "httpx", specifier = ">=0.28.1" },
     { name = "python-dotenv", specifier = ">=1.0.0" },
     { name = "requests", specifier = ">=2.32.0" },
@@ -391,6 +393,15 @@ sdist = { url = "https://files.pythonhosted.org/packages/60/3c/ec64b9a275ca22fa1
 wheels = [
     { url = "https://files.pythonhosted.org/packages/db/18/79e9008530b79527e0d5f79e7eef08d3b179b7f851cfd3a2f27822fbdfa9/google_auth-2.47.0-py3-none-any.whl", hash = "sha256:c516d68336bfde7cf0da26aab674a36fedcf04b37ac4edd59c597178760c3498", size = 234867, upload-time = "2026-01-06T21:55:28.6Z" },
 ]
+
+[[package]]
+name = "google-search-results"
+version = "2.4.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "requests" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/77/30/b3a6f6a2e00f8153549c2fa345c58ae1ce8e5f3153c2fe0484d444c3abcb/google_search_results-2.4.2.tar.gz", hash = "sha256:603a30ecae2af8e600b22635757a6df275dad4b934f975e67878ccd640b78245", size = 18818, upload-time = "2023-03-10T11:13:09.953Z" }
 
 [[package]]
 name = "googleapis-common-protos"
