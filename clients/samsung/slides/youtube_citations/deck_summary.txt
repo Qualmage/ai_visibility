@@ -1,0 +1,52 @@
+YOUTUBE CITATIONS: MINI-LED — EXECUTIVE SUMMARY
+=================================================
+
+TLDR: When users ask AI models about Mini-LED TVs, the #1 content format
+cited back is comparison videos. Samsung needs comparison-format YouTube
+content that positions Neo QLED favorably — AI models are building their
+"recommended viewing" lists from this content right now.
+
+
+THE NUMBERS
+-----------
+- 11 of 15 top-cited Mini-LED videos are direct comparisons
+  (OLED vs Mini-LED, QLED vs Mini-LED)
+- The top 2 prompts triggering YouTube citations are
+  "Mini-LED vs QLED" (66 citations) and "Mini-LED vs OLED" (52 citations)
+- Comparison queries account for ~60% of all Mini-LED YouTube citations
+- Digital Trends' "OLED, QLED, or Mini-LED?" video has 2.87M views AND
+  91 AI citations — comparison content earns both audience reach and AI trust
+
+
+WHO AI TRUSTS
+-------------
+- RTINGS (111 citations) and Digital Trends (105) lead — both produce
+  structured, methodical comparison content
+- Small channels with focused comparison content outperform massive creators:
+  ForeMost Picks (2.9K subs) beats Jon Rettinger (1.65M subs) in citations
+- AI models even timestamp specific comparison moments — pointing users to
+  the exact second a creator starts comparing technologies
+
+
+THE TAKEAWAY
+------------
+Samsung needs to ensure comparison-format YouTube content positions Mini-LED
+(Neo QLED) favorably against OLED and competing Mini-LED brands. AI models
+are building their "recommended viewing" lists from this content, and right
+now the narrative is being shaped by independent reviewers, not Samsung.
+
+
+DECK CONTENTS (5 SLIDES)
+-------------------------
+1. Overview        — KPIs + top Mini-LED prompts triggering YouTube citations
+2. Channels        — Top 15 channels cited for Mini-LED content
+3. Videos          — Top 15 most-cited Mini-LED videos
+4. Timestamps      — 12 videos cited at specific moments with transcript quotes
+5. Transcripts     — Key themes, word frequency, and representative quotes
+
+
+DATA SCOPE
+----------
+164 videos analyzed, 86 channels, 3,175 citations, 4,469 comments, 18.2M views
+Source: SerpAPI YouTube extraction + SEMrush AI Visibility (Mini-LED tag)
+Date: February 2026
