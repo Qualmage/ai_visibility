@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transcript Insights | Samsung TV AI Visibility</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link rel="stylesheet" href="../css/slides.css">
+    <style>
+        .top-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            padding: 24px 24px 0 24px;
+        }
+
+        .quotes-section {
+            padding: 0 24px 24px 24px;
+            margin-top: 24px;
+        }
+
+        .quotes-section-title {
+            font-family: var(--font-display);
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--color-text-primary);
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--color-primary);
+        }
+
+        .quotes-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .quote-card .quote-source {
+            font-size: 12px;
+            color: var(--color-text-secondary);
+            margin-top: 8px;
+        }
+
+        .quote-card .quote-source strong {
+            color: var(--color-text-primary);
+            font-weight: 600;
+        }
+
+        .quote-card .quote-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+        }
+
+        .quote-card .tag-badge {
+            background: var(--color-primary);
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .sentiment-legend {
+            display: flex;
+            gap: 16px;
+            margin-top: 12px;
+            padding: 0 4px;
+        }
+
+        .sentiment-legend .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: var(--color-text-secondary);
+        }
+
+        .sentiment-legend .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <header class="slide-header">
+            <div>
+                <h1>What's Being Said<span class="subtitle">Transcript Analysis from Top Mini-LED Cited Videos</span></h1>
+            </div>
+            <span class="slide-badge">YouTube Citations | Feb 2026</span>
+        </header>
+
+        <!-- Top Row: 2-column grid -->
+        <div class="top-row">
+            <!-- Left Column: Themes Chart -->
+            <div class="section">
+                <h2>Key Themes in Cited Transcripts</h2>
+                <div class="chart-container" id="themes-chart"></div>
+                <div class="sentiment-legend">
+                    <div class="legend-item">
+                        <div class="legend-dot" style="background: #96d551;"></div>
+                        Positive
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-dot" style="background: #9e9e9e;"></div>
+                        Neutral
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-dot" style="background: #ff4438;"></div>
+                        Concern
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Word Frequency -->
+            <div class="section">
+                <h2>Most Frequent Terms</h2>
+                <div class="chart-container" id="words-chart"></div>
+            </div>
+        </div>
+
+        <!-- Bottom: Quote Cards Grid -->
+        <div class="quotes-section">
+            <div class="quotes-section-title">Representative Quotes from Top-Cited Transcripts</div>
+            <div class="quotes-grid" id="quotes-grid"></div>
+        </div>
+    </div>
+
+    <script>
+        /* ============================================
+           DATA
+           ============================================ */
+        const themeData = [
+            { theme: 'Mini-LED vs OLED Comparisons', count: 52, sentiment: 'neutral' },
+            { theme: 'Brightness & HDR Performance', count: 46, sentiment: 'positive' },
+            { theme: 'Dimming Zones & Local Dimming', count: 42, sentiment: 'positive' },
+            { theme: 'Price & Value Proposition', count: 38, sentiment: 'positive' },
+            { theme: 'Blooming & Halo Effects', count: 35, sentiment: 'negative' },
+            { theme: 'Gaming Performance', count: 31, sentiment: 'positive' },
+            { theme: 'Room Lighting Considerations', count: 28, sentiment: 'neutral' },
+            { theme: 'Samsung Neo QLED Branding', count: 24, sentiment: 'neutral' },
+            { theme: 'Contrast & Black Levels', count: 22, sentiment: 'positive' },
+            { theme: 'RGB Mini-LED & Next Gen', count: 18, sentiment: 'positive' }
+        ];
+
+        const wordData = [
+            { word: 'Mini-LED', count: 892 },
+            { word: 'OLED', count: 756 },
+            { word: 'backlight', count: 634 },
+            { word: 'dimming zones', count: 587 },
+            { word: 'brightness', count: 523 },
+            { word: 'Samsung', count: 498 },
+            { word: 'contrast', count: 467 },
+            { word: 'Neo QLED', count: 412 },
+            { word: 'blooming', count: 389 },
+            { word: 'HDR', count: 356 },
+            { word: 'Sony Bravia 9', count: 334 },
+            { word: 'TCL', count: 312 },
+            { word: 'Hisense', count: 298 },
+            { word: 'quantum dots', count: 276 },
+            { word: 'QLED', count: 245 }
+        ];
+
+        const quotes = [
+            { text: "Mini-LED sits in the sweet spot. Instead of a handful of dimming zones, you've got thousands of tiny LEDs controlling the backlight way more precisely.", source: "Jon Rettinger", video: "Best type of TV in 2026", tag: "Mini-LED" },
+            { text: "Most shoppers can't even tell which is which until someone points out the differences. Which screen technology actually deserves your money?", source: "Explaining Tech Like You're Five", video: "Mini-LED vs OLED", tag: "Comparison" },
+            { text: "I'm testing a $250 monitor that's just as good as a $1,500 OLED. Is it true? Did I really waste $1,000?", source: "Switch and Click", video: "Mini LED vs OLED Monitors", tag: "Value" },
+            { text: "Samsung calls its mini-LEDs Neo QLED \u2014 this is where marketing terms start to muddy the waters a little bit.", source: "Tom's Guide", video: "OLED, Mini-LED, RGB Compared", tag: "Branding" },
+            { text: "You've probably seen QLED and Mini-LED plastered everywhere. The TV industry thinks acronyms are their new selling point. My job is to help this make sense.", source: "The Viewing Angle", video: "QLED vs Mini-LED TVs", tag: "Education" },
+            { text: "A traditional mini-LED TV uses a blue backlight with quantum dots. This massive Hisense uses three different colors on each pixel: red, green, and blue.", source: "Tech Steve", video: "RGB and SQD-Mini LED", tag: "Technology" }
+        ];
+
+        /* ============================================
+           SENTIMENT COLOR MAP
+           ============================================ */
+        const sentimentColor = {
+            positive: '#96d551',
+            neutral: '#9e9e9e',
+            negative: '#ff4438'
+        };
+
+        /* ============================================
+           RENDER ON LOAD
+           ============================================ */
+        document.addEventListener('DOMContentLoaded', () => {
+            renderThemesChart();
+            renderWordsChart();
+            renderQuoteCards();
+        });
+
+        /* ============================================
+           THEMES HORIZONTAL BAR CHART
+           ============================================ */
+        function renderThemesChart() {
+            const container = document.getElementById('themes-chart');
+            const rect = container.getBoundingClientRect();
+            const margin = { top: 8, right: 48, bottom: 8, left: 190 };
+            const width = rect.width || 520;
+            const height = 300;
+            const innerWidth = width - margin.left - margin.right;
+            const innerHeight = height - margin.top - margin.bottom;
+
+            const svg = d3.select('#themes-chart')
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height);
+
+            const g = svg.append('g')
+                .attr('transform', `translate(${margin.left},${margin.top})`);
+
+            const xScale = d3.scaleLinear()
+                .domain([0, d3.max(themeData, d => d.count)])
+                .range([0, innerWidth]);
+
+            const yScale = d3.scaleBand()
+                .domain(themeData.map(d => d.theme))
+                .range([0, innerHeight])
+                .padding(0.25);
+
+            // Bars
+            g.selectAll('.theme-bar')
+                .data(themeData)
+                .enter()
+                .append('rect')
+                .attr('class', 'theme-bar')
+                .attr('x', 0)
+                .attr('y', d => yScale(d.theme))
+                .attr('width', d => xScale(d.count))
+                .attr('height', yScale.bandwidth())
+                .attr('rx', 3)
+                .attr('fill', d => sentimentColor[d.sentiment]);
+
+            // Theme labels (left)
+            g.selectAll('.theme-label')
+                .data(themeData)
+                .enter()
+                .append('text')
+                .attr('x', -8)
+                .attr('y', d => yScale(d.theme) + yScale.bandwidth() / 2)
+                .attr('dy', '0.35em')
+                .attr('text-anchor', 'end')
+                .attr('font-size', '12px')
+                .attr('font-family', "'Samsung One', sans-serif")
+                .attr('fill', '#333')
+                .text(d => d.theme);
+
+            // Count labels (right of bar)
+            g.selectAll('.count-label')
+                .data(themeData)
+                .enter()
+                .append('text')
+                .attr('x', d => xScale(d.count) + 6)
+                .attr('y', d => yScale(d.theme) + yScale.bandwidth() / 2)
+                .attr('dy', '0.35em')
+                .attr('text-anchor', 'start')
+                .attr('font-size', '12px')
+                .attr('font-weight', '600')
+                .attr('font-family', "'Samsung One', sans-serif")
+                .attr('fill', '#333')
+                .text(d => d.count);
+        }
+
+        /* ============================================
+           WORD FREQUENCY HORIZONTAL BAR CHART
+           ============================================ */
+        function renderWordsChart() {
+            const container = document.getElementById('words-chart');
+            const rect = container.getBoundingClientRect();
+            const margin = { top: 8, right: 48, bottom: 8, left: 100 };
+            const width = rect.width || 520;
+            const height = 300;
+            const innerWidth = width - margin.left - margin.right;
+            const innerHeight = height - margin.top - margin.bottom;
+
+            const svg = d3.select('#words-chart')
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height);
+
+            const g = svg.append('g')
+                .attr('transform', `translate(${margin.left},${margin.top})`);
+
+            const maxCount = d3.max(wordData, d => d.count);
+
+            const xScale = d3.scaleLinear()
+                .domain([0, maxCount])
+                .range([0, innerWidth]);
+
+            const yScale = d3.scaleBand()
+                .domain(wordData.map(d => d.word))
+                .range([0, innerHeight])
+                .padding(0.2);
+
+            // Opacity scale: highest count = 1.0, lowest = 0.35
+            const opacityScale = d3.scaleLinear()
+                .domain([d3.min(wordData, d => d.count), maxCount])
+                .range([0.35, 1.0]);
+
+            // Bars
+            g.selectAll('.word-bar')
+                .data(wordData)
+                .enter()
+                .append('rect')
+                .attr('class', 'word-bar')
+                .attr('x', 0)
+                .attr('y', d => yScale(d.word))
+                .attr('width', d => xScale(d.count))
+                .attr('height', yScale.bandwidth())
+                .attr('rx', 3)
+                .attr('fill', '#1428A0')
+                .attr('opacity', d => opacityScale(d.count));
+
+            // Word labels (left)
+            g.selectAll('.word-label')
+                .data(wordData)
+                .enter()
+                .append('text')
+                .attr('x', -8)
+                .attr('y', d => yScale(d.word) + yScale.bandwidth() / 2)
+                .attr('dy', '0.35em')
+                .attr('text-anchor', 'end')
+                .attr('font-size', '11px')
+                .attr('font-family', "'Samsung One', sans-serif")
+                .attr('fill', '#333')
+                .text(d => d.word);
+
+            // Count labels (right of bar)
+            g.selectAll('.count-label')
+                .data(wordData)
+                .enter()
+                .append('text')
+                .attr('x', d => xScale(d.count) + 6)
+                .attr('y', d => yScale(d.word) + yScale.bandwidth() / 2)
+                .attr('dy', '0.35em')
+                .attr('text-anchor', 'start')
+                .attr('font-size', '11px')
+                .attr('font-weight', '600')
+                .attr('font-family', "'Samsung One', sans-serif")
+                .attr('fill', '#333')
+                .text(d => d.count);
+        }
+
+        /* ============================================
+           QUOTE CARDS
+           ============================================ */
+        function renderQuoteCards() {
+            const grid = document.getElementById('quotes-grid');
+
+            quotes.forEach(q => {
+                const card = document.createElement('div');
+                card.className = 'quote-card';
+
+                const escapedText = q.text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                const escapedSource = q.source.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                const escapedVideo = q.video.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                const escapedTag = q.tag.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+                card.innerHTML = `
+                    <div class="quote-text">${escapedText}</div>
+                    <div class="quote-bottom">
+                        <div class="quote-source"><strong>${escapedSource}</strong> &mdash; ${escapedVideo}</div>
+                        <span class="tag-badge">${escapedTag}</span>
+                    </div>
+                `;
+
+                grid.appendChild(card);
+            });
+        }
+    </script>
+</body>
+</html>

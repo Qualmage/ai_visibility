@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Most Cited Videos | Samsung TV AI Visibility</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link rel="stylesheet" href="../css/slides.css">
+    <style>
+        .table-section {
+            background: var(--color-bg-section);
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .table-section h2 {
+            font-family: var(--font-display);
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--color-text-primary);
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--color-primary);
+        }
+
+        .video-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+        .video-table th {
+            background: #f0f0f0;
+            padding: 8px 12px;
+            text-align: left;
+            font-weight: 600;
+            font-family: var(--font-display);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .video-table th:first-child {
+            width: 32px;
+            text-align: center;
+        }
+        .video-table th.col-title {
+            min-width: 200px;
+        }
+        .video-table th.col-citations {
+            width: 140px;
+        }
+        .video-table th.col-views,
+        .video-table th.col-likes {
+            text-align: right;
+            width: 70px;
+        }
+        .video-table th.col-published {
+            text-align: right;
+            width: 100px;
+        }
+
+        .video-table td {
+            padding: 8px 12px;
+            border-bottom: 1px solid #e0e0e0;
+            vertical-align: middle;
+        }
+        .video-table td:first-child {
+            text-align: center;
+            color: var(--color-text-secondary);
+            font-weight: 600;
+        }
+        .video-table td.td-title {
+            max-width: 300px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-weight: 500;
+        }
+        .video-table td.td-channel {
+            color: var(--color-primary);
+            font-weight: 500;
+            white-space: nowrap;
+        }
+        .video-table td.td-citations {
+            white-space: nowrap;
+        }
+        .video-table td.td-views,
+        .video-table td.td-likes {
+            text-align: right;
+            color: var(--color-text-secondary);
+        }
+        .video-table td.td-published {
+            text-align: right;
+            color: var(--color-text-secondary);
+            white-space: nowrap;
+        }
+        .video-table tbody tr:nth-child(even) {
+            background: #fafafa;
+        }
+        .video-table tbody tr:nth-child(odd) {
+            background: #ffffff;
+        }
+
+        .citation-cell {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .citation-count {
+            font-weight: 700;
+            color: var(--color-primary);
+            min-width: 28px;
+        }
+        .citation-bar {
+            height: 6px;
+            background: var(--color-primary);
+            border-radius: 3px;
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <header class="slide-header">
+            <div>
+                <h1>Most Cited Videos<span class="subtitle">Top Mini-LED YouTube Content Referenced by AI</span></h1>
+            </div>
+            <span class="slide-badge">YouTube Citations | Feb 2026</span>
+        </header>
+
+        <div class="slide-content">
+            <!-- Full-Width Table -->
+            <div class="table-section">
+                <h2>Top 15 Videos by Citation Count</h2>
+                <table class="video-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th class="col-title">Title</th>
+                            <th>Channel</th>
+                            <th class="col-citations">Citations</th>
+                            <th class="col-views">Views</th>
+                            <th class="col-likes">Likes</th>
+                            <th class="col-published">Published</th>
+                        </tr>
+                    </thead>
+                    <tbody id="video-table-body"></tbody>
+                </table>
+            </div>
+
+            <!-- Insights Row -->
+            <div class="insights horizontal">
+                <div class="insight-card">
+                    <strong>Comparison Format Dominates</strong>
+                    11 of 15 top videos are direct comparisons (OLED vs Mini-LED, QLED vs Mini-LED). AI models overwhelmingly favor head-to-head content when answering Mini-LED questions.
+                </div>
+                <div class="insight-card">
+                    <strong>Viral Reach + AI Citations</strong>
+                    Digital Trends' OLED vs Mini-LED guide has 2.87M views AND 91 citations. High-production comparison content earns both audience reach and AI trust.
+                </div>
+                <div class="insight-card">
+                    <strong>Evergreen Content Stays Cited</strong>
+                    all things tech's 2023 explainer still earns 21 citations in 2026. Well-structured Mini-LED educational content maintains AI relevance for years.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const videoData = [
+            { rank: 1, title: 'The Best TVs To Buy in 2025 | OLED, QLED, and Mini LED!', channel: 'RTINGS Home Theater', citations: 93, views: '167K', likes: '1.9K', published: 'Oct 23, 2025' },
+            { rank: 2, title: 'OLED, QLED, or Mini-LED? Which TV to Buy in 2025', channel: 'Digital Trends', citations: 91, views: '2.87M', likes: '64K', published: 'Apr 11, 2025' },
+            { rank: 3, title: "Mini LED vs OLED Monitors (don't waste your money)", channel: 'Switch and Click', citations: 80, views: '417K', likes: '16K', published: 'Nov 24, 2025' },
+            { rank: 4, title: 'OLED vs QLED vs Mini LED in 2026 | The Best Choice Finally Revealed!', channel: 'ForeMost Picks', citations: 69, views: '10.6K', likes: '-', published: 'Jan 15, 2026' },
+            { rank: 5, title: "OLED vs QLED: Don't Get Tricked in the Store", channel: "Explaining Tech Like You're Five", citations: 63, views: '834K', likes: '8.9K', published: 'Nov 29, 2025' },
+            { rank: 6, title: 'Mini-LED vs OLED — Which One Should YOU Buy?', channel: "Explaining Tech Like You're Five", citations: 39, views: '66.9K', likes: '855', published: 'Dec 2, 2025' },
+            { rank: 7, title: 'The new king for 2026! QLED vs Mini-LED TVs', channel: 'The Viewing Angle', citations: 39, views: '402K', likes: '2.0K', published: 'Oct 2, 2025' },
+            { rank: 8, title: 'OLED Vs Mini LED - Pros & Cons', channel: 'Toasty Bros', citations: 29, views: '118K', likes: '4.1K', published: 'Nov 14, 2025' },
+            { rank: 9, title: 'Did you buy the wrong TV? OLED vs Mini LED', channel: 'Jon Rettinger', citations: 24, views: '428K', likes: '2.7K', published: 'Nov 27, 2025' },
+            { rank: 10, title: "Mini LED vs OLED TVs 2026! Don't make a mistake", channel: 'The Viewing Angle', citations: 23, views: '488K', likes: '6.8K', published: 'Jul 31, 2025' },
+            { rank: 11, title: 'Best TVs of 2025 (OLED & Mini LED)', channel: 'The Display Guy', citations: 22, views: '8.4K', likes: '150', published: 'Dec 1, 2025' },
+            { rank: 12, title: "Mini LED TVs vs Standard LED TVs — There is a BIG Difference", channel: 'all things tech', citations: 21, views: '435K', likes: '4.1K', published: 'Nov 2, 2023' },
+            { rank: 13, title: 'Best Mini LED TVs in 2026 - Buying Guide & Comparison', channel: 'Blumoo', citations: 18, views: '46', likes: '1', published: 'Jan 9, 2026' },
+            { rank: 14, title: 'OLED vs QLED vs Mini-LED: Which TV Should You Buy in 2026?', channel: 'New Gen Home', citations: 16, views: '2.7K', likes: '51', published: 'Jan 16, 2026' },
+            { rank: 15, title: 'Best Mini LED TVs (End of Year 2025) - Top 6 Best Models', channel: 'Royalty Consumer', citations: 15, views: '61.7K', likes: '-', published: 'Sep 23, 2025' }
+        ];
+
+        const maxCitations = d3.max(videoData, d => d.citations);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderTable();
+        });
+
+        function renderTable() {
+            const tbody = document.getElementById('video-table-body');
+            videoData.forEach(d => {
+                const barWidth = Math.round((d.citations / maxCitations) * 80);
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${d.rank}</td>
+                    <td class="td-title" title="${d.title.replace(/"/g, '&quot;')}">${d.title}</td>
+                    <td class="td-channel">${d.channel}</td>
+                    <td class="td-citations">
+                        <div class="citation-cell">
+                            <span class="citation-count">${d.citations}</span>
+                            <div class="citation-bar" style="width: ${barWidth}px;"></div>
+                        </div>
+                    </td>
+                    <td class="td-views">${d.views}</td>
+                    <td class="td-likes">${d.likes}</td>
+                    <td class="td-published">${d.published}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+    </script>
+</body>
+</html>

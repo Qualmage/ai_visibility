@@ -100,7 +100,288 @@ See `docs/build-log.md` for detailed troubleshooting and plain-English explanati
 
 ---
 
+## YouTube Data Pipeline Status
+
+**Last updated:** 2026-02-06 (Session 21)
+
+This section provides a handoff-ready overview of the YouTube data pipeline: what has been collected, what is missing, and what remains to be done.
+
+### Supabase Tables
+
+| Table | Rows | Notes |
+|-------|------|-------|
+| `youtube_videos` | 700 (of 2,300 cited URLs) | Top 700 by citation count fetched |
+| `youtube_channels` | 293 | All have subscriber counts |
+| `youtube_comments` | 19,460 across 592 videos | |
+
+### Data Quality
+
+| Field | Coverage | Notes |
+|-------|----------|-------|
+| Video title/views | 688/700 (98%) | 12 deleted/private videos |
+| Channel linkage | 680/700 (97%) | 20 videos missing channel_id (no @handle in link) |
+| Transcripts | 627/700 (90%) | 73 have captions disabled on YouTube |
+| Comment author | 14,991/19,460 (77%) | Backfilled from raw_response. 4,469 old batch missing |
+| Comment likes | 8,622/19,460 (44%) | SerpAPI omits field when 0 votes |
+| Comment sentiment | 0/19,460 | **Not yet implemented** -- needs NLP/LLM pass |
+| Raw responses | 690 videos, 250 channels, 14,991 comments | Old batch (164 videos) missing raw on comments/channels |
+
+### Known Issues Fixed
+
+- **SerpAPI comment field mapping:** `channel.name` mapped to `author`, `extracted_vote_count` mapped to `likes`. Fixed in both extraction scripts.
+- **Added `raw_response jsonb` column** to `youtube_channels` and `youtube_comments` tables.
+
+### Remaining Work
+
+1. **Comment sentiment analysis** -- 19,460 comments need sentiment classification (positive/neutral/negative). Schema has `sentiment` and `sentiment_score` columns ready.
+2. **Re-fetch comments for original 137 videos** -- Would fill the 4,469 comments missing author/likes (~550 SerpAPI calls). Run: `uv run python clients/samsung/scripts/serpapi_youtube_extraction.py --comments-only` (needs implementation or manual re-run).
+3. **Fetch remaining 1,623 videos** -- Low priority, all have 5 or fewer citations. Run: `uv run python clients/samsung/scripts/serpapi_youtube_extraction.py` (resumes automatically).
+4. **More slides** -- Current 5 slides are Mini-LED focused. Could add slides for other tags, comment sentiment analysis, etc.
+
+### Scripts
+
+| Script | Purpose |
+|--------|---------|
+| `clients/samsung/scripts/serpapi_youtube_extraction.py` | Main extraction pipeline (SerpAPI to Supabase). Has resume support, concurrent workers, dry-run mode. |
+| `clients/samsung/scripts/upload_youtube_to_supabase.py` | Standalone uploader from JSON file. |
+| `clients/samsung/scripts/test_youtube_top10.py` | Test script for SerpAPI validation. |
+
+### Slides (YouTube Citations)
+
+| File | Content |
+|------|---------|
+| `clients/samsung/slides/youtube_citations/1-overview.html` | KPI cards + Mini-LED prompt bar chart |
+| `clients/samsung/slides/youtube_citations/2-influencer-channels.html` | Top channels table + chart |
+| `clients/samsung/slides/youtube_citations/3-top-videos.html` | Top videos table with mini bars |
+| `clients/samsung/slides/youtube_citations/4-timestamp-citations.html` | Timestamp citation cards |
+| `clients/samsung/slides/youtube_citations/5-transcript-insights.html` | Themes, word frequency, quotes |
+
+---
+
 ## Session Progress
+
+### 2026-02-06 (Session 21): YouTube Data Quality Audit, Backfill & Handoff
+
+**Summary:** Conducted a full data quality audit of the YouTube pipeline (700 videos, 293 channels, 19,460 comments). Backfilled comment author and likes fields from raw_response data. Fixed SerpAPI field mapping for comments (`channel.name` to `author`, `extracted_vote_count` to `likes`). Added `raw_response jsonb` column to `youtube_channels` and `youtube_comments`. Documented pipeline status and remaining work for colleague handoff.
+
+#### Data Quality Audit Results
+
+| Field | Coverage | Gap Reason |
+|-------|----------|------------|
+| Video title/views | 688/700 (98%) | 12 deleted/private videos |
+| Channel linkage | 680/700 (97%) | 20 videos have no @handle in URL |
+| Transcripts | 627/700 (90%) | 73 videos have captions disabled |
+| Comment author | 14,991/19,460 (77%) | Old batch (164 videos) predates raw_response column |
+| Comment likes | 8,622/19,460 (44%) | SerpAPI omits likes when 0 votes |
+| Comment sentiment | 0/19,460 | Not yet implemented |
+
+#### Bugs Fixed
+
+| Bug | Root Cause | Fix |
+|-----|-----------|-----|
+| Comment author field empty | SerpAPI uses `channel.name` not `author` | Updated field mapping in extraction scripts |
+| Comment likes field empty | SerpAPI uses `extracted_vote_count` not `likes` | Updated field mapping in extraction scripts |
+| No raw_response on channels/comments | Column did not exist in initial schema | Added `raw_response jsonb` to both tables |
+
+#### Handoff Notes
+
+- Pipeline status section added to DEVELOPMENT.md (above Session Progress) for quick reference
+- Remaining work documented with exact commands to run
+- All scripts have resume support -- safe to re-run without duplicating data
+
+---
+
+### 2026-02-06 (Session 19): YouTube Data Extraction Pipeline & Slide Planning
+
+**Summary:** Built a complete YouTube data extraction pipeline using SerpAPI, created three Supabase tables and two RPC functions, extracted 164 videos with 4,469 comments from Mini-LED tagged content, and planned a 5-slide YouTube citations presentation. Also investigated and documented the Supabase RPC timeout issue from Session 18.
+
+#### YouTube Citation Analysis
+
+- Found 4,070 unique YouTube URLs in `semrush_prompt_urls` table with 15,363 total citations
+- After deduplication by video ID: 2,324 unique videos (many URL variants with tracking params)
+- Time range: 2026-01-01 to 2026-02-03 (34 distinct dates)
+
+#### YouTube Data Extraction Pipeline
+
+1. **Main script:** `clients/samsung/scripts/serpapi_youtube_extraction.py`
+   - Full extraction: video details, channel upsert, comments (paginated), transcript, Supabase upload
+   - Uses SerpAPI `youtube_video` engine for details/comments and `youtube_video_transcript` for transcripts
+   - Supports `--tag`, `--workers`, `--limit`, `--offset`, `--dry-run`, `--skip-comments` flags
+   - `serpapi_call()` wrapper with retry on disconnect (exponential backoff)
+   - ThreadPoolExecutor-based concurrent processing (2 workers)
+   - Resume support: skips already-fetched video_ids
+   - Pagination for 1000+ Supabase rows
+
+2. **Helper scripts:**
+   - `clients/samsung/scripts/upload_youtube_to_supabase.py` - Initial upload for test batch
+   - `clients/samsung/scripts/test_youtube_top10.py` - Validated SerpAPI response structure
+
+#### Supabase Schema (YouTube Tables)
+
+Three new tables via migration `create_youtube_tables`:
+- `youtube_channels` - id, channel_handle (UNIQUE), name, link, thumbnail, subscribers, extracted_subscribers, verified, fetched_at
+- `youtube_videos` - id, video_id (UNIQUE), url, channel_id (FK), title, thumbnail, views, likes, published_date, description, description_links (jsonb), chapters (jsonb), transcript_text, transcript_segments (jsonb), citation_count, comments_token, raw_response (jsonb), fetched_at
+- `youtube_comments` - id, video_id (FK), author, content, likes, published_date, reply_count, sentiment, sentiment_score, fetched_at
+- RLS enabled with anon read policies, indexes on channel_id, video_id, citation_count
+
+#### Supabase RPC Functions
+
+- `get_youtube_cited_urls()` - Deduplicates YouTube URLs by video ID, aggregates citations across URL variants
+- `get_youtube_cited_urls_by_tag(p_tag)` - Same but filtered by prompt tag (e.g., 'Mini-LED')
+
+#### Extraction Results
+
+- Prioritized Mini-LED tagged content first
+- **Completed:** 164 videos, 86 channels, 4,469 comments extracted and stored
+- Processing rate: ~200 videos/hour with 2 workers
+- ~75 API calls per 20 videos (avg ~4 per video: details + comments pages + transcript)
+
+#### Key Bugs Fixed During Development
+
+| Bug | Cause | Fix |
+|-----|-------|-----|
+| Description field type error | SerpAPI returns `description` as dict `{content, links}` not string | `isinstance()` check |
+| Transcript field name | Segments use `snippet` not `text` | Fixed join expression |
+| RPC return type mismatch | Had to `DROP FUNCTION` before recreating with new signature | Drop + recreate |
+| Numeric vs bigint | `SUM()` returns numeric type | `::bigint` cast |
+| 1000 row limit | Supabase client caps RPC results at 1000 | Pagination loop |
+| SerpAPI disconnects | Too many concurrent workers | Reduced from 10 to 2 + retry wrapper |
+| Python output buffering | Background tasks showed no output | `python -u` flag |
+
+#### Slide Planning (In Progress)
+
+Plan written for 5 YouTube citation slides at `clients/samsung/slides/youtube_citations/`:
+1. `1-overview.html` - KPIs + top prompts bar chart
+2. `2-influencer-channels.html` - Channel table + citations bar chart
+3. `3-top-videos.html` - Videos table with engagement metrics
+4. `4-timestamp-citations.html` - Cards showing transcript quotes at cited timestamps
+5. `5-transcript-insights.html` - Themes, word frequency, representative quotes
+
+#### Remaining Work
+
+- Extract remaining ~2,160 non-Mini-LED videos
+- Implement `--comments-only` mode (partially coded)
+- Re-fetch first 10 videos to populate `raw_response` (currently null)
+- Materialized view for `get_samsung_country_citations()` timeout fix
+
+---
+
+### 2026-02-06 (Session 20): YouTube Citations 5-Slide Presentation Build
+
+**Summary:** Built all 5 YouTube Citations presentation slides at `clients/samsung/slides/youtube_citations/`, completing the plan from Session 19. Data was queried from Supabase (`youtube_videos`, `youtube_channels`, `youtube_comments`, `semrush_prompt_urls`) and hardcoded inline following the existing Samsung slide pattern. Dataset: 164 videos, 86 channels, 3,175 citations, 4,469 comments, 18.2M views.
+
+#### Slides Built
+
+| # | File | Content |
+|---|------|---------|
+| 1 | `1-overview.html` | KPI scorecards (videos, citations, channels, views, comments) + top prompts horizontal bar chart + key insights |
+| 2 | `2-influencer-channels.html` | Top 15 channels table (name, subscribers, videos cited, total citations, views) + bar chart + insights |
+| 3 | `3-top-videos.html` | Top 15 videos table with mini bar visualizations (title, channel, views, likes, citations) + insights |
+| 4 | `4-timestamp-citations.html` | 12 timestamp citation cards showing transcript quotes at specific moments AI models reference |
+| 5 | `5-transcript-insights.html` | Themes chart + word frequency analysis + 6 representative quote cards from transcripts |
+
+#### Data Sources
+
+- `youtube_videos`, `youtube_channels`, `youtube_comments` Supabase tables (populated in Session 19)
+- `semrush_prompt_urls` for prompt data that triggered YouTube citations
+- Transcript snippets extracted via SQL matching `start_ms` from `transcript_segments` JSONB column
+
+#### Key Numbers
+
+| Metric | Value |
+|--------|-------|
+| Videos cited by AI | 164 |
+| Unique channels | 86 |
+| Total citations across prompts | 3,175 |
+| Comments collected | 4,469 |
+| Total views across cited videos | 18.2M |
+
+#### Files Created
+- `clients/samsung/slides/youtube_citations/1-overview.html`
+- `clients/samsung/slides/youtube_citations/2-influencer-channels.html`
+- `clients/samsung/slides/youtube_citations/3-top-videos.html`
+- `clients/samsung/slides/youtube_citations/4-timestamp-citations.html`
+- `clients/samsung/slides/youtube_citations/5-transcript-insights.html`
+
+#### Files Created
+- `clients/samsung/scripts/serpapi_youtube_extraction.py`
+- `clients/samsung/scripts/upload_youtube_to_supabase.py`
+- `clients/samsung/scripts/test_youtube_top10.py`
+
+#### Supabase Changes
+- Created tables: `youtube_channels`, `youtube_videos`, `youtube_comments`
+- Created RPC functions: `get_youtube_cited_urls()`, `get_youtube_cited_urls_by_tag(p_tag)`
+- Data loaded: 164 videos, 86 channels, 4,469 comments
+
+---
+
+### 2026-02-06 (Session 18): Supabase RPC Timeout Investigation on Samsung Geo Dashboard
+
+**Summary:** Investigated an intermittent 500 error on the Samsung GEO Dashboard caused by the `get_samsung_country_citations()` RPC function exceeding the Supabase `anon` role's 3-second statement timeout under concurrent load. The fix (materialized view) has been identified but deferred.
+
+#### Problem
+
+- **Symptom:** Intermittent `Error loading data: Supabase RPC error: 500 - {"code":"57014"...}` when loading geo-dashboard.html. Works on refresh.
+- **Root Cause:** The dashboard fires 10 RPC calls simultaneously via `Promise.all` (line 3755). The `get_samsung_country_citations()` function runs 6 regex operations per row across ~23,000 "Owned" rows in `semrush_prompt_urls` (317,789 rows, 151 MB). Under concurrent load, this query exceeds the `anon` role's 3-second timeout. On refresh, Postgres buffer cache makes it fast enough.
+
+#### Role Timeout Configuration
+
+| Role | Timeout | Used By |
+|------|---------|---------|
+| `anon` | 3 seconds | Public dashboard (geo-dashboard.html) |
+| `authenticated` | 8 seconds | Logged-in users |
+| `service_role` | Unlimited | Backend admin tasks |
+
+#### Planned Fix (Deferred)
+
+1. **Materialized view** to pre-compute country citation aggregations (instant query vs regex-per-row)
+2. **Bump `anon` timeout to 8s** as a safety net
+
+#### Files Investigated (Not Modified)
+- `clients/samsung/dashboards/geo-dashboard.html` - line 3755, `Promise.all` with 10 concurrent RPC calls
+- Supabase RPC function `get_samsung_country_citations()` - 6 regex operations per row
+
+---
+
+### 2026-02-04 (Session 17): Samsung Slide Refinements for PowerPoint
+
+**Summary:** Refined multiple Samsung presentation slides to improve PowerPoint compatibility, remove unnecessary content, and update terminology for clarity. This was a polish pass focused on aspect ratios, content trimming, and labeling improvements.
+
+#### What Was Done
+
+1. **Aspect Ratio Improvements:**
+   - `methodology.html` - Made slide more compact for PPT by switching KPI items from vertical stack to 2-column grid layout; reduced padding, font sizes, and gaps throughout
+
+2. **Terminology Updates:**
+   - `genai/2-source-breakdown.html` - Renamed "Direct (GenAI)" to "GenAI (No referrer)" in table and data; updated callout from "Direct Attribution Gap" to "No Referrer Attribution Gap"; changed text from "show as Direct" to "have no referrer"
+
+3. **Content Trimming:**
+   - `sov_mentions.html` - Removed "Movies & Cinema" row from table
+   - `citations_vs_competitors.html` - Removed "Movies & Cinema" row from table and JS data
+   - `mini_led_deepdive/executive_summary.html` - Removed the quote "Mini-LED is to TCL what OLED is to LG"
+
+4. **Platform Breakdown Slide Restructure:**
+   - `platform_breakdown.html` - Removed "Platform Volume Insights" panel entirely; expanded Brand Index table to full width; added "Overall SOV" column; reordered brands by SOV (Samsung, LG, TCL, Sony, Hisense); reduced chart height and font sizes to shorten slide
+
+5. **Messaging Update:**
+   - `mini_led_deepdive/competitor_deepdive.html` - Changed "exploit with Neo QLED messaging" to "address with Mini-LED messaging"
+
+6. **Pulled Colleague's Work:**
+   - Pulled `kpi_scorecards.html` from GitHub (colleague's new slide)
+
+#### Files Modified
+- `clients/samsung/slides/tv_ai_visibility/methodology.html`
+- `clients/samsung/slides/genai/2-source-breakdown.html`
+- `clients/samsung/slides/tv_ai_visibility/sov_mentions.html`
+- `clients/samsung/slides/tv_ai_visibility/platform_breakdown.html`
+- `clients/samsung/slides/tv_ai_visibility/citations_vs_competitors.html`
+- `clients/samsung/slides/mini_led_deepdive/executive_summary.html`
+- `clients/samsung/slides/mini_led_deepdive/competitor_deepdive.html`
+
+#### Files Pulled from GitHub
+- `clients/samsung/slides/tv_ai_visibility/kpi_scorecards.html`
+
+---
 
 ### 2026-02-04 (Session 16): TV AI Visibility Presentation - Methodology Slide
 
@@ -2113,6 +2394,19 @@ uv run clients/samsung/scripts/assemble_dashboard.py clients/samsung/configs/sco
 
 | Date | Decision | Why | Alternatives Rejected |
 |------|----------|-----|----------------------|
+| 2026-02-06 | Backfill comment author/likes from `raw_response` jsonb rather than re-fetching from SerpAPI | Avoids ~550 additional API calls; raw_response already contains the data; only 14,991 of 19,460 comments have raw_response (old batch predates column) | Re-fetch all comments via SerpAPI (expensive, ~550 calls), leave fields empty (loses data quality), manual correction (not scalable) |
+| 2026-02-06 | Store `raw_response` jsonb on all three YouTube tables | Future-proofs against schema changes; enables re-extraction of fields without re-calling API; essential for debugging field mapping issues like the comment author/likes bug | Only store on videos table (lose channel/comment raw data), store as files (harder to query), don't store (lose ability to backfill) |
+| 2026-02-06 | Hardcode all data inline for YouTube citation slides (no live Supabase calls) | Consistent with existing Samsung slide pattern (`slides/qled/`, `slides/tv_ai_visibility/`, etc.); self-contained HTML files for offline sharing; no build step or server dependency; data changes infrequently (snapshot analysis) | Live Supabase queries (adds loading time, requires connectivity), JSON data files (adds file dependency), server-rendered (requires hosting) |
+| 2026-02-06 | Extract transcript snippets at timestamps via SQL (matching start_ms from transcript_segments JSONB) | Timestamp citations are the most compelling evidence of what AI models reference; SQL extraction from JSONB is precise and reproducible; enables showing exact quotes at exact moments | Manual transcript reading (not scalable), full transcript display (too long, loses context), no timestamp data (misses key insight) |
+| 2026-02-06 | Derive word frequency and themes from transcript analysis of top-cited videos | Reveals what topics AI models prioritize in video content; word frequency highlights key terms across transcripts; themes provide narrative structure for the presentation | Manual theme identification (subjective, slow), no transcript analysis (misses content insights), automated NLP (adds dependency, overkill for 164 videos) |
+| 2026-02-06 | Use SerpAPI over YouTube Data API for YouTube data extraction | SerpAPI provides more data in single call (video details, comments with pagination, transcript); no YouTube API quota management needed; consistent with existing SerpAPI usage patterns | YouTube Data API v3 (requires quota management, separate transcript API, multiple calls), yt-dlp scraping (fragile, TOS risk), manual collection (not scalable) |
+| 2026-02-06 | 2 concurrent workers for SerpAPI extraction (not 10) | 10 workers caused frequent "Server disconnected" errors from SerpAPI; 3 was borderline; 2 workers proved stable with ~200 videos/hour throughput | 10 workers (unstable, frequent disconnects), 1 worker (too slow at ~100 videos/hour), 3 workers (borderline stability) |
+| 2026-02-06 | Save `comments_token` in youtube_videos for deferred comment fetching | Allows fetching comments separately later without re-fetching video details; enables `--comments-only` mode; useful if initial extraction skips comments via `--skip-comments` | Fetch all comments immediately (slow, may not need all), don't save token (lose ability to resume comment fetching) |
+| 2026-02-06 | Preserve raw SerpAPI response in `raw_response` jsonb column | Future-proofs against schema changes; allows re-extracting fields without re-calling API; useful for debugging data mapping issues | Only save mapped fields (lose unmapped data), save to files (harder to query), don't save (lose ability to re-extract) |
+| 2026-02-06 | Deduplicate YouTube URLs by video_id at SQL level (RPC function) | YouTube URLs have many variants (tracking params, mobile URLs, short URLs) that all point to same video; deduplication in SQL is more reliable and reusable than Python-side logic; aggregates citation counts across all URL variants | Python-side deduplication (duplicated logic, less reliable), UNIQUE constraint on URL (misses variants), no deduplication (inflated counts) |
+| 2026-02-06 | Standalone HTML slides with inline data for YouTube citations (matching existing Samsung slide pattern) | Consistent with existing slide pattern in `clients/samsung/slides/`; self-contained for easy sharing; no build step or server required; can be opened offline | React/Vue app (build step, dependencies), server-rendered (requires hosting), Jupyter notebooks (requires Python environment) |
+| 2026-02-06 | Defer `get_samsung_country_citations()` timeout fix; plan materialized view | Dashboard is functional (error is intermittent, refresh resolves); materialized view requires view definition, refresh triggers, and dashboard code changes; regex-per-row approach is root cause but pre-computing eliminates it entirely | Bump `anon` timeout only (does not fix underlying inefficiency), reduce concurrent RPC calls (slower dashboard load), move to `authenticated` role (requires login flow), fix immediately (low priority vs other work) |
+| 2026-02-06 | Plan materialized view over query optimization for country citations | Pre-computing ~30 aggregate rows is fundamentally faster than running 138,000 regex evaluations per request; materialized view refreshes can run as `service_role` with no timeout; dashboard query becomes instant read | Optimize regex patterns (marginal gains, still slow), add indexes (regex cannot be indexed), paginate results (still runs full query), cache in JavaScript (stale data risk) |
 | 2026-02-02 | 5-slide structure per panel type (platform, concepts, citations, trends, competitive) | Each slide has single analytical focus for clearer storytelling; allows deeper drill-down per topic; better for stakeholder presentations with Q&A | 3-section single page (too dense), 10+ slides (too many), single overview page (not enough detail) |
 | 2026-02-02 | Dual donut charts for Platform slide (Mentions vs Citations) | Clearly separates two distinct metrics that stakeholders often conflate; visual side-by-side comparison highlights platform differences | Single donut with toggle (loses comparison), stacked bar (harder to read percentages), table only (not visual enough) |
 | 2026-02-02 | Horizontal stacked sentiment bars for Concepts slide | Shows sentiment breakdown per concept at a glance; horizontal layout fits more concept names; stacked bars show proportion not just counts | Vertical bars (truncates long concept names), treemap (loses granular % breakdown), pie charts per concept (too many charts) |
@@ -2206,6 +2500,55 @@ uv run clients/samsung/scripts/assemble_dashboard.py clients/samsung/configs/sco
 ## Changelog
 
 ### [Unreleased]
+
+#### Added
+- **YouTube Data Pipeline Status Section** in DEVELOPMENT.md -- Handoff-ready reference with table row counts, data quality coverage, known issues, remaining work with commands, and script/slide inventory
+- **`raw_response jsonb` column** added to `youtube_channels` and `youtube_comments` tables -- Stores full SerpAPI response for future re-extraction
+
+#### Fixed
+- **SerpAPI comment field mapping** -- `channel.name` was not being mapped to `author`, `extracted_vote_count` was not being mapped to `likes`; fixed in both extraction scripts
+- **Comment author/likes backfill** -- 14,991 comments backfilled from raw_response data; 4,469 comments from old batch (164 videos) still missing because they predate the raw_response column
+
+#### Added
+- **YouTube Citations 5-Slide Presentation** - Complete presentation deck at `clients/samsung/slides/youtube_citations/`:
+  - `1-overview.html` - KPI scorecards (164 videos, 3,175 citations, 86 channels, 18.2M views, 4,469 comments) + top prompts horizontal bar chart + key insights
+  - `2-influencer-channels.html` - Top 15 channels table with subscribers, videos cited, total citations, views + bar chart visualization + insights
+  - `3-top-videos.html` - Top 15 videos table with mini bar visualizations showing title, channel, views, likes, citations + insights
+  - `4-timestamp-citations.html` - 12 timestamp citation cards with transcript quotes extracted at specific moments AI models reference
+  - `5-transcript-insights.html` - Themes chart + word frequency analysis + 6 representative quote cards from transcripts
+  - All data hardcoded inline matching existing Samsung slide pattern (standalone HTML, D3.js v7, `../css/slides.css`)
+  - Data sourced from `youtube_videos`, `youtube_channels`, `youtube_comments`, `semrush_prompt_urls` Supabase tables
+- **YouTube Data Extraction Pipeline** - Complete pipeline for extracting YouTube video data cited in AI responses:
+  - Main script `clients/samsung/scripts/serpapi_youtube_extraction.py` with full extraction workflow: video details, channel upsert, paginated comments, transcript, Supabase upload
+  - Uses SerpAPI `youtube_video` and `youtube_video_transcript` engines
+  - CLI flags: `--tag`, `--workers`, `--limit`, `--offset`, `--dry-run`, `--skip-comments`
+  - Retry wrapper with exponential backoff for SerpAPI disconnects
+  - ThreadPoolExecutor-based concurrency (2 workers, ~200 videos/hour)
+  - Resume support: skips already-fetched video_ids
+  - Pagination loop for 1000+ Supabase row results
+  - Helper scripts: `upload_youtube_to_supabase.py` (initial test upload), `test_youtube_top10.py` (SerpAPI validation)
+- **YouTube Supabase Schema** - Three new tables via migration `create_youtube_tables`:
+  - `youtube_channels` (id, channel_handle UNIQUE, name, link, thumbnail, subscribers, extracted_subscribers, verified, fetched_at)
+  - `youtube_videos` (id, video_id UNIQUE, url, channel_id FK, title, thumbnail, views, likes, published_date, description, description_links jsonb, chapters jsonb, transcript_text, transcript_segments jsonb, citation_count, comments_token, raw_response jsonb, fetched_at)
+  - `youtube_comments` (id, video_id FK, author, content, likes, published_date, reply_count, sentiment, sentiment_score, fetched_at)
+  - RLS enabled with anon read policies; indexes on channel_id, video_id, citation_count
+- **YouTube RPC Functions:**
+  - `get_youtube_cited_urls()` - Deduplicates YouTube URLs by video ID, aggregates citations across URL variants
+  - `get_youtube_cited_urls_by_tag(p_tag)` - Same but filtered by prompt tag (e.g., 'Mini-LED')
+- **YouTube Data Loaded:** 164 videos, 86 channels, 4,469 comments (Mini-LED tagged content prioritized)
+- **YouTube Citation Slide Plan** - 5-slide presentation plan at `clients/samsung/slides/youtube_citations/`: overview KPIs, influencer channels, top videos, timestamp citations, transcript insights
+
+#### Fixed
+- **SerpAPI description field type error** - SerpAPI returns `description` as dict `{content, links}` not string; fixed with `isinstance()` check
+- **Transcript field name mismatch** - SerpAPI transcript segments use `snippet` not `text`; fixed join expression
+- **Supabase RPC return type mismatch** - Had to `DROP FUNCTION` before recreating with new column signature
+- **Numeric vs bigint type mismatch** - `SUM()` returns numeric type; fixed with `::bigint` cast in RPC functions
+- **Supabase 1000 row limit** - RPC results capped at 1000 rows by client library; added pagination loop
+- **SerpAPI "Server disconnected" errors** - Reduced concurrent workers from 10 to 2 + added retry wrapper with exponential backoff
+- **Python output buffering** - Background tasks showed no output; fixed with `python -u` unbuffered flag
+
+#### Investigated
+- **Supabase RPC Timeout on Samsung Geo Dashboard** - Intermittent 500 error (`PostgreSQL 57014: statement timeout`) when loading `geo-dashboard.html`; caused by `get_samsung_country_citations()` exceeding the `anon` role's 3-second timeout under concurrent load (10 `Promise.all` RPC calls); query runs 6 regex operations per row across ~23k "Owned" rows in `semrush_prompt_urls` (317,789 rows, 151 MB); works on refresh due to Postgres buffer cache warming; planned fix: materialized view for pre-computed country citations + optional `anon` timeout bump to 8s; fix deferred (dashboard functional with refresh workaround)
 
 #### Added
 - **Samsung QLED 5-Slide Prototype** - New 5-slide presentation structure in `clients/samsung/slides/qled/`:

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timestamp Deep Dive | Samsung TV AI Visibility</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link rel="stylesheet" href="../css/slides.css">
+    <style>
+        .intro-banner {
+            background: linear-gradient(135deg, #1428A0 0%, #0d1a6b 100%);
+            color: white;
+            border-radius: 8px;
+            padding: 16px 24px;
+            text-align: center;
+            font-size: 18px;
+            font-family: var(--font-display);
+        }
+        .intro-banner strong {
+            font-weight: 700;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-top: 20px;
+            max-height: 520px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+        .card-grid::-webkit-scrollbar {
+            width: 6px;
+        }
+        .card-grid::-webkit-scrollbar-track {
+            background: #f0f0f0;
+            border-radius: 3px;
+        }
+        .card-grid::-webkit-scrollbar-thumb {
+            background: #bbb;
+            border-radius: 3px;
+        }
+
+        .timestamp-card {
+            background: white;
+            border-radius: 8px;
+            padding: 16px 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            border-left: 4px solid #FF0000;
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 16px;
+            align-items: start;
+        }
+        .timestamp-badge {
+            background: #FF0000;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-family: 'Samsung Sharp Sans', monospace;
+            font-size: 14px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .card-content .video-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--color-text-primary);
+            line-height: 1.4;
+            margin-bottom: 4px;
+        }
+        .card-content .channel-name {
+            font-size: 12px;
+            color: var(--color-text-secondary);
+            margin-bottom: 8px;
+        }
+        .citation-badge {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            display: inline-block;
+        }
+        .transcript-quote {
+            font-style: italic;
+            font-size: 12px;
+            line-height: 1.5;
+            color: #555;
+            border-left: 3px solid #1428A0;
+            padding-left: 12px;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <header class="slide-header">
+            <div>
+                <h1>Timestamp Deep Dive<span class="subtitle">AI Models Cite Specific Mini-LED Video Moments</span></h1>
+            </div>
+            <span class="slide-badge">YouTube Citations | Feb 2026</span>
+        </header>
+
+        <div class="slide-content">
+            <!-- Intro Stat Banner -->
+            <div class="intro-banner">
+                <strong>12 Mini-LED videos</strong> cited with specific timestamps — AI models pinpoint exact moments where Mini-LED technology is explained or compared
+            </div>
+
+            <!-- Timestamp Cards Grid -->
+            <div class="card-grid" id="card-grid"></div>
+
+            <!-- Bottom Insights Row -->
+            <div class="insights horizontal">
+                <div class="insight-card">
+                    <strong>Technology Explainers Timestamped</strong>
+                    AI models timestamp the exact moments where creators explain Mini-LED backlight technology, dimming zones, and brightness advantages — pinpointing educational value.
+                </div>
+                <div class="insight-card">
+                    <strong>Comparison Moments Most Cited</strong>
+                    7 of 12 timestamp citations point to segments comparing Mini-LED vs OLED or QLED. AI models direct users to the specific moment the comparison begins.
+                </div>
+                <div class="insight-card">
+                    <strong>Deep Dives Get Deep Links</strong>
+                    The Display Guy's 7:27 timestamp (22 citations) shows AI navigating deep into a video to find the Mini-LED recommendation segment — not just linking the intro.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const timestampData = [
+            { time: '0:13', seconds: 13, title: 'Mini-LED vs OLED — Which One Should YOU Buy?', channel: 'Explaining Tech Like You\'re Five', citations: 39, views: '66.9K', quote: "Most shoppers can't even tell which is which until someone points out the differences. Which screen technology actually deserves your money?" },
+            { time: '0:36', seconds: 36, title: 'Did you buy the wrong TV? OLED vs Mini LED', channel: 'Jon Rettinger', citations: 24, views: '428K', quote: "Movie nights, Rams games with every light on, gaming sessions that have gone way too late, and the results weren't that close, actually." },
+            { time: '7:27', seconds: 447, title: 'Best TVs of 2025 (OLED & Mini LED)', channel: 'The Display Guy', citations: 22, views: '8.4K', quote: "The best mini-LED TV of 2025 has got to go to the Sony Bravia 9. A perfect TV doesn't exist yet. It does have some trade-offs..." },
+            { time: '1:07', seconds: 67, title: 'Mini LED TVs vs Standard LED TVs — There is a BIG Difference', channel: 'all things tech', citations: 21, views: '435K', quote: "Then you get mini LEDs where there's thousands of LEDs giving you better brightness, better contrast — and unfortunately it will be a more expensive TV." },
+            { time: '6:49', seconds: 409, title: 'My pick! The best type of TV in 2026!', channel: 'Jon Rettinger', citations: 12, views: '255K', quote: "Mini-LED sits in the sweet spot. Instead of a handful of dimming zones, you've got thousands of tiny LEDs controlling the backlight way more precisely." },
+            { time: '0:36', seconds: 36, title: 'RGB and SQD-Mini LED technology — What\'s new in 2026?', channel: 'Tech Steve', citations: 8, views: '4.8K', quote: "A traditional mini-LED TV uses a blue backlight LED with quantum dots. This massive 116-inch Hisense uses three different colors on each pixel: red, green, and blue." },
+            { time: '0:27', seconds: 27, title: 'Best TVs of 2026 EXPOSED: OLED vs Mini-LED Truth!', channel: 'NextGen Picks', citations: 7, views: '1.3K', quote: "Every single TV technology has a failure point. The industry wants you to believe that premium automatically means flawless." },
+            { time: '0:08', seconds: 8, title: 'Mini-LED vs OLED in 2026 | Sony Bravia 9 4K TV Review', channel: 'Jeff Rauseo', citations: 6, views: '18.6K', quote: "Over the past three months, I've been working on redoing this space. Today, I want to talk about the last thing I added — this brand new TV." },
+            { time: '0:03', seconds: 3, title: 'Amazon Fire TV Omni Mini-LED TV review: the best Fire TV yet?', channel: 'TechRadar', citations: 5, views: '10.4K', quote: "This is Amazon's most advanced own-brand TV so far. It delivers a dynamic and colorful picture — the brightest we've seen on an Amazon-made TV." },
+            { time: '2:01', seconds: 121, title: 'What Type of TV Should You Buy? OLED, Mini-LED, RGB Compared (2026 Guide)', channel: "Tom's Guide", citations: 4, views: '3.6K', quote: "Since every TV brand is doing mini-LED, they've all developed ways to differentiate. Samsung calls its mini-LEDs Neo QLED — this is where marketing terms start to muddy the waters." },
+            { time: '1:04', seconds: 64, title: 'Top 10 Best Mini-LED TVs in 2025 — Must-See Picks!', channel: 'Factic', citations: 4, views: '18', quote: "Let's dive into the top 10 mini-LED TVs you need to know before buying. The Sony Bravia X95L is a top tier mini-LED TV that delivers outstanding performance." },
+            { time: '0:20', seconds: 20, title: 'Can Hisense Knock Sony Off the Throne? | Bravia 9 vs. U9N', channel: 'Digital Trends', citations: 3, views: '226K', quote: "I've had the Bravia 9 hanging out for a few weeks, the U9N has been hanging out for a few weeks, and I thought, you know what? I really want to compare these two." }
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderCards();
+        });
+
+        function renderCards() {
+            const grid = document.getElementById('card-grid');
+
+            timestampData.forEach(d => {
+                const card = document.createElement('div');
+                card.className = 'timestamp-card';
+
+                const escapedTitle = d.title.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+                const escapedQuote = d.quote.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+                const escapedChannel = d.channel.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+                card.innerHTML = `
+                    <div class="timestamp-badge">${d.time}</div>
+                    <div class="card-content">
+                        <div class="video-title">${escapedTitle}</div>
+                        <div class="channel-name">${escapedChannel} &middot; ${d.views} views</div>
+                        <span class="citation-badge">${d.citations} citations</span>
+                        <div class="transcript-quote">"${escapedQuote}"</div>
+                    </div>
+                `;
+
+                grid.appendChild(card);
+            });
+        }
+    </script>
+</body>
+</html>

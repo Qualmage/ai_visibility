@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Influencer Channel Analysis | Samsung TV AI Visibility</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link rel="stylesheet" href="../css/slides.css">
+    <style>
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 24px;
+        }
+
+        .table-section {
+            background: var(--color-bg-section);
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .table-section h3 {
+            font-family: var(--font-display);
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--color-text-primary);
+            margin-bottom: 16px;
+        }
+
+        .channel-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        .channel-table th {
+            background: #f0f0f0;
+            padding: 10px 10px;
+            text-align: left;
+            font-weight: 600;
+            font-family: var(--font-display);
+            font-size: 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .channel-table th:first-child {
+            width: 36px;
+            text-align: center;
+        }
+        .channel-table th:nth-child(3),
+        .channel-table th:nth-child(4),
+        .channel-table th:nth-child(5),
+        .channel-table th:nth-child(6) {
+            text-align: right;
+        }
+        .channel-table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .channel-table td:first-child {
+            text-align: center;
+            color: var(--color-text-secondary);
+            font-weight: 600;
+        }
+        .channel-table td:nth-child(3),
+        .channel-table td:nth-child(4),
+        .channel-table td:nth-child(5),
+        .channel-table td:nth-child(6) {
+            text-align: right;
+        }
+        .channel-table td:nth-child(5) {
+            font-weight: 700;
+            color: var(--color-primary);
+        }
+        .channel-table tbody tr:nth-child(even) {
+            background: #fafafa;
+        }
+        .channel-table tbody tr:nth-child(odd) {
+            background: #ffffff;
+        }
+
+        .right-column {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .chart-section {
+            background: var(--color-bg-section);
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .chart-section h3 {
+            font-family: var(--font-display);
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--color-text-primary);
+            margin-bottom: 16px;
+        }
+
+        .insight-card {
+            background: white;
+            padding: 14px 18px;
+            border-radius: 8px;
+            font-size: 13px;
+            line-height: 1.5;
+            border-left: 4px solid var(--color-primary);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+        }
+        .insight-card strong {
+            color: var(--color-primary);
+            display: block;
+            margin-bottom: 4px;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <header class="slide-header">
+            <div>
+                <h1>Influencer Channel Analysis<span class="subtitle">Top YouTube Channels Cited for Mini-LED Content</span></h1>
+            </div>
+            <span class="slide-badge">YouTube Citations | Feb 2026</span>
+        </header>
+
+        <div class="slide-content">
+            <div class="main-grid">
+                <!-- Left Column: Table -->
+                <div class="table-section">
+                    <h3>Top 15 Channels by Citations</h3>
+                    <table class="channel-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Channel</th>
+                                <th>Subscribers</th>
+                                <th>Videos</th>
+                                <th>Citations</th>
+                                <th>Views</th>
+                            </tr>
+                        </thead>
+                        <tbody id="channel-table-body"></tbody>
+                    </table>
+                </div>
+
+                <!-- Right Column: Chart + Insights -->
+                <div class="right-column">
+                    <div class="chart-section">
+                        <h3>Citations by Channel</h3>
+                        <div id="bar-chart" style="height: 280px;"></div>
+                    </div>
+
+                    <div class="insight-card">
+                        <strong>RTINGS & Digital Trends Lead</strong>
+                        The two largest tech review outlets combine for 216 Mini-LED citations across 14 videos — structured testing and brand authority drive AI trust.
+                    </div>
+
+                    <div class="insight-card">
+                        <strong>Small Channels Punch Above Weight</strong>
+                        ForeMost Picks (2.9K subs) earns 69 citations from a single video, outperforming Jon Rettinger (1.65M subs, 47 citations). Content relevance trumps audience size for Mini-LED topics.
+                    </div>
+
+                    <div class="insight-card">
+                        <strong>Explainer Channels Dominate</strong>
+                        Explaining Tech Like You're Five ranks #3 with 102 citations from just 2 videos. AI models heavily favor channels that break down Mini-LED technology in accessible terms.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const channelData = [
+            { rank: 1, name: 'RTINGS Home Theater', subscribers: '398K', videos: 7, citations: 111, views: '719K' },
+            { rank: 2, name: 'Digital Trends', subscribers: '1.37M', videos: 7, citations: 105, views: '3.8M' },
+            { rank: 3, name: "Explaining Tech Like You're Five", subscribers: '78.5K', videos: 2, citations: 102, views: '901K' },
+            { rank: 4, name: 'Switch and Click', subscribers: '1.09M', videos: 1, citations: 80, views: '417K' },
+            { rank: 5, name: 'ForeMost Picks', subscribers: '2.9K', videos: 1, citations: 69, views: '10.6K' },
+            { rank: 6, name: 'The Viewing Angle', subscribers: '572K', videos: 4, citations: 64, views: '1.5M' },
+            { rank: 7, name: 'Jon Rettinger', subscribers: '1.65M', videos: 7, citations: 47, views: '3.3M' },
+            { rank: 8, name: 'The Display Guy', subscribers: '50.8K', videos: 7, citations: 42, views: '612K' },
+            { rank: 9, name: 'Toasty Bros', subscribers: '893K', videos: 1, citations: 29, views: '118K' },
+            { rank: 10, name: 'all things tech', subscribers: '279K', videos: 1, citations: 21, views: '435K' },
+            { rank: 11, name: 'NextGen Picks', subscribers: '2.3K', videos: 3, citations: 19, views: '2.3K' },
+            { rank: 12, name: 'New Gen Home', subscribers: '2.8K', videos: 3, citations: 18, views: '33.3K' },
+            { rank: 13, name: 'Blumoo', subscribers: '11.8K', videos: 1, citations: 18, views: '46' },
+            { rank: 14, name: 'Smart Home Sounds', subscribers: '154K', videos: 5, citations: 16, views: '460K' },
+            { rank: 15, name: 'B The Installer', subscribers: '276K', videos: 2, citations: 15, views: '125K' }
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderTable();
+            renderBarChart();
+        });
+
+        function renderTable() {
+            const tbody = document.getElementById('channel-table-body');
+            channelData.forEach(d => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${d.rank}</td>
+                    <td>${d.name}</td>
+                    <td>${d.subscribers}</td>
+                    <td>${d.videos}</td>
+                    <td>${d.citations}</td>
+                    <td>${d.views}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderBarChart() {
+            const chartData = channelData.slice(0, 10);
+            const container = document.getElementById('bar-chart');
+            const width = container.clientWidth;
+            const height = 280;
+            const margin = { top: 8, right: 50, bottom: 8, left: 140 };
+            const chartWidth = width - margin.left - margin.right;
+            const chartHeight = height - margin.top - margin.bottom;
+
+            const svg = d3.select('#bar-chart')
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height);
+
+            const chart = svg.append('g')
+                .attr('transform', `translate(${margin.left}, ${margin.top})`);
+
+            // Scales
+            const y = d3.scaleBand()
+                .domain(chartData.map(d => d.name))
+                .range([0, chartHeight])
+                .padding(0.2);
+
+            const x = d3.scaleLinear()
+                .domain([0, d3.max(chartData, d => d.citations) * 1.1])
+                .range([0, chartWidth]);
+
+            // Bars
+            chart.selectAll('rect')
+                .data(chartData)
+                .enter()
+                .append('rect')
+                .attr('y', d => y(d.name))
+                .attr('x', 0)
+                .attr('height', y.bandwidth())
+                .attr('width', d => x(d.citations))
+                .attr('fill', '#1428A0')
+                .attr('rx', 4)
+                .attr('opacity', 0.85);
+
+            // Channel name labels (left of bars)
+            chart.selectAll('.channel-label')
+                .data(chartData)
+                .enter()
+                .append('text')
+                .attr('class', 'channel-label')
+                .attr('x', -8)
+                .attr('y', d => y(d.name) + y.bandwidth() / 2)
+                .attr('text-anchor', 'end')
+                .attr('dominant-baseline', 'middle')
+                .style('font-family', 'Samsung One, sans-serif')
+                .style('font-size', '11px')
+                .style('fill', '#333')
+                .text(d => d.name);
+
+            // Citation count labels (right of bars)
+            chart.selectAll('.count-label')
+                .data(chartData)
+                .enter()
+                .append('text')
+                .attr('class', 'count-label')
+                .attr('x', d => x(d.citations) + 6)
+                .attr('y', d => y(d.name) + y.bandwidth() / 2)
+                .attr('dominant-baseline', 'middle')
+                .style('font-family', 'Samsung One, sans-serif')
+                .style('font-size', '11px')
+                .style('font-weight', '600')
+                .style('fill', '#666')
+                .text(d => d.citations);
+        }
+    </script>
+</body>
+</html>

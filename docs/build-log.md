@@ -10,6 +10,909 @@ A detailed journal of the General Analytics development process. Each session do
 
 ---
 
+## 2026-02-06 (Session 21): YouTube Data Quality Audit, Backfill & Handoff Documentation
+
+### Session Goals
+Audit the full YouTube data pipeline for data quality gaps, backfill missing comment fields from raw API responses, fix field mapping bugs in the extraction scripts, and create handoff documentation so a colleague can pick up remaining work.
+
+---
+
+### Part 1: Data Quality Audit
+
+#### What Was Audited
+
+After scaling the YouTube extraction from the initial 164 Mini-LED videos (Session 19) to 700 videos across all tags, a full audit was performed against all three YouTube Supabase tables.
+
+| Table | Total Rows | Context |
+|-------|-----------|---------|
+| `youtube_videos` | 700 | Top 700 videos by citation count (out of 2,300 total cited YouTube URLs) |
+| `youtube_channels` | 293 | All unique channels from those 700 videos; all have subscriber counts |
+| `youtube_comments` | 19,460 | Comments across 592 of the 700 videos (108 videos had comments disabled or no comments) |
+
+#### Field-Level Coverage
+
+| Field | Coverage | Gap Reason |
+|-------|----------|------------|
+| Video title/views | 688/700 (98%) | 12 videos are deleted or set to private on YouTube |
+| Channel linkage | 680/700 (97%) | 20 videos have no @handle in their YouTube URL, so `channel_id` could not be resolved |
+| Transcripts | 627/700 (90%) | 73 videos have captions disabled by the uploader |
+| Comment author | 14,991/19,460 (77%) | Backfilled from `raw_response`; 4,469 comments from the old batch (first 164 videos) have no raw data |
+| Comment likes | 8,622/19,460 (44%) | SerpAPI omits the `likes` field entirely when a comment has 0 votes |
+| Comment sentiment | 0/19,460 | Not yet implemented -- columns (`sentiment`, `sentiment_score`) exist in schema but are empty |
+| Raw API responses | 690 videos, 250 channels, 14,991 comments | The original 164-video batch was extracted before the `raw_response` column was added |
+
+#### Plain English
+Think of the data quality audit like checking a filing cabinet after a big data collection project. We opened every drawer and counted what was complete versus what had missing pages. Most drawers (98% of videos, 97% of channels) were fully filled out. The biggest gaps were in the comments drawer: about 23% of comments were missing the author's name, and 56% were missing the "likes" count. The reason for the likes gap turned out to be that our data supplier (SerpAPI) simply does not include the likes field when a comment has zero likes -- they leave it out entirely rather than saying "0". The author gap was caused by a field naming mismatch that we fixed (see Part 2).
+
+---
+
+### Part 2: SerpAPI Comment Field Mapping Fix
+
+#### What Happened
+Comments extracted in the initial 164-video batch had empty `author` and `likes` fields. When the extraction script was first written, it looked for fields called `author` and `likes` in SerpAPI's response, but SerpAPI actually uses different field names.
+
+#### Technical Cause
+SerpAPI's YouTube video response nests comment data with non-obvious field names:
+- The comment author's name is at `comment.channel.name` (not `comment.author`)
+- The comment like count is at `comment.extracted_vote_count` (not `comment.likes`)
+
+The extraction script was mapping the wrong keys, resulting in `NULL` values being stored in Supabase.
+
+#### Plain English Cause
+Imagine ordering a filing cabinet from a supplier, and the label on the "Author" drawer actually says "Channel Name" on their end. We were looking in the right cabinet but reading the wrong label. Once we learned what SerpAPI actually calls these fields, we updated our script to look in the right place.
+
+#### Fix Applied
+Updated the field mapping in both extraction scripts:
+- `serpapi_youtube_extraction.py` -- Changed comment parsing to read `channel.name` for author and `extracted_vote_count` for likes
+- `upload_youtube_to_supabase.py` -- Same mapping fix for the standalone uploader
+
+#### Backfill from raw_response
+For the newer batch of comments (536 videos, 14,991 comments), the full SerpAPI response had been stored in the `raw_response` jsonb column. This allowed backfilling the `author` and `likes` fields directly from the stored data without making any new API calls.
+
+The older batch (164 videos, 4,469 comments) was extracted before the `raw_response` column existed, so those comments cannot be backfilled without re-fetching from SerpAPI (~550 API calls).
+
+#### Plain English
+For the newer comments, we had kept a photocopy of the original SerpAPI response in our database. So we could go back to that photocopy, find the author name and likes count in the right place, and fill in the blanks. For the older comments, we did not keep photocopies, so the only way to fill in the blanks would be to go back to SerpAPI and ask again (which costs API credits).
+
+---
+
+### Part 3: Schema Changes
+
+#### `raw_response jsonb` Column Added
+
+Added a `raw_response` column (type: jsonb) to two tables that were missing it:
+- `youtube_channels` -- Stores the full SerpAPI channel response
+- `youtube_comments` -- Stores the full SerpAPI comment response
+
+The `youtube_videos` table already had this column from Session 19.
+
+#### Why This Matters
+Storing the raw API response is insurance against future problems like the field mapping bug. If a field is mapped incorrectly or a new field becomes available, the raw data can be re-processed without re-calling the API.
+
+#### Plain English
+This is like keeping the original receipt after a purchase. Even if you file the purchase under the wrong category in your spreadsheet, you can always go back to the receipt and correct it. Without the receipt (raw_response), you would have to go back to the store (SerpAPI) and ask for a copy -- which takes time and may cost money.
+
+---
+
+### Part 4: Pipeline Status Summary (Handoff Reference)
+
+#### Current State
+
+The YouTube data pipeline has three Supabase tables populated with data from SerpAPI:
+
+**`youtube_videos` (700 rows):**
+These are the top 700 YouTube videos by citation count from the 2,300 unique YouTube URLs found in AI responses. Each row contains video metadata (title, views, likes, publish date), the full transcript text and timestamped segments, and a link to the channel that uploaded it.
+
+**`youtube_channels` (293 rows):**
+The 293 unique YouTube channels that uploaded those 700 videos. Each has subscriber count, verification status, and channel handle.
+
+**`youtube_comments` (19,460 rows):**
+Comments from 592 of the 700 videos. Contains comment text, author name (77% populated), likes count (44% populated), and publish date.
+
+#### What Still Needs Doing
+
+1. **Comment sentiment analysis** (highest value, no API cost)
+   - 19,460 comments need to be classified as positive, neutral, or negative
+   - The database columns `sentiment` (text) and `sentiment_score` (float) already exist and are empty
+   - Could use an LLM (like Claude or GPT) to batch-classify, or a lighter NLP library like TextBlob or VADER
+
+2. **Re-fetch comments for original 137 videos** (moderate value, ~550 SerpAPI calls)
+   - Would fill the 4,469 comments that are missing author and likes fields
+   - Command: `uv run python clients/samsung/scripts/serpapi_youtube_extraction.py --comments-only`
+   - Note: the `--comments-only` flag needs implementation or the videos can be manually re-run
+
+3. **Fetch remaining 1,623 videos** (low priority)
+   - All remaining videos have 5 or fewer citations each
+   - The extraction script has built-in resume support and will automatically skip already-fetched videos
+   - Command: `uv run python clients/samsung/scripts/serpapi_youtube_extraction.py`
+
+4. **Additional slides**
+   - Current 5 slides focus on Mini-LED tag
+   - Could create similar decks for other tags (OLED, Gaming TVs, etc.)
+   - Comment sentiment slides would be possible once sentiment analysis is complete
+
+#### Scripts Reference
+
+| Script | What It Does | How to Run |
+|--------|-------------|------------|
+| `serpapi_youtube_extraction.py` | Main pipeline: fetches video details, comments, and transcripts from SerpAPI, uploads to Supabase. Supports `--tag`, `--workers`, `--limit`, `--offset`, `--dry-run`, `--skip-comments` flags. Has resume support (skips already-fetched videos). | `uv run python clients/samsung/scripts/serpapi_youtube_extraction.py` |
+| `upload_youtube_to_supabase.py` | Uploads YouTube data from a local JSON file to Supabase. Used for initial test batch. | `uv run python clients/samsung/scripts/upload_youtube_to_supabase.py` |
+| `test_youtube_top10.py` | Tests SerpAPI response structure for YouTube videos. | `uv run python clients/samsung/scripts/test_youtube_top10.py` |
+
+#### Slides Reference
+
+Five slides were built in Session 20, all at `clients/samsung/slides/youtube_citations/`:
+
+| Slide | File | Content |
+|-------|------|---------|
+| 1 | `1-overview.html` | KPI scorecards (videos, citations, channels, views, comments) + Mini-LED prompt bar chart |
+| 2 | `2-influencer-channels.html` | Top YouTube channels table ranked by citation count + bar chart |
+| 3 | `3-top-videos.html` | Top individual videos table with mini bar visualizations |
+| 4 | `4-timestamp-citations.html` | Cards showing specific transcript moments that AI models reference |
+| 5 | `5-transcript-insights.html` | Themes, word frequency analysis, and representative quote cards |
+
+---
+
+### Session Summary
+
+| Aspect | Detail |
+|--------|--------|
+| Primary task | Data quality audit and handoff documentation |
+| Videos audited | 700 (of 2,300 cited URLs) |
+| Channels audited | 293 |
+| Comments audited | 19,460 |
+| Bug fixed | SerpAPI comment field mapping (`channel.name` to `author`, `extracted_vote_count` to `likes`) |
+| Schema changes | Added `raw_response jsonb` to `youtube_channels` and `youtube_comments` |
+| Backfill completed | 14,991 comments had author/likes populated from raw_response |
+| Backfill gap | 4,469 comments (old batch) still missing author/likes -- need SerpAPI re-fetch |
+| Documentation | Pipeline status section added to DEVELOPMENT.md; handoff notes in both doc files |
+
+### Files Modified
+- `clients/samsung/scripts/serpapi_youtube_extraction.py` -- Fixed comment field mapping
+- `clients/samsung/scripts/upload_youtube_to_supabase.py` -- Fixed comment field mapping
+
+### Supabase Changes
+- Added `raw_response jsonb` column to `youtube_channels` table
+- Added `raw_response jsonb` column to `youtube_comments` table
+- Backfilled 14,991 comment rows with author and likes from raw_response
+
+### Lessons Learned
+
+1. **Always store the raw API response.** The `raw_response` column saved us from needing ~550 API calls to backfill comment fields. The original 164-video batch did not store raw responses for comments/channels, and those records now have permanent gaps unless re-fetched. The cost of storing a few KB of JSON per row is trivial compared to the cost of re-calling an API.
+
+2. **API field names are not always intuitive.** SerpAPI uses `channel.name` for comment author and `extracted_vote_count` for likes. These are not obvious mappings. When integrating with any API, always inspect the actual response structure rather than guessing field names from documentation alone.
+
+3. **"Missing" vs "zero" is ambiguous in API responses.** SerpAPI omits the `likes` field entirely when a comment has 0 votes, rather than returning `likes: 0`. This means a missing field could mean "zero" or "not fetched" -- two very different things. When designing schemas, consider adding a `fetched_at` timestamp or a `raw_response` column to distinguish between "we never asked" and "the answer was nothing."
+
+---
+
+## 2026-02-06 (Session 20): YouTube Citations 5-Slide Presentation Build
+
+### Session Goals
+Build the complete 5-slide YouTube Citations presentation deck at `clients/samsung/slides/youtube_citations/`, implementing the plan from Session 19. Query Supabase for YouTube citation data and hardcode it inline following the existing Samsung slide pattern.
+
+---
+
+### Part 1: Data Preparation
+
+#### What Was Queried
+
+Data was pulled from four Supabase tables to populate the slides:
+
+| Table | What It Provided |
+|-------|-----------------|
+| `youtube_videos` | Video metadata: titles, views, likes, publish dates, transcripts, transcript_segments (JSONB with timestamps) |
+| `youtube_channels` | Channel names, subscriber counts, verification status |
+| `youtube_comments` | Comment counts per video |
+| `semrush_prompt_urls` | Which AI prompts cite YouTube URLs and how many times |
+
+The resulting dataset covers 164 videos cited by AI models, from 86 unique YouTube channels, with 3,175 total citations across AI prompts, 4,469 comments, and 18.2 million combined views.
+
+#### Plain English
+We gathered data from four different filing cabinets in our database. One cabinet had details about each video (title, how many people watched it, what was said in the video). Another had information about the YouTube channels that made those videos. A third had all the viewer comments. And the fourth had records of which questions people asked AI models that resulted in these videos being recommended. Combining all four gave us the complete picture for the presentation.
+
+---
+
+### Part 2: Slide-by-Slide Build
+
+#### Slide 1: Overview (`1-overview.html`)
+
+**Content:** Five KPI scorecards across the top (videos cited, total citations, unique channels, total views, total comments) followed by a horizontal bar chart showing the top prompts that trigger YouTube citations, plus a key insights panel.
+
+**Technical:** KPI cards use the standard Samsung card pattern from `slides.css`. The bar chart is built with D3.js v7, rendering horizontal bars sized proportionally to citation count. Insights are presented as bullet points in a styled panel below the chart.
+
+**Plain English:** This is the "big picture" slide. It answers: "How much YouTube content are AI models recommending?" The KPI cards give five headline numbers at a glance, the bar chart shows which questions people ask that lead to YouTube videos being cited, and the insights highlight the most important takeaways.
+
+#### Slide 2: Influencer Channels (`2-influencer-channels.html`)
+
+**Content:** A table of the top 15 YouTube channels ranked by how often their videos are cited by AI models, showing channel name, subscriber count, number of videos cited, total citations, and total views. Accompanied by a bar chart and insights panel.
+
+**Technical:** The table uses the standard slide table styling. Bar chart rendered with D3.js. Channel data was aggregated by joining `youtube_videos` with `youtube_channels` on `channel_id`, then grouping by channel to sum citations and views.
+
+**Plain English:** This slide answers: "Which YouTube creators does AI trust the most?" If a channel like RTINGS or MKBHD has many of its videos recommended by AI, that tells us AI models view that channel as an authority on the topic. The table ranks these channels so Samsung can see who the key influencers are in the AI recommendation ecosystem.
+
+#### Slide 3: Top Videos (`3-top-videos.html`)
+
+**Content:** A table of the top 15 individual videos ranked by citation count, showing title, channel, views, likes, and citations. Each row includes mini bar visualizations for views and citations to make comparisons visual.
+
+**Technical:** Mini bars are inline SVG elements rendered proportionally within table cells. This approach avoids full D3.js chart overhead while still providing visual comparison. Video data comes directly from `youtube_videos` table ordered by `citation_count DESC`.
+
+**Plain English:** This slide answers: "Which specific videos do AI models recommend the most?" While the previous slide looked at channels (the creators), this one looks at individual videos. A single viral review video might be cited dozens of times. This helps Samsung identify exactly which content pieces AI models are sending people to.
+
+#### Slide 4: Timestamp Citations (`4-timestamp-citations.html`)
+
+**Content:** 12 cards, each showing a specific moment in a video that AI models reference. Each card displays the video title, channel name, timestamp, and the exact transcript quote at that moment.
+
+**Technical:** Transcript snippets were extracted using SQL by matching the `start_ms` field within the `transcript_segments` JSONB column in `youtube_videos`. Each segment has a `start_ms` (milliseconds) and `snippet` (text) field. The query finds the segment closest to the cited timestamp and extracts a window of surrounding segments to form a coherent quote.
+
+**Plain English:** This is the most granular slide. When AI models cite a YouTube video, they sometimes reference a specific moment -- like "at 3:45 in this video, the reviewer explains why Mini-LED backlighting reduces blooming." This slide shows exactly what was said at those moments. It is like having someone watch 164 videos for you and mark the exact quotes that AI models think are most important.
+
+#### Slide 5: Transcript Insights (`5-transcript-insights.html`)
+
+**Content:** A themes chart showing major topics discussed across all cited video transcripts, a word frequency analysis highlighting the most common technical terms, and 6 representative quote cards pulled from transcripts.
+
+**Technical:** Themes and word frequency were derived from transcript analysis of the top-cited videos. The themes chart uses D3.js horizontal bars. Word frequency data was computed by tokenizing `transcript_text`, removing stop words, and counting occurrences of relevant technical terms. Quote cards are manually selected representative excerpts that illustrate key themes.
+
+**Plain English:** This slide answers: "What are all these YouTube videos actually talking about?" Instead of watching 164 videos, this slide summarizes the common themes (like "backlighting technology" or "picture quality comparison"), shows which words come up most often (revealing what topics dominate the conversation), and highlights 6 representative quotes that capture the overall narrative. It is like reading a book summary instead of the whole book.
+
+---
+
+### Part 3: Design Decisions
+
+#### Inline Data Pattern
+
+All data is hardcoded directly into each HTML file rather than fetching from Supabase at runtime. This matches the established pattern across all Samsung slide decks (`slides/qled/`, `slides/tv_ai_visibility/`, `slides/mini_led_deepdive/`, `slides/genai/`).
+
+**Why this works:** These slides are snapshot analyses meant for presentations. The data represents a specific point in time and does not need to update dynamically. Hardcoding means the slides work offline, load instantly, have no API dependencies, and can be shared as standalone files.
+
+**Plain English:** Think of these slides like printed photographs rather than live camera feeds. A photograph captures a moment perfectly and works anywhere -- you can email it, print it, show it on any screen. A live camera feed needs a network connection and a server running. For presentations, photographs (hardcoded data) are more reliable.
+
+#### Transcript Timestamp Extraction
+
+The most technically interesting part was extracting transcript quotes at specific timestamps. YouTube transcripts are stored as JSONB arrays where each segment has:
+- `start_ms`: when the segment starts (in milliseconds)
+- `snippet`: the text spoken during that segment
+
+To get a readable quote, we could not just take one segment (they are often only 2-5 words). Instead, we took a window of surrounding segments (typically 3-5 before and after the target timestamp) and concatenated their `snippet` fields to form a coherent sentence or paragraph.
+
+**Plain English:** YouTube transcripts are chopped into tiny pieces -- sometimes just a few words each, with a timestamp for when each piece was spoken. To get a meaningful quote, we could not just grab one piece ("reduces the" is not useful). Instead, we grabbed the pieces before and after the target moment and stitched them together into a complete thought, like assembling puzzle pieces around a center point.
+
+---
+
+### Session Summary
+
+| Aspect | Detail |
+|--------|--------|
+| Primary deliverable | 5-slide YouTube Citations presentation deck |
+| Location | `clients/samsung/slides/youtube_citations/` |
+| Data scope | 164 videos, 86 channels, 3,175 citations, 4,469 comments, 18.2M views |
+| Data sources | `youtube_videos`, `youtube_channels`, `youtube_comments`, `semrush_prompt_urls` |
+| Pattern followed | Existing Samsung slide pattern (standalone HTML, D3.js v7, `../css/slides.css`, inline data) |
+| Slides built | 5 of 5 (overview, channels, videos, timestamps, transcript insights) |
+| Status | Complete |
+
+### Files Created
+- `clients/samsung/slides/youtube_citations/1-overview.html` -- KPI scorecards + top prompts bar chart
+- `clients/samsung/slides/youtube_citations/2-influencer-channels.html` -- Top 15 channels table + bar chart
+- `clients/samsung/slides/youtube_citations/3-top-videos.html` -- Top 15 videos table with mini bars
+- `clients/samsung/slides/youtube_citations/4-timestamp-citations.html` -- 12 timestamp citation cards with transcript quotes
+- `clients/samsung/slides/youtube_citations/5-transcript-insights.html` -- Themes chart + word frequency + quote cards
+
+### Lessons Learned
+
+1. **JSONB timestamp extraction needs windowing.** A single transcript segment is usually too short (2-5 words) to be meaningful. Always extract a window of surrounding segments to form coherent quotes. The `start_ms` field is in milliseconds, not seconds -- a common source of off-by-1000x errors.
+
+2. **Inline data slides are faster to build than live-data slides.** No loading states, error handling, or API configuration needed. For snapshot analyses that represent a specific point in time, hardcoding is the pragmatic choice.
+
+3. **Mini bar visualizations in tables are highly effective.** Simple inline SVG bars within table cells provide instant visual comparison without the overhead of a full charting library. They make numeric tables much easier to scan.
+
+---
+
+## 2026-02-06 (Session 19): YouTube Data Extraction Pipeline & Slide Planning
+
+### Session Goals
+Build a complete pipeline to extract YouTube video data (details, comments, transcripts) for videos cited in AI responses, store it in Supabase, and plan a 5-slide presentation for YouTube citation analysis. Also continued investigating the Supabase RPC timeout issue documented in Session 18.
+
+---
+
+### Part 1: YouTube Citation Discovery
+
+#### What Was Found
+The `semrush_prompt_urls` table contains 4,070 unique YouTube URLs with 15,363 total citations across AI responses. After deduplicating by video ID (extracting the `v=` parameter from URLs), this reduced to 2,324 unique videos. The difference comes from URL variants -- the same video can be cited with different tracking parameters, mobile URLs (`m.youtube.com`), short URLs (`youtu.be`), or timestamp links (`&t=123`).
+
+The data spans 34 distinct dates from 2026-01-01 to 2026-02-03.
+
+#### Plain English
+When AI models like ChatGPT or Google AI recommend YouTube videos in their responses, the same video often shows up with slightly different web addresses. For example, one video might appear as `youtube.com/watch?v=abc123`, `m.youtube.com/watch?v=abc123` (the mobile version), or `youtube.com/watch?v=abc123&t=45` (linking to a specific timestamp). All of these are the same video, just with different "decorations" on the address. We found 4,070 different addresses pointing to 2,324 actual videos.
+
+---
+
+### Part 2: SerpAPI YouTube Extraction Pipeline
+
+#### Architecture
+
+The extraction script (`clients/samsung/scripts/serpapi_youtube_extraction.py`) uses SerpAPI as a data intermediary rather than the YouTube Data API directly. SerpAPI provides a unified interface that returns video details, comments, and transcripts in structured JSON.
+
+**Two SerpAPI engines used:**
+1. `youtube_video` -- Returns video metadata (title, views, likes, published date, description, chapters) and comments (with pagination via `next_page_token`)
+2. `youtube_video_transcript` -- Returns the full transcript with timestamps and text segments
+
+**Extraction flow per video:**
+1. Call SerpAPI `youtube_video` engine with the video ID
+2. Parse video details (title, views, likes, description, chapters)
+3. Extract channel info and upsert into `youtube_channels` (create if new, update if exists)
+4. Parse comments from the response
+5. If more comments exist (`next_page_token`), paginate to fetch additional pages
+6. Call SerpAPI `youtube_video_transcript` engine for the transcript
+7. Combine transcript segments into full text
+8. Upload everything to Supabase (video record, channel record, comment records)
+
+#### Plain English
+Think of SerpAPI as a librarian who goes to YouTube on our behalf. Instead of us going to YouTube directly (which has strict rules about how many books we can check out), we ask the librarian to fetch the information. For each video, the librarian gets us four things: the video's details (title, how many people watched it, when it was posted), the channel that posted it, what people said in the comments, and a written transcript of everything said in the video. The librarian puts all of this into a neat package that we then store in our database.
+
+#### CLI Flags
+
+The script supports several command-line options:
+- `--tag <tag>` -- Only extract videos cited in prompts with this tag (e.g., `--tag "Mini-LED"`)
+- `--workers <n>` -- Number of concurrent extraction threads (default: 2)
+- `--limit <n>` -- Maximum number of videos to process
+- `--offset <n>` -- Skip the first N videos (for resuming)
+- `--dry-run` -- Show what would be extracted without actually calling APIs
+- `--skip-comments` -- Extract video details and transcript only, skip comments
+
+#### Concurrency and Retry Logic
+
+The script uses Python's `ThreadPoolExecutor` for concurrent processing. Initially 10 workers were tried, but SerpAPI frequently returned "Server disconnected without sending a response" errors. Reducing to 3 was borderline. 2 workers proved stable at approximately 200 videos per hour.
+
+A retry wrapper (`serpapi_call()`) handles transient failures:
+- On disconnect, waits with exponential backoff (2s, 4s, 8s)
+- Retries up to 3 times before giving up on a video
+- Logs all retries for debugging
+
+#### Plain English
+Imagine sending 10 research assistants to the same library at the same time. The library gets overwhelmed and starts closing the door on some of them ("Server disconnected"). We reduced to 2 assistants going at a time, which the library could handle. If an assistant gets turned away, they wait a bit (starting at 2 seconds, then doubling) and try again up to 3 times before giving up on that particular book.
+
+#### Resume Support
+
+The script checks which video IDs already exist in the `youtube_videos` table before starting. Any videos already extracted are skipped automatically. This means you can stop the script and restart it without re-processing completed videos.
+
+---
+
+### Part 3: Supabase Schema Design
+
+#### Three New Tables
+
+**`youtube_channels`**
+| Column | Type | Purpose |
+|--------|------|---------|
+| id | bigint (PK) | Auto-generated ID |
+| channel_handle | text (UNIQUE) | YouTube handle (e.g., `@MKBHD`); used as dedup key |
+| name | text | Display name |
+| link | text | Full channel URL |
+| thumbnail | text | Channel avatar URL |
+| subscribers | text | Raw subscriber text (e.g., "18.2M subscribers") |
+| extracted_subscribers | bigint | Parsed numeric value (e.g., 18200000) |
+| verified | boolean | Whether channel is verified |
+| fetched_at | timestamptz | When data was fetched |
+
+**`youtube_videos`**
+| Column | Type | Purpose |
+|--------|------|---------|
+| id | bigint (PK) | Auto-generated ID |
+| video_id | text (UNIQUE) | YouTube video ID (the `v=` parameter) |
+| url | text | Canonical URL |
+| channel_id | bigint (FK) | Reference to youtube_channels |
+| title | text | Video title |
+| thumbnail | text | Thumbnail URL |
+| views | bigint | View count |
+| likes | bigint | Like count |
+| published_date | text | Publication date string |
+| description | text | Video description text |
+| description_links | jsonb | Links extracted from description |
+| chapters | jsonb | Video chapter markers |
+| transcript_text | text | Full transcript as concatenated text |
+| transcript_segments | jsonb | Individual transcript segments with timestamps |
+| citation_count | bigint | Number of AI citations for this video |
+| comments_token | text | Token for fetching additional comments later |
+| raw_response | jsonb | Complete SerpAPI response for future use |
+| fetched_at | timestamptz | When data was fetched |
+
+**`youtube_comments`**
+| Column | Type | Purpose |
+|--------|------|---------|
+| id | bigint (PK) | Auto-generated ID |
+| video_id | text (FK) | Reference to youtube_videos.video_id |
+| author | text | Comment author name |
+| content | text | Comment text |
+| likes | bigint | Comment like count |
+| published_date | text | When comment was posted |
+| reply_count | integer | Number of replies |
+| sentiment | text | Placeholder for future sentiment analysis |
+| sentiment_score | real | Placeholder for future sentiment score |
+| fetched_at | timestamptz | When data was fetched |
+
+All tables have Row Level Security (RLS) enabled with `anon` read policies for dashboard access.
+
+#### Plain English
+We created three filing cabinets in our database:
+
+1. **Channels cabinet** -- One folder per YouTube channel (like MKBHD or Linus Tech Tips). Contains the channel's name, how many subscribers they have, and their profile picture. Each channel gets a unique folder so we never create duplicates.
+
+2. **Videos cabinet** -- One folder per video. Contains everything about the video: its title, how many views and likes it has, the full transcript (everything said in the video), any chapter markers, and links in the description. We also store a "comments token" -- think of it as a bookmark that tells us where to pick up if we want to fetch more comments later.
+
+3. **Comments cabinet** -- One entry per comment on each video. Contains who wrote the comment, what they said, how many likes the comment got, and when it was posted. We also reserved space for future sentiment analysis (is the comment positive or negative?).
+
+#### RPC Functions
+
+Two SQL functions were created:
+
+1. **`get_youtube_cited_urls()`** -- Takes all YouTube URLs from `semrush_prompt_urls`, extracts the video ID from each URL, groups them together, and counts total citations across all URL variants. Returns a list of unique videos with their aggregated citation counts.
+
+2. **`get_youtube_cited_urls_by_tag(p_tag)`** -- Same as above but only looks at URLs from prompts tagged with a specific topic (e.g., "Mini-LED"). This lets us focus extraction on videos relevant to a particular analysis.
+
+#### Plain English
+These are pre-built database queries that do the hard work of URL deduplication. Instead of the dashboard having to figure out that `youtube.com/watch?v=abc123` and `m.youtube.com/watch?v=abc123&t=45` are the same video, the database handles this automatically and tells the dashboard "this video was cited 15 times total across all its URL variants."
+
+---
+
+### Part 4: Extraction Results
+
+#### Mini-LED Prioritized Extraction
+
+We started with videos tagged under "Mini-LED" prompts since this was the immediate analysis need. Results:
+
+| Metric | Count |
+|--------|-------|
+| Videos extracted | 164 |
+| Channels discovered | 86 |
+| Comments collected | 4,469 |
+| Processing rate | ~200 videos/hour |
+| API calls per 20 videos | ~75 (avg ~4 per video) |
+
+The ~4 API calls per video breaks down as: 1 for video details + 1-2 for comment pages + 1 for transcript. Some videos have no transcript (unavailable) which saves a call.
+
+#### Plain English
+We processed 164 YouTube videos that AI models cite when people ask about Mini-LED TVs. For each video, we collected who made it, what was said, and what viewers think (via comments). At our processing speed of ~200 videos per hour, the full set of 164 took less than an hour.
+
+---
+
+### Part 5: Bugs Encountered and Fixed
+
+#### Bug 1: Description Field Type Error
+
+**What happened:** The script crashed with a type error when trying to store the video description.
+
+**Technical cause:** SerpAPI returns the `description` field as a dictionary `{"content": "...", "links": [...]}` rather than a plain string. The code assumed it was a string and tried to insert it directly into a text column.
+
+**Plain English:** We expected the description to be a simple block of text, but it came wrapped in a package with both the text AND a list of links. It would be like receiving a letter inside a box when you expected just the letter -- you need to open the box first.
+
+**Fix:** Added an `isinstance()` check: if the description is a dictionary, extract the `content` field for the text column and the `links` field for the separate `description_links` jsonb column. If it is already a string, use it directly.
+
+#### Bug 2: Transcript Field Name Mismatch
+
+**What happened:** The transcript text was empty even though segments were being returned.
+
+**Technical cause:** The code joined segments using `segment['text']` but SerpAPI transcript segments use the key `snippet` not `text`.
+
+**Plain English:** We were looking for the transcript text under the label "text" but SerpAPI filed it under "snippet." It is like looking for a file labeled "Notes" when it is actually labeled "Memo" -- the content is the same, just the label differs.
+
+**Fix:** Changed the join expression from `segment['text']` to `segment['snippet']`.
+
+#### Bug 3: RPC Return Type Mismatch
+
+**What happened:** The `get_youtube_cited_urls()` function failed after being updated with new columns.
+
+**Technical cause:** PostgreSQL does not allow changing the return type of an existing function. You must drop the old function first and recreate it.
+
+**Plain English:** Imagine you have a report template that produces a table with 3 columns. If you want to change it to 5 columns, you cannot just edit the template -- you have to throw away the old one and create a brand new template. That is how PostgreSQL treats function signatures.
+
+**Fix:** Added `DROP FUNCTION IF EXISTS get_youtube_cited_urls()` before the `CREATE OR REPLACE FUNCTION` statement.
+
+#### Bug 4: Numeric vs Bigint Type Mismatch
+
+**What happened:** The RPC function returned an error about incompatible types.
+
+**Technical cause:** PostgreSQL's `SUM()` aggregate function returns `numeric` type, but the function's return type declared the column as `bigint`. These types are not automatically compatible in function return types.
+
+**Plain English:** The database calculated a sum and got a number like "15363" but stored it in a general-purpose number format. Our function expected a specific integer format. Even though they look the same, the database treats them as different types -- like the difference between writing "15,363" (formatted number) and "15363" (plain integer).
+
+**Fix:** Added explicit `::bigint` casts to all `SUM()` expressions in the function.
+
+#### Bug 5: Supabase 1000 Row Limit
+
+**What happened:** Only 1,000 cited URLs were returned even though the actual count was higher.
+
+**Technical cause:** The Supabase JavaScript client library caps RPC results at 1,000 rows by default. This is a client-side limit, not a database limit.
+
+**Plain English:** Supabase only delivers results in batches of 1,000. If you have 2,324 results, you get the first 1,000 and the rest are silently dropped. It is like a delivery truck that can only carry 1,000 packages -- anything beyond that needs a second trip.
+
+**Fix:** Added a pagination loop that calls the RPC with `LIMIT 1000 OFFSET n` incrementally until no more rows are returned, then combines all pages.
+
+#### Bug 6: SerpAPI Server Disconnects
+
+**What happened:** With 10 concurrent workers, many requests failed with "Server disconnected without sending a response."
+
+**Technical cause:** SerpAPI's servers could not handle 10 simultaneous requests from the same client. The server simply dropped connections under load.
+
+**Plain English:** We were making too many phone calls to SerpAPI at the same time. Their switchboard got overwhelmed and started hanging up on us. By reducing from 10 simultaneous calls to 2, the switchboard could handle the load.
+
+**Fix:** Reduced workers from 10 to 2 and added a retry wrapper with exponential backoff (wait 2s, then 4s, then 8s between retries).
+
+#### Bug 7: Python Output Buffering
+
+**What happened:** When running the script in the background, no output appeared in the log file for long periods.
+
+**Technical cause:** Python buffers stdout by default. When output is redirected to a file (not a terminal), it only flushes when the buffer is full (~4KB) or the program exits.
+
+**Plain English:** Python was writing its progress reports into a holding pen instead of sending them out immediately. It would wait until it had enough to fill a page before actually writing to the log file. For a slow-running script, this meant no visible progress for minutes at a time.
+
+**Fix:** Run with `python -u` flag which disables output buffering, causing each print statement to appear immediately.
+
+---
+
+### Part 6: YouTube Citation Slide Plan
+
+#### Planned Slides
+
+Five HTML slides were planned for the YouTube citations presentation at `clients/samsung/slides/youtube_citations/`:
+
+| # | File | Content |
+|---|------|---------|
+| 1 | `1-overview.html` | KPI scorecards (total videos cited, total citations, unique channels, avg views) + horizontal bar chart of top prompts that cite YouTube |
+| 2 | `2-influencer-channels.html` | Table of top channels by citation count with subscriber counts and verification badges + bar chart of citations per channel |
+| 3 | `3-top-videos.html` | Table of top videos by citation count with views, likes, publish date, and channel name |
+| 4 | `4-timestamp-citations.html` | Cards showing transcript excerpts at the specific timestamps cited by AI models |
+| 5 | `5-transcript-insights.html` | Aggregated themes from transcripts, word frequency analysis, representative quotes |
+
+These follow the existing Samsung slide pattern (standalone HTML files with inline data, Samsung branding, D3.js charts) established in Sessions 14-15.
+
+#### Plain English
+We planned five presentation slides that tell the story of "Which YouTube videos do AI models recommend when people ask about Mini-LED TVs?" The slides go from broad to specific:
+1. The big picture numbers (how many videos, how many citations)
+2. Which YouTube channels are most cited (the influencers AI trusts)
+3. Which specific videos are most cited
+4. What exact moments in videos are being referenced (transcript quotes)
+5. Common themes across all the transcripts (what topics come up repeatedly)
+
+---
+
+### Session Summary
+
+| Aspect | Detail |
+|--------|--------|
+| Primary deliverable | YouTube data extraction pipeline |
+| Script | `clients/samsung/scripts/serpapi_youtube_extraction.py` |
+| API used | SerpAPI (`youtube_video` + `youtube_video_transcript` engines) |
+| New Supabase tables | `youtube_channels`, `youtube_videos`, `youtube_comments` |
+| New RPC functions | `get_youtube_cited_urls()`, `get_youtube_cited_urls_by_tag(p_tag)` |
+| Data extracted | 164 videos, 86 channels, 4,469 comments (Mini-LED tag) |
+| Total YouTube URLs found | 4,070 (2,324 unique videos after dedup) |
+| Bugs fixed | 7 (description type, transcript field, RPC signature, numeric cast, row limit, concurrency, buffering) |
+| Slide plan | 5 slides at `clients/samsung/slides/youtube_citations/` |
+| Status | Pipeline complete; Mini-LED extraction done; slides planned but not yet built |
+
+### Files Created
+- `clients/samsung/scripts/serpapi_youtube_extraction.py` -- Main extraction pipeline
+- `clients/samsung/scripts/upload_youtube_to_supabase.py` -- Initial test upload helper
+- `clients/samsung/scripts/test_youtube_top10.py` -- SerpAPI response structure validation
+
+### Lessons Learned
+
+1. **SerpAPI rate limits are connection-based, not key-based.** Reducing concurrent connections matters more than spacing out requests. 2 workers was the sweet spot for stability.
+
+2. **Always check API response field types.** SerpAPI documentation does not always match reality. The description field being a dict instead of a string was undocumented. Always use `isinstance()` checks when mapping API responses to database columns.
+
+3. **PostgreSQL function signatures are immutable.** You cannot change the return type of an existing function with `CREATE OR REPLACE`. You must `DROP FUNCTION` first. This is different from modifying the function body, which `CREATE OR REPLACE` handles fine.
+
+4. **Supabase RPC has a client-side 1000 row limit.** This is not a database limit -- it is the JavaScript client library default. Always implement pagination when RPC results might exceed 1000 rows.
+
+5. **Save raw API responses.** Storing the complete `raw_response` in a jsonb column costs minimal storage but provides enormous value: you can re-extract fields, debug mapping issues, and discover new data without re-calling the API.
+
+6. **Deduplicate at the database level.** YouTube URLs have many variants (tracking params, mobile URLs, timestamps). Deduplicating in SQL with regex video_id extraction is more reliable and reusable than doing it in Python.
+
+7. **Use `python -u` for background scripts.** Output buffering causes log files to appear empty during long-running processes. The `-u` flag forces immediate output, which is essential for monitoring progress.
+
+---
+
+## 2026-02-06 (Session 18): Supabase RPC Timeout Investigation on Samsung Geo Dashboard
+
+### Session Goals
+Investigate and document an intermittent 500 error on the Samsung GEO Dashboard caused by a Supabase RPC function timing out under concurrent load. This was a diagnostic session -- the fix has been identified but deferred.
+
+---
+
+### Part 1: The Symptom
+
+#### What Happened
+When loading the Samsung GEO Dashboard (`clients/samsung/dashboards/geo-dashboard.html`), users sometimes see the error:
+
+```
+Error loading data: Supabase RPC error: 500 - {"code":"57014","details":null,"hint":null,"message":"canceling statement due to statement timeout"}
+```
+
+The error is intermittent -- refreshing the page often makes it go away.
+
+#### Plain English
+Imagine you walk into a restaurant and order 10 dishes at the same time. The kitchen has a strict rule: every dish must be ready within 3 minutes or it gets thrown away. Most of the time, each dish takes about 1.7 minutes, so they all finish in time. But when the kitchen is busy preparing all 10 dishes simultaneously, some dishes take longer than 3 minutes and get cancelled. If you order again (refresh), the kitchen remembers the recipes from last time (they are still on the counter), so everything comes out faster and nothing gets cancelled.
+
+That is exactly what is happening with the dashboard's database queries.
+
+---
+
+### Part 2: Root Cause Analysis
+
+#### The Technical Chain of Events
+
+1. **The dashboard fires 10 RPC calls simultaneously.** On line 3755 of `geo-dashboard.html`, the `loadDashboard()` function uses `Promise.all` to fire all data-fetching functions at once. This is normally a good practice -- it loads data in parallel instead of one-at-a-time.
+
+2. **One of those calls is `get_samsung_country_citations()`.** This RPC function queries the `semrush_prompt_urls` table (317,789 rows, 151 MB total). It runs 6 regex operations per row to extract country codes from URLs across roughly 23,000 "Owned" domain rows.
+
+3. **The `anon` role has a 3-second statement timeout.** Supabase assigns different timeout limits based on the database role making the request:
+   - `anon` role: **3 seconds** (used by the public dashboard)
+   - `authenticated` role: **8 seconds** (used by logged-in users)
+   - `service_role`: **unlimited** (used by backend admin tasks)
+
+4. **Under ideal conditions, the query takes ~1.7 seconds.** That is well within the 3-second limit. But when 10 queries hit the database simultaneously, they compete for CPU, memory, and disk I/O. The country citations query -- being the heaviest -- gets pushed past 3 seconds and gets killed by Postgres.
+
+5. **On refresh, it works.** After the first attempt, Postgres has loaded the relevant data pages into its buffer cache (RAM). The second attempt reads from cache instead of disk, making it significantly faster -- fast enough to finish within 3 seconds even under concurrent load.
+
+#### Plain English
+The dashboard asks the database 10 questions at once. One of those questions is particularly hard -- it has to scan through 300,000+ rows and run pattern-matching on each one. The database has a 3-second deadline for answering questions from anonymous users. Usually the hard question finishes in about 1.7 seconds, but when the database is also answering the other 9 questions at the same time, it sometimes takes longer than 3 seconds and gets cut off. When you refresh the page, the database has already loaded the relevant data into its fast memory, so the same question now takes less than a second.
+
+#### What the Error Code Means
+- **PostgreSQL error code `57014`**: "canceling statement due to statement timeout"
+- This is Postgres saying: "I stopped running your query because it took too long according to the timeout configured for your role."
+
+---
+
+### Part 3: Why This Specific Query Is Slow
+
+#### The `get_samsung_country_citations()` Function
+
+This function does the following:
+1. Filters `semrush_prompt_urls` to rows where `domain_type = 'Owned'` (about 23,000 rows)
+2. Runs **6 regex operations per row** to extract country codes from Samsung URLs (e.g., `samsung.com/us/` becomes `/us/`, `design.samsung.com` becomes `design.samsung.com`)
+3. Groups the results by country code and counts citations
+
+The table statistics:
+- Total rows: **317,789**
+- Total table size: **151 MB**
+- Rows matching `domain_type = 'Owned'`: **~23,000**
+- Regex operations per matching row: **6**
+- Effective regex evaluations: **~138,000** per query execution
+
+#### Plain English
+Think of it like searching through a filing cabinet with 300,000 folders. First, you pull out the 23,000 folders labeled "Owned." Then for each of those 23,000 folders, you open them up and run 6 different pattern-matching tests to figure out which country the folder belongs to. That is 138,000 pattern-matching operations. On a good day, you can finish this in 1.7 seconds. On a busy day when you are also doing 9 other searches at the same time, it takes over 3 seconds.
+
+---
+
+### Part 4: Role Timeout Configuration
+
+#### Supabase Role Timeouts
+Supabase uses PostgreSQL's `statement_timeout` setting per role:
+
+| Role | Timeout | Used By |
+|------|---------|---------|
+| `anon` | 3 seconds | Public-facing dashboards (no login required) |
+| `authenticated` | 8 seconds | Logged-in users |
+| `service_role` | Unlimited | Backend admin tasks, Edge Functions |
+
+The Samsung GEO Dashboard uses the `anon` key (no authentication required), which means all queries must complete within 3 seconds.
+
+#### Plain English
+The database treats different types of users differently. Anonymous visitors (people who just open the dashboard without logging in) get a strict 3-second limit. Logged-in users get 8 seconds. Admin tools have no limit. Our dashboard is public, so it gets the strictest limit.
+
+---
+
+### Part 5: Planned Fix (Deferred)
+
+#### Option A: Materialized View (Primary Fix)
+Create a materialized view that pre-computes the country citation aggregations. Instead of running regex on 23,000 rows every time someone loads the dashboard, the results would be calculated once and stored. The dashboard query would then read the pre-computed results instantly.
+
+**Before (current):** Every dashboard load runs ~138,000 regex evaluations in real time.
+**After (with materialized view):** Every dashboard load reads ~30 pre-computed rows. Instant.
+
+The materialized view would need to be refreshed periodically (e.g., after new data is loaded), but this refresh would run as `service_role` with no timeout.
+
+#### Option B: Bump `anon` Timeout to 8 Seconds (Safety Net)
+As an additional safety measure, the `anon` role timeout could be increased from 3 seconds to 8 seconds. This would match the `authenticated` role's timeout and give all queries more breathing room. However, this alone does not fix the underlying inefficiency -- it just raises the threshold.
+
+#### Why Deferred
+The dashboard is functional -- the error only occurs intermittently on first load, and a refresh resolves it. The materialized view approach requires creating the view definition, testing it, setting up a refresh trigger, and verifying the dashboard code works with the new data source. This work is planned but not yet scheduled.
+
+#### Plain English
+The long-term solution is to do the hard calculation once ahead of time and save the results, rather than doing it fresh every time someone opens the dashboard. Think of it like pre-making a summary report each night instead of pulling every file and counting from scratch every time someone asks. We have not done this yet because the dashboard works most of the time -- it only fails occasionally on the first load, and refreshing fixes it.
+
+---
+
+### Session Summary
+
+| Aspect | Detail |
+|--------|--------|
+| Issue | Intermittent 500 timeout on geo-dashboard.html |
+| Error code | PostgreSQL `57014` (statement timeout) |
+| Root cause | `anon` role 3s timeout + heavy regex query + 10 concurrent RPC calls |
+| Affected function | `get_samsung_country_citations()` |
+| Affected file | `clients/samsung/dashboards/geo-dashboard.html` (line 3755) |
+| Affected table | `semrush_prompt_urls` (317,789 rows, 151 MB) |
+| Status | Investigated, fix deferred |
+| Planned fix | Materialized view for pre-computed country citations |
+| Safety net | Consider bumping `anon` timeout from 3s to 8s |
+
+### Files Investigated (Not Modified)
+- `clients/samsung/dashboards/geo-dashboard.html` -- line 3755, `Promise.all` fires 10 RPC calls simultaneously
+- Supabase RPC function `get_samsung_country_citations()` -- runs 6 regex operations per row across ~23k rows
+
+### Lessons Learned
+
+1. **Supabase role timeouts are strict.** The `anon` role's 3-second timeout is aggressive for queries involving regex operations across large tables. Always check role timeout limits when designing RPC functions for public-facing dashboards.
+
+2. **Concurrent queries compete for resources.** A query that runs fine in isolation may fail when 9 other queries are running at the same time. `Promise.all` is great for performance but increases database contention.
+
+3. **Postgres buffer cache masks the problem.** The fact that "refresh fixes it" is a classic sign of a cold-cache vs warm-cache issue. The first load hits disk; subsequent loads hit cache. This can make intermittent timeout bugs hard to reproduce consistently.
+
+4. **Regex in SQL is expensive at scale.** Running 6 regex operations per row across 23,000 rows is ~138,000 evaluations. Pre-computing these results (materialized view) is almost always the right approach when the underlying data does not change between requests.
+
+5. **Know your role timeouts.** Different Supabase roles (anon, authenticated, service_role) have different timeout settings. Designing queries for the `anon` role requires keeping them fast or pre-computing heavy aggregations.
+
+---
+
+## 2026-02-04 (Session 17): Samsung Slide Refinements for PowerPoint
+
+### Session Goals
+Polish multiple Samsung presentation slides to improve PowerPoint compatibility, remove unnecessary content, update terminology for clarity, and ensure slides fit well when exported to PPT format. This was a refinement session rather than new feature development.
+
+---
+
+### Part 1: Aspect Ratio Improvements for PowerPoint
+
+#### The Problem
+The methodology slide had KPI definitions stacked vertically, making the slide too tall for comfortable PowerPoint viewing. When slides are too long, they either get cut off or require scrolling when exported.
+
+#### What Was Changed
+**File:** `clients/samsung/slides/tv_ai_visibility/methodology.html`
+- Changed KPI items from a vertical stack to a 2-column grid layout
+- Reduced padding, font sizes, and gaps throughout the slide
+- Made the overall slide more compact
+
+#### Technical Details
+The CSS change involved switching from `display: block` (stacking items top to bottom) to a CSS Grid layout with `grid-template-columns: 1fr 1fr` (two equal columns side by side).
+
+#### Plain English
+Think of it like organizing items on a shelf. Instead of stacking books on top of each other (making a tall pile), we arranged them side by side in two columns. This uses the same horizontal space but reduces the vertical height, making the slide fit better in PowerPoint's fixed dimensions.
+
+---
+
+### Part 2: Terminology Update - "Direct" to "No Referrer"
+
+#### The Problem
+The term "Direct (GenAI)" was misleading. In web analytics, "direct" traffic traditionally means someone typed the URL directly or used a bookmark. But AI traffic that shows as "direct" is actually traffic where the AI platform did not send a referrer header - a technical distinction that was being obscured by the label.
+
+#### What Was Changed
+**File:** `clients/samsung/slides/genai/2-source-breakdown.html`
+- Renamed "Direct (GenAI)" to "GenAI (No referrer)" in the table and JavaScript data
+- Changed the callout title from "Direct Attribution Gap" to "No Referrer Attribution Gap"
+- Updated callout description from "show as Direct" to "have no referrer"
+
+#### Technical Details
+When you click a link from some AI platforms, the browser does not tell the destination website where you came from (no HTTP Referer header). This traffic gets bucketed as "direct" in analytics tools because there is no referral information. It is not truly "direct" - the user did not type the URL - but the analytics tool cannot tell the difference.
+
+#### Plain English
+Imagine you are a store owner trying to figure out where your customers heard about you. Some customers come in and say "I saw your ad on Facebook" (referral traffic). Others come in but have no idea how they found you (direct). Now imagine Facebook started hiding the fact that it sent customers - they still came from Facebook, but the store owner cannot tell anymore. That is what "no referrer" traffic is: we know it came from AI, but the AI platform did not leave a calling card.
+
+#### Why This Matters
+Using "No Referrer" instead of "Direct" is more accurate and does not confuse stakeholders who know "direct" has a specific meaning in analytics. It also explains WHY we cannot attribute this traffic rather than implying the users typed the URL.
+
+---
+
+### Part 3: Content Trimming - Removing "Movies & Cinema"
+
+#### What Was Changed
+Two slides had their "Movies & Cinema" row removed:
+- `clients/samsung/slides/tv_ai_visibility/sov_mentions.html` - Removed from HTML table
+- `clients/samsung/slides/tv_ai_visibility/citations_vs_competitors.html` - Removed from both HTML table and JavaScript data array
+
+#### Why
+The "Movies & Cinema" category was likely deemed irrelevant to the core TV AI visibility narrative or had insufficient data. Removing low-value rows keeps slides focused and easier to read.
+
+#### Plain English
+When preparing a presentation, you want every row in a table to earn its place. If "Movies & Cinema" was not adding insight to the TV AI visibility story, removing it makes the remaining data more impactful. Less noise, more signal.
+
+---
+
+### Part 4: Platform Breakdown Slide Restructure
+
+#### What Was Changed
+**File:** `clients/samsung/slides/tv_ai_visibility/platform_breakdown.html`
+
+Major changes:
+1. **Removed "Platform Volume Insights" panel entirely** - The panel was redundant or not adding value
+2. **Expanded Brand Index table to full width** - Without the insights panel, the table can use all available horizontal space
+3. **Added "Overall SOV" column to Brand Index table** - New metric showing each brand's total Share of Voice
+4. **Reordered brands by SOV** - Now sorted Samsung, LG, TCL, Sony, Hisense (descending by Share of Voice)
+5. **Reduced chart height** - From 220px to 180px
+6. **Reduced font sizes** - "Total Mentions" label and value now smaller
+7. **Reduced padding and gaps** - Overall slide is shorter/more compact
+
+#### Plain English
+This slide got a significant cleanup. An entire panel was removed because it was not earning its space. The main table was expanded to fill the gap and got a new column showing overall Share of Voice. The brands were reordered so Samsung (the client) appears first, followed by competitors in descending order of their share. Finally, everything was made more compact to fit better in PowerPoint.
+
+#### Why Reorder by SOV?
+Putting Samsung first (as the brand being analyzed) and then showing competitors in descending SOV order creates a natural narrative: "Here is Samsung, and here are the competitors ranked by how much of the AI conversation they own."
+
+---
+
+### Part 5: Mini-LED Deep Dive Content Refinements
+
+#### What Was Changed
+
+**File 1:** `clients/samsung/slides/mini_led_deepdive/executive_summary.html`
+- Removed the quote: "Mini-LED is to TCL what OLED is to LG"
+
+**File 2:** `clients/samsung/slides/mini_led_deepdive/competitor_deepdive.html`
+- Changed "exploit with Neo QLED messaging" to "address with Mini-LED messaging"
+
+#### Why Remove the Quote
+The quote "Mini-LED is to TCL what OLED is to LG" was likely seen as either:
+- Too provocative or confrontational for a client presentation
+- Not directly relevant to Samsung's Mini-LED strategy
+- Giving too much brand association to competitors
+
+#### Why Change "Exploit" to "Address"
+The word "exploit" has negative connotations (taking unfair advantage). "Address" is more professional and focuses on solving a market opportunity rather than taking advantage of competitors. The change also specified "Mini-LED messaging" instead of "Neo QLED messaging" to be more precise about the product category.
+
+#### Plain English
+These were tone adjustments. The quote was removed because it might have been too bold for a formal presentation. The word "exploit" was changed to "address" because it sounds less aggressive. Instead of "we will exploit their weakness", it is now "we will address this opportunity" - same idea, more professional language.
+
+---
+
+### Part 6: Pulling Colleague's Work from GitHub
+
+#### What Was Done
+Pulled `clients/samsung/slides/tv_ai_visibility/kpi_scorecards.html` from GitHub - a new slide created by a colleague.
+
+#### Plain English
+Another team member created a new slide and pushed it to the shared repository. We pulled their changes to get the latest version. This is normal collaborative development using Git.
+
+---
+
+### Session Summary
+
+| Change Type | Count | Description |
+|-------------|-------|-------------|
+| Aspect ratio improvements | 1 | methodology.html made more compact |
+| Terminology updates | 1 | "Direct" renamed to "No referrer" |
+| Content removals | 3 | Movies & Cinema rows, quote, insights panel |
+| Structural changes | 1 | platform_breakdown.html restructured |
+| Messaging updates | 1 | "exploit" changed to "address" |
+| External pulls | 1 | Colleague's kpi_scorecards.html |
+
+### Files Modified
+
+- `clients/samsung/slides/tv_ai_visibility/methodology.html` - Aspect ratio improvements
+- `clients/samsung/slides/genai/2-source-breakdown.html` - Terminology update
+- `clients/samsung/slides/tv_ai_visibility/sov_mentions.html` - Removed Movies & Cinema row
+- `clients/samsung/slides/tv_ai_visibility/platform_breakdown.html` - Major restructure
+- `clients/samsung/slides/tv_ai_visibility/citations_vs_competitors.html` - Removed Movies & Cinema row
+- `clients/samsung/slides/mini_led_deepdive/executive_summary.html` - Removed quote
+- `clients/samsung/slides/mini_led_deepdive/competitor_deepdive.html` - Messaging update
+
+### Files Pulled from GitHub
+
+- `clients/samsung/slides/tv_ai_visibility/kpi_scorecards.html`
+
+### Lessons Learned
+
+1. **PowerPoint constraints matter:** When creating HTML slides that will be exported to PPT, vertical space is at a premium. Using grid layouts instead of stacked layouts helps fit more content.
+
+2. **Terminology precision:** Using accurate technical terms ("no referrer") instead of simplified-but-misleading terms ("direct") prevents confusion when presenting to analytics-savvy stakeholders.
+
+3. **Less is more in presentations:** Removing low-value content (the quotes, the insights panel, the Movies & Cinema rows) makes the remaining content more impactful.
+
+4. **Professional tone:** Words like "exploit" might seem fine in internal discussions but should be replaced with neutral terms like "address" in client-facing materials.
+
+---
+
 ## 2026-02-04 (Session 16): TV AI Visibility Presentation - Methodology Slide
 
 ### Session Goals
